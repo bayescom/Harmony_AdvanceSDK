@@ -15,6 +15,7 @@ export class AdvanceReqModel {
   sdk_version: string = ''
   time: string = ''
   appid: string = ''
+  adspotid: string = ''
   appver: string = ''
   reqid: string = ''
   device_encinfo: string = ''
@@ -68,6 +69,7 @@ export class AdvanceStrategyResponse {
 // 渠道信息返回体
 export class AdvanceSupplierModel {
   id: string = ""
+  name: string = ""
   adspotid: string = ""
   mediaid: string = ""
   mediakey: string = ""
@@ -99,7 +101,9 @@ export class AdvanceSupplierModel {
 export class AdvanceStrategySettingModel {
   bidding_type: number = 0
   parallel_timeout: number = 0
-  parallel_group: number[] = []
+  //并发二维数组
+  parallel_group: number[][] = []
+  //bidding一维数组
   head_bidding_group: number[] = []
 }
 

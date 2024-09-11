@@ -27,6 +27,7 @@ export class AdvanceRequestManger {
       req.time = systemDateTime.getTime(false) + ""
       let appid = AdvanceSingleton.get().appId
       req.appid = appid
+      req.adspotid = adConfig.codeId
       let bundleInfo =
         await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION)
       req.appver = bundleInfo.versionName;
@@ -74,9 +75,6 @@ export class AdvanceRequestManger {
 
       //oaid获取
       await AdvanceRequestManger.prepareOAID(deviceInf)
-
-      //ua信息为单独获取得
-      deviceInf.ua = BYDevice.getUA()
 
       let deviceOri = JSON.stringify(deviceInf)
       BYLog.devDebug(`deviceOri = ${deviceOri}`)
@@ -128,8 +126,8 @@ export class AdvanceRequestManger {
   }
 
 
-  //获取广告返回信息，传入广告位信息，并回调广告成功返回信息或者失败信息
-  static async requestAD(adConfig: AdvanceOption,
+  //获取聚合策略信息，无策略或者网络错误将回调失败
+  static async requestStrategy(adConfig: AdvanceOption,
     callBack?: (err?: AdvanceError, data?: AdvanceStrategyResponse) => void) {
 
     let hasResult = false
