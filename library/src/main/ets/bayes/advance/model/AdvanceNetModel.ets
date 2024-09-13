@@ -81,6 +81,7 @@ export class AdvanceSupplierModel {
   wintk: string = ""
   imptk: string = ""
   clicktk: string = ""
+
   is_head_bidding: number = 0
   timeout: number = 0
   priority: number = 0
@@ -110,16 +111,16 @@ export class AdvanceStrategySettingModel {
 
 //设备信息，请求时加密传输使用
 export class AdvanceDeviceModel {
-  ua: string = ""
+  // ua: string = ""
   network: number = 0
   os: number = 4 // 4 代表鸿蒙os
   osv: string = ""
   devicetype: number = 1
-  sw: number = 0
-  sh: number = 0
-  ppi: number = 0
-  dpi: number = 0
-  density: number = 0
+  // sw: number = 0
+  // sh: number = 0
+  // ppi: number = 0
+  // dpi: number = 0
+  // density: number = 0
   imei: string = ""
   mac: string = ""
   aaid: string = ""

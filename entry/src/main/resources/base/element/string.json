@@ -10,7 +10,27 @@
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "advanceDev"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "获取网络数据"
+    },
+    {
+      "name": "oaid_permission_reason",
+      "value": "允许应用读取开放匿名设备标识符。"
+    },
+    {
+      "name": "permission_LOCATION",
+      "value": "用于应用获取设备位置信息"
+    },
+    {
+      "name": "net_permission_reason",
+      "value": "允许应用读取网络状态。"
+    },
+    {
+      "name": "permission_need",
+      "value": "必要权限。"
     }
   ]
 }

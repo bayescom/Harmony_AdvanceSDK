@@ -19,6 +19,7 @@ export const ADV_ERR_DATA_NULL = "9901";
 export const ADV_ERR_EXCEPTION_LOAD = "9902";
 export const ADV_ERR_EXCEPTION_SHOW = "9903";
 export const ADV_ERR_EXCEPTION_RENDER = "9904";
+export const ADV_ERR_NO_ADAPTER = "9905";
 
 export class AdvanceError {
   code: string = ADV_ERR_UNKNOW_ERROR

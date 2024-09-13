@@ -10,6 +10,7 @@ export abstract class AdvanceADNCommonAdapter {
   //   todo report loaded tk
   }
 
+  abstract loadAd():Promise<boolean>
 
   abstract getAdComponent() : NodeController | undefined
 }

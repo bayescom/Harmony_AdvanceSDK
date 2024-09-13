@@ -62,11 +62,11 @@ export class AdvanceRequestManger {
 
       deviceInf.operator = BYDevice.getOperator()
 
-      deviceInf.sw = BYDisplay.getScreenWPX()
-      deviceInf.sh = BYDisplay.getScreenHPX()
-      deviceInf.dpi = BYDisplay.getScreenDPI()
-      deviceInf.density = BYDisplay.getScreenDensity()
-      deviceInf.ppi = BYDisplay.getScreenPPI()
+      // deviceInf.sw = BYDisplay.getScreenWPX()
+      // deviceInf.sh = BYDisplay.getScreenHPX()
+      // deviceInf.dpi = BYDisplay.getScreenDPI()
+      // deviceInf.density = BYDisplay.getScreenDensity()
+      // deviceInf.ppi = BYDisplay.getScreenPPI()
 
       //无接口获取imei
       deviceInf.imei = ''
@@ -135,6 +135,15 @@ export class AdvanceRequestManger {
       let reqObj = await AdvanceRequestManger.prepareReqAdData(adConfig)
       //获取广告返回信息
       let netResult: AdvanceStrategyResponse = await AdvanceNet.get().getStrategy(reqObj)
+      if (!netResult) {
+        if (callBack != undefined) {
+          let advErr = new AdvanceError()
+          advErr.code = ADV_ERR_DATA_NULL
+          advErr.msg = '策略信息为空'
+          callBack(advErr, undefined);
+        }
+        return
+      }
       //首先确保返回状态码为200，非200有两种可能，1是http请求状态为非200，2是广告服务器返回状态码为非200；任一一个非200均代表了广告失败
       if (netResult.code != 200) {
         //非200返回进行错误回调

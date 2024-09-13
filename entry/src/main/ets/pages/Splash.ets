@@ -6,7 +6,7 @@ import { toast } from '../util/Toast'
 @Entry
 @Component
 struct Splash {
-  @State adID: string = '10002652'
+  @State adID: string = '10007795'
   @State splash?: AdvanceSplash = undefined
   @State splashAdComponent?: NodeController = undefined
 

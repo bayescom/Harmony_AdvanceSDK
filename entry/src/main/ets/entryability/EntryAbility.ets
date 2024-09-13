@@ -9,8 +9,8 @@ export default class EntryAbility extends UIAbility {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     let ctx = getContext()
     //初始化SDK
-    AdvanceSDK.initSDK(ctx, '')
-
+    AdvanceSDK.initSDK(ctx, '111')
+    AdvanceSDK.debug()
   }
 
   onDestroy(): void {

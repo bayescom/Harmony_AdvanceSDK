@@ -19,8 +19,8 @@ export class BYSecurity {
       await aesCipher.init(cryptoFramework.CryptoMode.ENCRYPT_MODE, key, BYSecurity.genIvParamsSpec())
       //5.aes 加密
       let encryptText = await aesCipher.doFinal({ data: BYSecurity.stringToUint8Array(content) })
-      // return that.encodeToStringSync(encryptText.data,util.Type.BASIC_URL_SAFE)
-      return that.encodeToStringSync(encryptText.data)
+      return that.encodeToStringSync(encryptText.data,util.Type.BASIC_URL_SAFE)
+      // return that.encodeToStringSync(encryptText.data)
     } catch (error) {
       return ''
     }

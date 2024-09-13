@@ -6,6 +6,7 @@ export class AdvanceADNUnitData {
   supplier?: AdvanceSupplierModel
   //补充内容
   ext?: AdvanceSupplierExt
+
 }
 
 
