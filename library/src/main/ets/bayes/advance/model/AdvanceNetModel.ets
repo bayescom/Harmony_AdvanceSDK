@@ -1,4 +1,6 @@
 // {
+import AdvanceConstant from './AdvanceConstant'
+
 // 	"version": "3.1.0",
 // 	"sdk_version": "5.1.1",
 // 	"time": "1725964754449",
@@ -75,13 +77,12 @@ export class AdvanceSupplierModel {
   mediakey: string = ""
   mediasecret: string = ""
   sdktag: string = ""
-  loadedtk: string = ""
-  succeedtk: string = ""
-  failedtk: string = ""
-  wintk: string = ""
-  imptk: string = ""
-  clicktk: string = ""
-
+  loadedtk: string[] = []
+  succeedtk: string[] = []
+  failedtk: string[] = []
+  wintk: string[] = []
+  imptk: string[] = []
+  clicktk: string[] = []
   is_head_bidding: number = 0
   timeout: number = 0
   priority: number = 0
@@ -101,7 +102,7 @@ export class AdvanceSupplierModel {
 // 策略统一设置内容、bidding设置内容
 export class AdvanceStrategySettingModel {
   bidding_type: number = 0
-  parallel_timeout: number = 0
+  parallel_timeout: number = AdvanceConstant.ADV_PARA_GROUP_TIMEOUT
   //并发二维数组
   parallel_group: number[][] = []
   //bidding一维数组

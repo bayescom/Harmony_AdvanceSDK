@@ -3,7 +3,7 @@ import { AdvanceADNUnitData } from './AdvanceADNUnitData';
 //并行组信息类
 export class AdvanceParaGroup {
   //并行组唯一id
-  groupID: number = 0;
+  groupID: number = -1;
   //并行的组成员(包含bidding成员)
   adnDataGroup: AdvanceADNUnitData[] = []
   //有广告返回的 最优渠道，一般是比价后胜出的那一个渠道、如果未包含比较渠道，则是价格最高的渠道

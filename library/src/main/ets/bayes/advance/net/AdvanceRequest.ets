@@ -2,7 +2,12 @@ import http from '@ohos.net.http';
 import { BYDevice } from '../../basic/BYDevice';
 import { BYLog } from '../../basic/BYLog';
 import { BYSingleton } from '../../basic/BYSingleton';
-import { ADV_ERR_NET_UNSUPPORT_TYPE, ADV_ERR_NET_FAILED, ADV_ERR_NET_EXCEPTION } from '../model/AdvanceError';
+import {
+  ADV_ERR_NET_UNSUPPORT_TYPE,
+  ADV_ERR_NET_FAILED,
+  ADV_ERR_NET_EXCEPTION,
+  ADV_ERR_NET_TIME_OUT
+} from '../model/AdvanceError';
 import { AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 
 
@@ -18,7 +23,24 @@ async function requestSync(url: string, method: http.RequestMethod,
     const res = new AdvanceStrategyResponse()
     let hasResult = false
     try {
-      // todo 增加超时检查
+
+     let tim = setTimeout(() => {
+        try {
+          if (hasResult == true) {
+            BYLog.debug(TAG + `接口已返回，不再校验超时`)
+            clearTimeout(tim)
+            return
+          }
+          BYLog.warn(TAG + 'requestSync timeout')
+          hasResult = true
+          res.code = ADV_ERR_NET_TIME_OUT
+          res.msg = `策略请求超时未响应`
+          resolve(res)
+          clearTimeout(tim)
+        } catch (e) {
+          BYLog.printE(e)
+        }
+      }, 5000)
 
       if (method === http.RequestMethod.POST) {
         if (!extraData) {
@@ -48,8 +70,16 @@ async function requestSync(url: string, method: http.RequestMethod,
       httpRequest.request(
         url, reqOption, (err, data) => {
         try {
-          // todo 服务器发生500异常时，不会返回responseCode，需要优化兼容
-          if (!err && data.responseCode === 200) {
+          if (err) {
+            res.code = err.code
+            let errMsg = err?.message ?? ""
+            res.msg = `接口响应失败：` + errMsg
+            BYLog.error(TAG + errMsg)
+            resolve(res)
+            return
+          }
+          // todo 请求http返回状态码为500 ，会导致app crash，如何避免？https://issuereporter.developer.huawei.com/detail/240914190446130/comment
+          if (data && data.responseCode === 200) {
             BYLog.debug(TAG + `request success, url: ${url}, result: ${JSON.stringify(data, undefined, undefined)}`)
 
             if (data.resultType === http.HttpDataType.STRING) {
@@ -76,7 +106,7 @@ async function requestSync(url: string, method: http.RequestMethod,
             }
           } else {
             res.code = data?.responseCode ?? ADV_ERR_NET_FAILED
-            res.msg = err?.message ?? ""
+            res.msg = "http 请求responseCode 非200， responseCode = " +data?.responseCode
             BYLog.error(TAG + `request error, url: ${url}, error: ${JSON.stringify(err, undefined, undefined)}`)
           }
           // 当该请求使用完毕时，调用destroy方法主动销毁

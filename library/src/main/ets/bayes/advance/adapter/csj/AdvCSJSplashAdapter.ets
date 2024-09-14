@@ -2,8 +2,9 @@ import { AdvanceADNCommonAdapter } from '../../core/AdvanceADNCommonAdapter';
 import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../../basic/BYLog';
 import { CSJAdCreator } from '@csj/openadsdk';
+import { BYUtil } from '../../../basic/BYUtil';
 
-export class AdvCSJSplashAdapter extends AdvanceADNCommonAdapter{
+export class AdvCSJSplashAdapter extends AdvanceADNCommonAdapter {
   loadAd(): Promise<boolean> {
     BYLog.devDebug(`AdvCSJSplashAdapter loadAd start`)
     let adCreator: CSJAdCreator = new CSJAdCreator()
@@ -11,11 +12,13 @@ export class AdvCSJSplashAdapter extends AdvanceADNCommonAdapter{
     return new Promise<boolean>((resolve, reject) => {
 
       let start: number = new Date().getTime();
-      while (new Date().getTime() - start < 1000) {
+      let delayTime = Math.random() * 2000
+      let randomResult = BYUtil.caseNumberInt(Math.random() - 0.5) == 1
+      while (new Date().getTime() - start < delayTime) {
         continue;
       }
-      BYLog.devDebug(`AdvCSJSplashAdapter loadAd mock success`)
-      resolve(true)
+      BYLog.devDebug(`AdvCSJSplashAdapter loadAd mock ${randomResult} , delayTime = ` + delayTime)
+      resolve(randomResult)
     })
     return new Promise<boolean>((resolve, reject) => {
       BYLog.devDebug(`AdvCSJSplashAdapter loadAd mock failed`)
@@ -26,12 +29,11 @@ export class AdvCSJSplashAdapter extends AdvanceADNCommonAdapter{
     let result = false
     BYLog.debug(`AdvCSJSplashAdapter loadAd`)
 
-     result
+    result
     // throw new Error('Method not implemented.');
   }
+
   getAdComponent(): NodeController | undefined {
     throw new Error('Method not implemented.');
   }
-
-
 }

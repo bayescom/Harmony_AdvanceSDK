@@ -20,6 +20,7 @@ export const ADV_ERR_EXCEPTION_LOAD = "9902";
 export const ADV_ERR_EXCEPTION_SHOW = "9903";
 export const ADV_ERR_EXCEPTION_RENDER = "9904";
 export const ADV_ERR_NO_ADAPTER = "9905";
+export const ADV_ERR_ALL_FAILED = "9906"; //全部渠道加载失败
 
 export class AdvanceError {
   code: string = ADV_ERR_UNKNOW_ERROR

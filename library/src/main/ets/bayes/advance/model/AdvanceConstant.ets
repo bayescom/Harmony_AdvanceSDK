@@ -14,6 +14,12 @@ export default class AdvanceConstant{
   public static readonly ADV_SDK_ID_TAP: string = '10'
   public static readonly ADV_AD_TYPE_SPLASH: number = 1
   public static readonly ADV_AD_TYPE_FEED: number = 2
+  public static readonly ADV_PARA_GROUP_TIMEOUT: number = 5000
+
+  //广告返回状态标记
+  public static readonly ADV_ADN_RESULT_LOADING: number = -1
+  public static readonly ADV_ADN_RESULT_FAILED: number = 0
+  public static readonly ADV_ADN_RESULT_SUCCESS: number = 1
 
   static windowStage: window.WindowStage
 }

@@ -7,7 +7,6 @@ import { BYDevice } from '../../basic/BYDevice';
 import { BYUtil } from '../../basic/BYUtil';
 
 import { BYStrUtil } from '../../basic/util/BYStrUtil';
-import { BYDisplay } from '../../basic/BYDisplay';
 import { BYSecurity } from '../../basic/BYSecurity';
 import { BYSingleton } from '../../basic/BYSingleton';
 import { BYSetting } from '../../basic/BYSetting';
