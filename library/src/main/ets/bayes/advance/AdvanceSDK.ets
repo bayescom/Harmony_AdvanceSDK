@@ -1,3 +1,4 @@
+import BYConstant from '../basic/BYConstant'
 import { BYLifecycle } from '../basic/BYLifecycle'
 import { BYSetting } from '../basic/BYSetting'
 import { BYSingleton } from '../basic/BYSingleton'
@@ -8,8 +9,8 @@ export class AdvanceSDK {
   //初始化SDK
   static initSDK(context: Context, appId: string) {
     AdvanceSingleton.get().appId = appId
-    BYSingleton.get().context = context
-    BYLifecycle.registerLife()
+    BYConstant.context = context
+    BYLifecycle.registerLife(context)
   }
 
   //调试模式

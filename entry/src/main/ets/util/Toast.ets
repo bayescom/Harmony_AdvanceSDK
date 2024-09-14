@@ -10,3 +10,10 @@ export function toast(message: string | Resource) {
     })
   }
 }
+
+
+export function logToast(message: string) {
+  let DEMO_TAG = "[ADVANCE_DEMO]"
+  console.log(DEMO_TAG + message)
+  toast(message)
+}

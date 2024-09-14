@@ -26,6 +26,6 @@ export class AdvanceError {
   msg: string = ''
 
   toString(): string {
-    return `[MercuryErr] code: ${this.code} , msg = ${this.msg}`
+    return `[AdvanceError] code: ${this.code} , msg = ${this.msg}`
   }
 }

@@ -20,10 +20,10 @@ struct Index {
           middle: { anchor: '__container__', align: HorizontalAlign.Center }
         })
 
-      Button('开屏广告').padding(10).onClick((ev) => {
+      Button('开屏广告').margin(10).onClick((ev) => {
         router.pushUrl({ url: "pages/Splash" })
       })
-      Button('信息流广告').padding(10).onClick((ev) => {
+      Button('信息流广告').margin(10).onClick((ev) => {
         // router.pushUrl({ url: "pages/Splash" })
       })
     }

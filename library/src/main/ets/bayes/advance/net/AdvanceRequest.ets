@@ -1,5 +1,4 @@
 import http from '@ohos.net.http';
-import hilog from '@ohos.hilog';
 import { BYDevice } from '../../basic/BYDevice';
 import { BYLog } from '../../basic/BYLog';
 import { BYSingleton } from '../../basic/BYSingleton';
@@ -7,19 +6,19 @@ import { ADV_ERR_NET_UNSUPPORT_TYPE, ADV_ERR_NET_FAILED, ADV_ERR_NET_EXCEPTION }
 import { AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 
 
-const TAG = "AdvanceRequest";
+const TAG = "【AdvanceRequest】";
 const baseUrl = "http://cruiser.bayescom.cn/"
-// const baseUrl = "http://raddus.bayescom.com/"
 const baseUrlHttps = "https://cruiser.bayescom.cn/"
 
 
-async function requestSync(url: string,
-  method: http.RequestMethod,
+async function requestSync(url: string, method: http.RequestMethod,
   expectDataType: http.HttpDataType = http.HttpDataType.STRING,
   extraData?: string | Object | ArrayBuffer): Promise<AdvanceStrategyResponse> {
   return new Promise<AdvanceStrategyResponse>((resolve) => {
     const res = new AdvanceStrategyResponse()
+    let hasResult = false
     try {
+      // todo 增加超时检查
 
       if (method === http.RequestMethod.POST) {
         if (!extraData) {
@@ -28,8 +27,8 @@ async function requestSync(url: string,
         }
       }
       const httpRequest = http.createHttp();
-      hilog.info(0, TAG,
-        `start request, url: ${url}, method: ${method}, extraData: ` + JSON.stringify(extraData, undefined, undefined));
+      BYLog.devDebug(TAG + `start request, url: ${url}, method: ${method}, extraData: ` +
+      JSON.stringify(extraData, undefined, undefined));
 
       let reqOption: http.HttpRequestOptions;
 
@@ -44,13 +43,14 @@ async function requestSync(url: string,
         reqOption.header = { 'User-Agent': BYDevice.getUA() }
       }
 
-      BYLog.debug(`reqOption.header = ${reqOption.header}`)
+      BYLog.debug(TAG + `reqOption.header = ${reqOption.header}`)
 
       httpRequest.request(
         url, reqOption, (err, data) => {
         try {
+          // todo 服务器发生500异常时，不会返回responseCode，需要优化兼容
           if (!err && data.responseCode === 200) {
-            hilog.info(0, TAG, `request success, url: ${url}, result: ${JSON.stringify(data, undefined, undefined)}`)
+            BYLog.debug(TAG + `request success, url: ${url}, result: ${JSON.stringify(data, undefined, undefined)}`)
 
             if (data.resultType === http.HttpDataType.STRING) {
               let obj: AdvanceStrategyResponse = JSON.parse(JSON.stringify(data.result))
@@ -77,7 +77,7 @@ async function requestSync(url: string,
           } else {
             res.code = data?.responseCode ?? ADV_ERR_NET_FAILED
             res.msg = err?.message ?? ""
-            hilog.error(0, TAG, `request error, url: ${url}, error: ${JSON.stringify(err, undefined, undefined)}`)
+            BYLog.error(TAG + `request error, url: ${url}, error: ${JSON.stringify(err, undefined, undefined)}`)
           }
           // 当该请求使用完毕时，调用destroy方法主动销毁
           httpRequest.destroy();
@@ -88,18 +88,36 @@ async function requestSync(url: string,
             let error = e as Error;
             let name = error.name;
             let msg = error.message;
-            let inf = `request exception ,err name:` + name + " , msg = " + msg
+            let inf = `请求中发生 exception ,err name:` + name + " , msg = " + msg
             res.msg = inf
           } catch (e) {
           }
         }
+        hasResult = true
         resolve(res);
       }
       )
     } catch (e) {
-      BYLog.printE(e)
-      resolve(res);
+      try {
+        res.code = ADV_ERR_NET_EXCEPTION
+
+        let error = e as Error;
+        let name = error.name;
+        let msg = error.message;
+        let errInf = `请求发起阶段发生 exception  ,err name:` + name + " , msg = " + msg
+        BYLog.error(TAG + errInf)
+        BYLog.printE(e)
+        if (!hasResult) {
+          hasResult = true
+          res.msg = errInf
+          resolve(res);
+        }
+      } catch (e) {
+      } finally {
+        resolve(res);
+      }
     }
+    BYLog.debug(TAG + ' request end')
   })
 }
 

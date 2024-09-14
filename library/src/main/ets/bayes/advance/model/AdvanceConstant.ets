@@ -12,6 +12,8 @@ export default class AdvanceConstant{
   public static readonly ADV_SDK_ID_KS: string = '5'
   public static readonly ADV_SDK_ID_TANX: string = '7'
   public static readonly ADV_SDK_ID_TAP: string = '10'
+  public static readonly ADV_AD_TYPE_SPLASH: number = 1
+  public static readonly ADV_AD_TYPE_FEED: number = 2
 
   static windowStage: window.WindowStage
 }

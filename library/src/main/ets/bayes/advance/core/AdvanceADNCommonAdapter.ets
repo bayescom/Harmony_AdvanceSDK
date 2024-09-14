@@ -1,5 +1,6 @@
 import { AdvanceADNUnitData } from '../model/AdvanceADNUnitData';
 import { NodeController } from '@kit.ArkUI';
+import { BYLog } from '../../basic/BYLog';
 
 export abstract class AdvanceADNCommonAdapter {
   //渠道参数
@@ -7,10 +8,15 @@ export abstract class AdvanceADNCommonAdapter {
 
   constructor(supData: AdvanceADNUnitData) {
     this.unitData = supData
-  //   todo report loaded tk
+    BYLog.debug('AdvanceADNCommonAdapter init')
   }
 
-  abstract loadAd():Promise<boolean>
+  testAA(){
+    console.info('AdvanceADNCommonAdapter testAA')
 
-  abstract getAdComponent() : NodeController | undefined
+  }
+
+  abstract loadAd(): Promise<boolean>
+
+  abstract getAdComponent(): NodeController | undefined
 }

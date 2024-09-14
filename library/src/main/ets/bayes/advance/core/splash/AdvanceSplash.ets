@@ -8,22 +8,26 @@ import AdvanceConstant from '../../model/AdvanceConstant';
 import { AdvCSJSplashAdapter } from '../../adapter/csj/AdvCSJSplashAdapter';
 
 export class AdvanceSplash extends AdvanceAdBase {
-  //获取对应adapter实现类
-  getAdnAdapter(adnData: AdvanceADNUnitData): AdvanceADNCommonAdapter | undefined {
-    let result: AdvanceADNCommonAdapter | undefined = undefined
-
-    try {
-      let sdkId = adnData.supplier?.id
-      if (sdkId == AdvanceConstant.ADV_SDK_ID_CSJ) {
-        result = new AdvCSJSplashAdapter(adnData)
-      }
-    } catch (e) {
-      BYLog.printE(e)
-    }
-    BYLog.debug(`getAdnAdapter , result = ${result}`)
-
-    return result
+  init(): void {
+    this.adSlotType = AdvanceConstant.ADV_AD_TYPE_SPLASH
   }
+
+  //获取对应adapter实现类
+  // getAdnAdapter(adnData: AdvanceADNUnitData): AdvanceADNCommonAdapter | undefined {
+  //   let result: AdvanceADNCommonAdapter | undefined = undefined
+  //
+  //   try {
+  //     let sdkId = adnData.supplier?.id
+  //     if (sdkId == AdvanceConstant.ADV_SDK_ID_CSJ) {
+  //       result = new AdvCSJSplashAdapter(adnData)
+  //     }
+  //   } catch (e) {
+  //     BYLog.printE(e)
+  //   }
+  //   BYLog.debug(`getAdnAdapter , result = ${result}`)
+  //
+  //   return result
+  // }
 
   mListener?: AdvanceSplashListener
 

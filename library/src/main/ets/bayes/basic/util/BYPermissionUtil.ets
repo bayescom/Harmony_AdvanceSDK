@@ -1,8 +1,8 @@
 import abilityAccessCtrl, { PermissionRequestResult, Permissions } from '@ohos.abilityAccessCtrl';
-import { bundleManager, common } from '@kit.AbilityKit';
+import { bundleManager } from '@kit.AbilityKit';
 import { BusinessError } from '@ohos.base';
 import { BYLog } from '../../basic/BYLog';
-import { BYSingleton } from '../../basic/BYSingleton';
+import BYConstant from '../BYConstant';
 
 
 /**
@@ -56,7 +56,7 @@ export class BYPermissionUtil {
    */
   static async requestPermissions(permissions: Permissions): Promise<boolean> {
     let atManager: abilityAccessCtrl.AtManager = abilityAccessCtrl.createAtManager();
-    let context = BYSingleton.get().context;
+    let context = BYConstant.context;
     // requestPermissionsFromUser会判断权限的授权状态来决定是否唤起弹窗
     let request: Promise<PermissionRequestResult> = atManager.requestPermissionsFromUser(context, [permissions]);
     let grantStatus: Array<number> = (await request).authResults;
@@ -77,7 +77,7 @@ export class BYPermissionUtil {
    */
   static async requestPermissionsList(permissions: Array<Permissions>): Promise<boolean> {
     let atManager: abilityAccessCtrl.AtManager = abilityAccessCtrl.createAtManager();
-    let context = BYSingleton.get().context
+    let context = BYConstant.context
     BYLog.debug(`requestPermissionsList context = ${context}}`)
     // requestPermissionsFromUser会判断权限的授权状态来决定是否唤起弹窗
     let request: Promise<PermissionRequestResult> = atManager.requestPermissionsFromUser(context, permissions);

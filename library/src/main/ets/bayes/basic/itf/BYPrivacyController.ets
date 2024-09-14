@@ -1,5 +1,7 @@
 import { BYLocation } from '../BYLocation'
 
+
+@Sendable
 export abstract class BYPrivacyController {
   /**
    * app在项目中配置权限。在适当时机申请权限，然后用户授权。

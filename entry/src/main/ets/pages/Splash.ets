@@ -1,12 +1,15 @@
 import { NodeController } from '@kit.ArkUI'
 import { AdvanceSplash } from 'advSDK'
 import { AdvanceOption } from 'advSDK/src/main/ets/bayes/advance/config/AdvanceOption'
-import { toast } from '../util/Toast'
+import { AdvanceCloseType } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceCloseType'
+import { AdvanceError } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceError'
+import { AdvanceSupplier } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceSupplier'
+import { logToast, toast } from '../util/Toast'
 
 @Entry
 @Component
 struct Splash {
-  @State adID: string = '10007795'
+  @State adID: string = '10008263'
   @State splash?: AdvanceSplash = undefined
   @State splashAdComponent?: NodeController = undefined
 
@@ -29,7 +32,29 @@ struct Splash {
           .onClick(() => {
             let opt = new AdvanceOption(this.adID)
             this.splash = new AdvanceSplash(opt)
-            // this.splash.
+            this.splash.setListener({
+              onShow: (): void => {
+                logToast(`onShow`)
+              },
+              onClose: (closeType: AdvanceCloseType): void => {
+                logToast(`onClose , closeType = ${closeType}`)
+              },
+              onLoaded: (supplier: AdvanceSupplier): void => {
+                logToast(`onLoaded , supplier : ${JSON.stringify(supplier)}`)
+              },
+              onClick: (): void => {
+                logToast(`onClick`)
+              },
+              onRenderSuccess: (): void => {
+                logToast(`onRenderSuccess`)
+              },
+              onRenderFail: (): void => {
+                logToast(`onRenderFail`)
+              },
+              onError: (err: AdvanceError): void => {
+                logToast(`onError , err = ${err.toString()}`)
+              }
+            })
             this.splash.loadStrategy()
           })
           .margin({

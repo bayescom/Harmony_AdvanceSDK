@@ -1,4 +1,4 @@
-import { AbilityLifecycleCallback, ApplicationStateChangeCallback, UIAbility } from '@kit.AbilityKit'
+import { AbilityLifecycleCallback, ApplicationStateChangeCallback, Context, UIAbility } from '@kit.AbilityKit'
 import { window } from '@kit.ArkUI'
 import { BYLog } from './BYLog'
 import { BYSingleton } from './BYSingleton'
@@ -8,9 +8,9 @@ const TAG = '[BYLifecycle] '
 
 //检测当前应用的生命周期事件
 export class BYLifecycle {
-  static registerLife() {
+  static registerLife(ctx: Context) {
     try {
-      let context = BYSingleton.get().context?.getApplicationContext()
+      let context = ctx.getApplicationContext()
       let lifecycleId = context?.on('abilityLifecycle', new BYAbilityLifecycleCallback())
       BYLog.devDebug(TAG + `registerLife ,lifecycleId = ${lifecycleId}`)
 

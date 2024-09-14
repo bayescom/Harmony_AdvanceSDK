@@ -281,11 +281,12 @@ export class BYDevice {
     return result
   }
 
-  // 获取操作系统版本，5.0.0.31(Beta2)
+  // 获取操作系统版本，5.0.0.60
   static getOSV(): string {
     let result: string = ""
     try {
-      result = deviceInfo.osFullName
+      result =
+        `${deviceInfo.majorVersion}.${deviceInfo.seniorVersion}.${deviceInfo.featureVersion}.${deviceInfo.buildVersion}`
     } catch (e) {
       BYLog.printE(e)
     }

@@ -1,5 +1,7 @@
 import { AdvancePrivacyController } from '../config/AdvancePrivacyController';
+"use shared"
 
+@Sendable
 export class AdvanceSingleton {
   public appId: string = ""
   public advancePrivacy?: AdvancePrivacyController
