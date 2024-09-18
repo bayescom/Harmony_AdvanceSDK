@@ -1,4 +1,3 @@
-import { Context } from '@kit.AbilityKit';
 import { BYPrivacyController } from './itf/BYPrivacyController';
 
 /**

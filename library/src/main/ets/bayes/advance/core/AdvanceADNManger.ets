@@ -1,5 +1,5 @@
 import { BYLog } from '../../basic/BYLog'
-import { AdvCSJSplashAdapter } from '../adapter/csj/AdvCSJSplashAdapter'
+import { AdvCSJSplashAdapter } from '../adapter/csj/AdvCsjSplashAdapter'
 import { AdvanceADNUnitData } from '../model/AdvanceADNUnitData'
 import AdvanceConstant from '../model/AdvanceConstant'
 import { AdvanceADNCommonAdapter } from './AdvanceADNCommonAdapter'

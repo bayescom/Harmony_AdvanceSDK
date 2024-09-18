@@ -18,29 +18,32 @@ const baseUrlHttps = "https://cruiser.bayescom.cn/"
 
 async function requestSync(url: string, method: http.RequestMethod,
   expectDataType: http.HttpDataType = http.HttpDataType.STRING,
-  extraData?: string | Object | ArrayBuffer): Promise<AdvanceStrategyResponse> {
+  extraData?: string | Object | ArrayBuffer, forceTimeout: boolean = false): Promise<AdvanceStrategyResponse> {
   return new Promise<AdvanceStrategyResponse>((resolve) => {
     const res = new AdvanceStrategyResponse()
     let hasResult = false
     try {
 
-     let tim = setTimeout(() => {
-        try {
-          if (hasResult == true) {
-            BYLog.debug(TAG + `接口已返回，不再校验超时`)
+      if (forceTimeout) {
+        let tim = setTimeout(() => {
+          try {
+            if (hasResult == true) {
+              BYLog.debug(TAG + `接口已返回，不再校验超时`)
+              clearTimeout(tim)
+              return
+            }
+            BYLog.warn(TAG + 'requestSync timeout')
+            hasResult = true
+            res.code = ADV_ERR_NET_TIME_OUT
+            res.msg = `策略请求超时未响应`
+            resolve(res)
             clearTimeout(tim)
-            return
+          } catch (e) {
+            BYLog.printE(e)
           }
-          BYLog.warn(TAG + 'requestSync timeout')
-          hasResult = true
-          res.code = ADV_ERR_NET_TIME_OUT
-          res.msg = `策略请求超时未响应`
-          resolve(res)
-          clearTimeout(tim)
-        } catch (e) {
-          BYLog.printE(e)
-        }
-      }, 5000)
+        }, 5000)
+      }
+
 
       if (method === http.RequestMethod.POST) {
         if (!extraData) {
@@ -106,7 +109,7 @@ async function requestSync(url: string, method: http.RequestMethod,
             }
           } else {
             res.code = data?.responseCode ?? ADV_ERR_NET_FAILED
-            res.msg = "http 请求responseCode 非200， responseCode = " +data?.responseCode
+            res.msg = "http 请求responseCode 非200， responseCode = " + data?.responseCode
             BYLog.error(TAG + `request error, url: ${url}, error: ${JSON.stringify(err, undefined, undefined)}`)
           }
           // 当该请求使用完毕时，调用destroy方法主动销毁
@@ -186,6 +189,6 @@ export default class AdvanceNet {
   //获取策略信息
   async getStrategy(body?: string | Object | ArrayBuffer): Promise<AdvanceStrategyResponse> {
     let reqUrl = `${getBaseUrl()}cruiser`
-    return requestSync(reqUrl, http.RequestMethod.POST, http.HttpDataType.OBJECT, body)
+    return requestSync(reqUrl, http.RequestMethod.POST, http.HttpDataType.OBJECT, body, true)
   }
 }

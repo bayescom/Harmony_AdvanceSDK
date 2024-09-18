@@ -1,6 +1,7 @@
 import { AdvanceADNUnitData } from '../model/AdvanceADNUnitData';
 import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../basic/BYLog';
+import { AdvanceAdnResult } from '../model/AdvanceSendModel';
 
 export abstract class AdvanceADNCommonAdapter {
   //渠道参数
@@ -11,12 +12,7 @@ export abstract class AdvanceADNCommonAdapter {
     BYLog.debug('AdvanceADNCommonAdapter init')
   }
 
-  testAA(){
-    console.info('AdvanceADNCommonAdapter testAA')
-
-  }
-
-  abstract loadAd(): Promise<boolean>
+  abstract loadAd(): Promise<AdvanceAdnResult>
 
   abstract getAdComponent(): NodeController | undefined
 }
