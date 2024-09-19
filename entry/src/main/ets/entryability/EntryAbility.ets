@@ -5,6 +5,7 @@ import { AdvanceSDK } from 'advSDK';
 import WindowUtils from '../util/WindowUtils';
 import { BYUtil } from 'advSDK/src/main/ets/bayes/basic/BYUtil';
 import { BYSetting } from 'advSDK/src/main/ets/bayes/basic/BYSetting';
+import { DemoConstants } from './DemoConstants';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -12,7 +13,7 @@ export default class EntryAbility extends UIAbility {
     let ctx = this.context
     AdvanceSDK.debug()
     //初始化SDK
-    AdvanceSDK.initSDK(ctx, '111')
+    AdvanceSDK.initSDK(ctx, '100171')
     //开发者模式
     BYSetting.get().isDev = true
   }
@@ -27,7 +28,6 @@ export default class EntryAbility extends UIAbility {
 
     const windowClass = await windowStage.getMainWindow();
     WindowUtils.init(windowClass);
-
     windowStage.loadContent('pages/Index', (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
@@ -35,6 +35,9 @@ export default class EntryAbility extends UIAbility {
       }
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
     });
+
+    // DemoConstants.windowStage = windowStage
+
   }
 
   onWindowStageDestroy(): void {

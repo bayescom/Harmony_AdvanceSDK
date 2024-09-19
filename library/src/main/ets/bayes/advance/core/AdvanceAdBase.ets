@@ -83,7 +83,21 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
       })
     } catch (e) {
+      BYLog.printE(e)
     }
+  }
+
+  //获取当前胜出的渠道信息
+  getWinSupplier(): AdvanceSupplier | undefined {
+    try {
+      let bestSup = this.runningGroup?.bestADN?.supplier
+      if (bestSup) {
+        return AdvanceUtil.caseSupplier(bestSup)
+      }
+    } catch (e) {
+      BYLog.printE(e)
+    }
+    return
   }
 
 
@@ -303,7 +317,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         } else if (adnData.resultStatus == AdvanceConstant.ADV_ADN_RESULT_FAILED) {
           BYLog.warn(TAG +
             `adn广告获取失败：${currentAdnInf}， errCode: ${adnResult.errCode}， errMsg: ${adnResult.errMsg}`)
-          taskpool.execute(reportAdnFailed, currentSup.failedtk)
+          taskpool.execute(reportAdnFailed, currentSup.failedtk, new AdvanceError(adnResult.errCode, adnResult.errMsg))
         }
       }
 
@@ -393,6 +407,8 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           BYLog.devDebug(TAG + `bestADN:${JSON.stringify(tempBestAdn)}`)
           BYLog.debug(TAG + `【当前最优】命中 ：${JSON.stringify(advanceBestSupplier)}`)
           this.baseListener?.onLoaded(advanceBestSupplier)
+
+          this.adnWin(tempBestAdn)
           //上报胜出
           taskpool.execute(reportWin, tempBestAdn.supplier.wintk)
         } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_RESULT_LOADING) {
@@ -414,6 +430,8 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
     }
 
   }
+
+  abstract adnWin(bestAdn: AdvanceADNUnitData)
 
   loadNextGroup() {
     try { //移除第一组
@@ -536,7 +554,9 @@ function reportAdnFailed(urlList: string[], err: AdvanceError) {
       if (BYStrUtil.isNotEmpty(element)) {
         BYLog.debug('start reportUrl')
         // todo 宏替换
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
+
+        let url = AdvanceUtil.appendFailedReason(element, err)
+        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(url))
       }
     }
   } catch (e) {

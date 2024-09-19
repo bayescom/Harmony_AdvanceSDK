@@ -4,6 +4,7 @@ import { AdvanceSingleton } from './AdvanceSingleton';
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { AdvanceSupplierModel } from '../model/AdvanceNetModel';
 import { AdvanceSupplier } from '../model/AdvanceSupplier';
+import { AdvanceError } from '../model/AdvanceError';
 
 export class AdvanceUtil {
   static getAdvancePrivacy(): AdvancePrivacyController | undefined {
@@ -30,5 +31,14 @@ export class AdvanceUtil {
     }
     return result
 
+  }
+
+  static appendFailedReason(ori: string, err: AdvanceError): string {
+    try {
+      let extErr = `&t_msg=err_${err?.code}`
+      return ori + extErr
+    } catch (e) {
+      return ori
+    }
   }
 }

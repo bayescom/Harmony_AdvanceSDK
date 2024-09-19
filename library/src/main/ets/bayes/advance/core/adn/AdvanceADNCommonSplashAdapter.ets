@@ -6,5 +6,6 @@ export abstract class AdvanceADNCommonSplashAdapter extends AdvanceADNCommonAdap
 
   setSplashListener(splashListener: AdvanceSplashListener) {
     this.splashListener = splashListener
+    this.baseListener = splashListener
   }
 }

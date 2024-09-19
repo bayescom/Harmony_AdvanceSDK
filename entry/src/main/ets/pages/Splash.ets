@@ -10,7 +10,7 @@ import { logToast, toast } from '../util/Toast'
 @Entry
 @Component
 struct Splash {
-  @State adID: string = '10008263'
+  @State adID: string = '10011044'
   @State splash?: AdvanceSplash = undefined
   @State splashAdComponent?: NodeController = undefined
 
@@ -49,8 +49,8 @@ struct Splash {
               onRenderSuccess: (): void => {
                 logToast(`onRenderSuccess`)
               },
-              onRenderFail: (): void => {
-                logToast(`onRenderFail`)
+              onRenderFail: (err: AdvanceError): void => {
+                logToast(`onRenderFail , ${err.toString()}`)
               },
               onError: (err: AdvanceError): void => {
                 logToast(`onError , err = ${err.toString()}`)

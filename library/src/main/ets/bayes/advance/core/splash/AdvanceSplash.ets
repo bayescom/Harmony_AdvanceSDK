@@ -4,6 +4,8 @@ import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../../basic/BYLog';
 import AdvanceConstant from '../../model/AdvanceConstant';
 import { AdvanceRenderOption } from '../../config/AdvanceOption';
+import { AdvanceADNUnitData } from '../adn/AdvanceADNUnitData';
+import { AdvanceADNCommonSplashAdapter } from '../adn/AdvanceADNCommonSplashAdapter';
 
 export class AdvanceSplash extends AdvanceAdBase {
   init(): void {
@@ -15,6 +17,19 @@ export class AdvanceSplash extends AdvanceAdBase {
   setListener(spl: AdvanceSplashListener) {
     this.baseListener = spl
     this.mListener = spl
+  }
+
+
+  adnWin(bestAdn: AdvanceADNUnitData): void {
+    //设置监听回调方法
+    try {
+      if (this.mListener) {
+        let adapter = this.getCurrentAdapter() as AdvanceADNCommonSplashAdapter
+        adapter.setSplashListener(this.mListener)
+      }
+    } catch (e) {
+      BYLog.printE(e)
+    }
   }
 
 
