@@ -3,6 +3,7 @@ import { AdvanceSplashListener } from '../AdvanceOpenListener';
 import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../../basic/BYLog';
 import AdvanceConstant from '../../model/AdvanceConstant';
+import { AdvanceRenderOption } from '../../config/AdvanceOption';
 
 export class AdvanceSplash extends AdvanceAdBase {
   init(): void {
@@ -25,5 +26,10 @@ export class AdvanceSplash extends AdvanceAdBase {
       BYLog.printE(e)
     }
     return
+  }
+
+
+  showAd(renderOP: AdvanceRenderOption) {
+    this.callShow(renderOP)
   }
 }

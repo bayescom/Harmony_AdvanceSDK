@@ -1,4 +1,4 @@
-import { AdvanceADNUnitData } from './AdvanceADNUnitData';
+import { AdvanceADNUnitData } from '../core/adn/AdvanceADNUnitData';
 
 //并行组信息类
 export class AdvanceParaGroup {

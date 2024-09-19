@@ -1,21 +1,29 @@
 import { BYLog } from '../../basic/BYLog'
-import { AdvanceOption } from '../config/AdvanceOption'
-import { AdvanceADNUnitData, AdvanceSupplierExt } from '../model/AdvanceADNUnitData'
-import { AdvanceError, ADV_ERR_ALL_FAILED, ADV_ERR_DATA_NULL, ADV_ERR_NO_ADAPTER } from '../model/AdvanceError'
+import { AdvanceOption, AdvanceRenderOption } from '../config/AdvanceOption'
+import { AdvanceADNUnitData, AdvanceSupplierExt } from './adn/AdvanceADNUnitData'
+import {
+  AdvanceError,
+  ADV_ERR_ADN_INIT_MISS,
+  ADV_ERR_ALL_FAILED,
+  ADV_ERR_DATA_NULL,
+  ADV_ERR_NO_ADAPTER
+} from '../model/AdvanceError'
 import { AdvanceParaGroup } from '../model/AdvanceGroup'
 import { AdvanceStrategyResponse } from '../model/AdvanceNetModel'
 import { AdvanceRequestManger } from '../net/AdvanceRequestManger'
-import { AdvanceADNCommonAdapter } from './AdvanceADNCommonAdapter'
+import { AdvanceADNCommonAdapter } from './adn/AdvanceADNCommonAdapter'
 import { AdvanceBaseOpenFuc } from './AdvanceOpenFuc'
 import { AdvanceBaseListener } from './AdvanceOpenListener'
 import { taskpool } from '@kit.ArkTS'
 import { AdvanceAdnResult } from '../model/AdvanceSendModel'
 import AdvanceNet from '../net/AdvanceRequest'
 import { BYStrUtil } from '../../basic/util/BYStrUtil'
-import { AdvanceADNManger } from './AdvanceADNManger'
+import { AdvanceADNManger } from './adn/AdvanceADNManger'
 import AdvanceConstant from '../model/AdvanceConstant'
 import { AdvanceSupplier } from '../model/AdvanceSupplier'
 import { AdvanceUtil } from './AdvanceUtil'
+import BYConstant from '../../basic/BYConstant'
+import { BYCacheUtil } from '../../basic/util/BYCacheUtil'
 
 
 const TAG = `[AdvanceAdBase] `
@@ -47,24 +55,35 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
   }
 
   loadStrategy(): void {
-    AdvanceRequestManger.requestStrategy(this.adOption, (err, data) => {
-      if (err) {
-        BYLog.error(TAG + err.msg)
-        this.baseListener?.onError(err)
-        return
-      }
-      if (!data) {
+    try {
+      if (!BYConstant.context) {
         let advErr = new AdvanceError()
-        advErr.code = ADV_ERR_DATA_NULL
-        advErr.msg = '获取到得策略信息为空'
+        advErr.code = ADV_ERR_ADN_INIT_MISS
+        advErr.msg = '未找到上下文，请先确保正确完成AdvanceSDK初始化'
         BYLog.error(TAG + advErr.msg)
-        this.baseListener?.onError(advErr)
         return
       }
-      //将返回策略，解析成必要数据信息
-      this.covertData(data)
 
-    })
+      AdvanceRequestManger.requestStrategy(this.adOption, (err, data) => {
+        if (err) {
+          BYLog.error(TAG + err.msg)
+          this.baseListener?.onError(err)
+          return
+        }
+        if (!data) {
+          let advErr = new AdvanceError()
+          advErr.code = ADV_ERR_DATA_NULL
+          advErr.msg = '获取到得策略信息为空'
+          BYLog.error(TAG + advErr.msg)
+          this.baseListener?.onError(advErr)
+          return
+        }
+        //将返回策略，解析成必要数据信息
+        this.covertData(data)
+
+      })
+    } catch (e) {
+    }
   }
 
 
@@ -87,7 +106,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
             adnData.adType = this.adSlotType
             adnMap[element.priority] = adnData
             // todo 是否有必要保留？？？？
-            let adapter = AdvanceADNManger.getAdnAdapter(adnData)
+            let adapter = AdvanceADNManger.getAdnAdapter(adnData, BYConstant.context)
             //添加元素
             if (adapter) {
               this.adapterMap.set(element.priority, adapter)
@@ -167,6 +186,13 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
   async loadAdn() {
 
     try {
+      if (!BYConstant.context) {
+        let advErr = new AdvanceError()
+        advErr.code = ADV_ERR_ADN_INIT_MISS
+        advErr.msg = '未找到上下文，请先确保正确完成AdvanceSDK初始化'
+        BYLog.error(TAG + advErr.msg)
+        return
+      }
       //取第一组运行
       this.runningGroup = this.supplierGroups[0]
 
@@ -180,13 +206,25 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         if (adnData && supplier) {
           let adInf = `adspotid：${supplier.adspotid} (${supplier.priority})`
           BYLog.debug(TAG + `开始执行  ` + adInf)
-          let task: taskpool.Task = new taskpool.Task(loadAdnAdapter, adnList[index]);
-          taskpool.execute(task).then((it) => {
-            BYLog.debug(TAG + `${adInf} loadAdnAdapter 执行结果：${JSON.stringify(it)}`)
 
+          let adnAdapter = this.adapterMap.get(supplier.priority)
+          if (adnAdapter) {
+            adnAdapter.loadAd().then((it) => {
+              BYLog.debug(TAG + `${adInf} loadAdnAdapter 执行结果：${JSON.stringify(it)}`)
 
-            this.updateResultPickBest(adnData, it as AdvanceAdnResult)
-          })
+              this.updateResultPickBest(adnData, it as AdvanceAdnResult)
+            })
+          }
+
+          // let task: taskpool.Task = new taskpool.Task(loadAdnAdapter, adnList[index], BYConstant.context);
+          // taskpool.execute(task).then((it) => {
+          //
+          //   BYLog.debug(TAG + `${adInf} loadAdnAdapter 执行结果：${JSON.stringify(it)}`)
+          //   let testErr = BYCacheUtil.get<AdvanceError>('test123')
+          //   BYLog.devDebug(`testErr = ${JSON.stringify(testErr.cacheValue as AdvanceError)}`)
+          //
+          //   this.updateResultPickBest(adnData, it as AdvanceAdnResult)
+          // })
 
           //上报SDK启动事件
           taskpool.execute(reportLoaded, supplier.loadedtk)
@@ -366,7 +404,6 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         }
 
 
-        // todo 测试处理此处逻辑
         if (this.currentGroupAbleSize <= 0) {
           BYLog.debug(TAG + `本组广告全部失败， 尝试加载下一组`)
           this.loadNextGroup()
@@ -402,10 +439,11 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
     }
   }
 
-  // todo 优化AdvanceADNCommonAdapter为interface接口形式
-  // abstract getAdnAdapter(adnData: AdvanceADNUnitData): AdvanceADNCommonAdapter | undefined
   abstract init()
 
+  protected callShow(renderOP: AdvanceRenderOption) {
+    this.getCurrentAdapter()?.showAd(renderOP)
+  }
 
   // getBestAdn():AdvanceADNUnitData  | undefined {
   //   if (this.runningGroup ) {
@@ -419,6 +457,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
   // return
   // }
 
+  // todo 优化AdvanceADNCommonAdapter为interface接口形式
   //根据currentAD 找到对应adapter
   getCurrentAdapter(): AdvanceADNCommonAdapter | undefined {
     try {
@@ -505,24 +544,34 @@ function reportAdnFailed(urlList: string[], err: AdvanceError) {
   }
 }
 
-
-@Concurrent
-async function loadAdnAdapter(adnData: AdvanceADNUnitData): Promise<AdvanceAdnResult> {
-  let tag = '--loadAdnAdapter--'
-  let result = new AdvanceAdnResult()
-  try {
-    let adid = adnData.supplier?.adspotid
-    BYLog.debug(tag + 'start， adspotid = ' + adid)
-
-    let adnSdkAdapter = AdvanceADNManger.getAdnAdapter(adnData)
-    if (adnSdkAdapter) {
-      result = await adnSdkAdapter.loadAd()
-      BYLog.debug(tag + '  adResult = ' + JSON.stringify(result))
-    } else {
-      BYLog.warn(tag + 'adnAdapter 不存在')
-    }
-  } catch (e) {
-    BYLog.printE(e)
-  }
-  return result
-}
+//
+// @Concurrent
+// async function loadAdnAdapter(adnData: AdvanceADNUnitData, context: Context): Promise<AdvanceAdnResult> {
+//   let tag = '--loadAdnAdapter--'
+//   let result = new AdvanceAdnResult()
+//   try {
+//     let adid = adnData.supplier?.adspotid
+//     BYLog.debug(tag + 'start， adspotid = ' + adid)
+//
+//     let adnSdkAdapter = AdvanceADNManger.getAdnAdapter(adnData, context)
+//     if (adnSdkAdapter) {
+//       result = await adnSdkAdapter.loadAd()
+//       BYLog.debug(tag + '  adResult = ' + JSON.stringify(result))
+//
+//
+//       // let err = new AdvanceError()
+//       // err.code = 'test123'
+//       // err.msg = 'test123'
+//       // BYCacheUtil.save('test123', err)
+//       //
+//       // let testErr = BYCacheUtil.get<AdvanceError>('test123')
+//       // BYLog.devDebug(`testErrInPool = ${JSON.stringify(testErr.cacheValue as AdvanceError)}`)
+//
+//     } else {
+//       BYLog.warn(tag + 'adnAdapter 不存在')
+//     }
+//   } catch (e) {
+//     BYLog.printE(e)
+//   }
+//   return result
+// }

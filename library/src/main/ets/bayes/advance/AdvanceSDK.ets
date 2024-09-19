@@ -1,5 +1,6 @@
 import BYConstant from '../basic/BYConstant'
 import { BYLifecycle } from '../basic/BYLifecycle'
+import { BYLog } from '../basic/BYLog'
 import { BYSetting } from '../basic/BYSetting'
 import { BYSingleton } from '../basic/BYSingleton'
 import { AdvancePrivacyController } from './config/AdvancePrivacyController'
@@ -11,14 +12,12 @@ export class AdvanceSDK {
     AdvanceSingleton.get().appId = appId
     BYConstant.context = context
     BYLifecycle.registerLife(context)
+    BYLog.debug(`AdvanceSDK initSDK  context = ${context}`)
   }
 
   //调试模式
   static debug() {
     BYSingleton.get().debug = true
-
-    // todo 移除
-    BYSetting.get().isDev = true
   }
 
   //隐私控制开关

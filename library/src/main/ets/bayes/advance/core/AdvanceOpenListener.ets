@@ -7,7 +7,7 @@ export interface AdvanceBaseListener {
   onShow: () => void //广告曝光成功
   onClick: () => void //广告点击
   onRenderSuccess: () => void // 在调用广告的render方法后，广告渲染成功，会回调该方法，此时表示广告已准备好，待展示
-  onRenderFail: () => void //广告曝光成功
+  onRenderFail: (err: AdvanceError) => void //广告曝光成功
   onError: (err: AdvanceError) => void //策略获取失败
 }
 

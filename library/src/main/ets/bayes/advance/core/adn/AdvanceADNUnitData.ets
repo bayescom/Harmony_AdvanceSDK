@@ -1,5 +1,5 @@
-import AdvanceConstant from './AdvanceConstant'
-import { AdvanceSupplierModel } from './AdvanceNetModel'
+import AdvanceConstant from '../../model/AdvanceConstant'
+import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
 
 //聚合adn侧使用的
 export class AdvanceADNUnitData {
@@ -18,4 +18,6 @@ export class AdvanceADNUnitData {
 
 //一些渠道上运行需要信息补充
 export class AdvanceSupplierExt {
+  vpWidth: number = 0
+  vpHeight: number = 0
 }

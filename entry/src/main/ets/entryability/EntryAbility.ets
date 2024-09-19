@@ -3,14 +3,18 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { AdvanceSDK } from 'advSDK';
 import WindowUtils from '../util/WindowUtils';
+import { BYUtil } from 'advSDK/src/main/ets/bayes/basic/BYUtil';
+import { BYSetting } from 'advSDK/src/main/ets/bayes/basic/BYSetting';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
-    let ctx = getContext()
+    let ctx = this.context
+    AdvanceSDK.debug()
     //初始化SDK
     AdvanceSDK.initSDK(ctx, '111')
-    AdvanceSDK.debug()
+    //开发者模式
+    BYSetting.get().isDev = true
   }
 
   onDestroy(): void {

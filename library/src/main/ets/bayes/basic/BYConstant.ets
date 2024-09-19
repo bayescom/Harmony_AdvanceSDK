@@ -10,6 +10,6 @@ export const BY_CACHE_KEY_ODID = 'BY_CACHE_KEY_ODID'
 export default class BYConstant {
 
   static windowStage: window.WindowStage
-  static context?: Context
+  static context: Context
 
 }

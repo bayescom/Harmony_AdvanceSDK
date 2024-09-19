@@ -21,10 +21,23 @@ export const ADV_ERR_EXCEPTION_SHOW = "9903";
 export const ADV_ERR_EXCEPTION_RENDER = "9904";
 export const ADV_ERR_NO_ADAPTER = "9905";
 export const ADV_ERR_ALL_FAILED = "9906"; //全部渠道加载失败
+export const ADV_ERR_ADN_INIT_FAILED_INT = 9907; //adn渠道初始化失败
+export const ADV_ERR_ADN_INIT_FAILED = "9907"; //adn渠道初始化失败
+export const ADV_ERR_ADN_INIT_MISS = "9908"; //advance未初始化
 
 export class AdvanceError {
   code: string = ADV_ERR_UNKNOW_ERROR
   msg: string = ''
+
+
+  constructor(code?:number|string,msg ?:string) {
+    if (code) {
+      this.code = `${code}`
+    }
+    if (msg) {
+      this.msg = msg
+    }
+  }
 
   toString(): string {
     return `[AdvanceError] code: ${this.code} , msg = ${this.msg}`

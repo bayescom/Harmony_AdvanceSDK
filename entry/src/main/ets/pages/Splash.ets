@@ -1,9 +1,10 @@
 import { NodeController } from '@kit.ArkUI'
 import { AdvanceSplash } from 'advSDK'
-import { AdvanceOption } from 'advSDK/src/main/ets/bayes/advance/config/AdvanceOption'
+import { AdvanceOption, AdvanceRenderOption } from 'advSDK/src/main/ets/bayes/advance/config/AdvanceOption'
 import { AdvanceCloseType } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceCloseType'
 import { AdvanceError } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceError'
 import { AdvanceSupplier } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceSupplier'
+import { DemoConstants } from '../entryability/DemoConstants'
 import { logToast, toast } from '../util/Toast'
 
 @Entry
@@ -67,8 +68,8 @@ struct Splash {
               toast(`请先请求广告`)
               return
             }
-            // let renOp = new AdvanceRenderOption(DemoConstants.windowStage)
-            // this.splash?.showAd(renOp)
+            let renOp = new AdvanceRenderOption(DemoConstants.windowStage)
+            this.splash?.showAd(renOp)
           }).margin({
           top: 20
         })

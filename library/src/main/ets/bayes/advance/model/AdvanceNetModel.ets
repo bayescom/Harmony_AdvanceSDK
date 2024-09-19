@@ -84,7 +84,7 @@ export class AdvanceSupplierModel {
   imptk: string[] = []
   clicktk: string[] = []
   is_head_bidding: number = 0
-  timeout: number = 0
+  timeout: number = 5000
   priority: number = 0
   sdk_price: number = 0
   index: number = 0
