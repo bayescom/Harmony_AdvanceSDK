@@ -13,7 +13,7 @@ import { AdvanceStrategyResponse } from '../model/AdvanceNetModel'
 import { AdvanceRequestManger } from '../net/AdvanceRequestManger'
 import { AdvanceADNCommonAdapter } from './adn/AdvanceADNCommonAdapter'
 import { AdvanceBaseOpenFuc } from './AdvanceOpenFuc'
-import { AdvanceBaseListener } from './AdvanceOpenListener'
+import { AdvanceCommListener } from './AdvanceOpenListener'
 import { taskpool } from '@kit.ArkTS'
 import { AdvanceAdnResult } from '../model/AdvanceSendModel'
 import AdvanceNet from '../net/AdvanceRequest'
@@ -23,26 +23,25 @@ import AdvanceConstant from '../model/AdvanceConstant'
 import { AdvanceSupplier } from '../model/AdvanceSupplier'
 import { AdvanceUtil } from './AdvanceUtil'
 import BYConstant from '../../basic/BYConstant'
-import { BYCacheUtil } from '../../basic/util/BYCacheUtil'
 
 
 const TAG = `[AdvanceAdBase] `
 
 export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
-  adOption: AdvanceOption
-  baseListener ?: AdvanceBaseListener
-  adSlotType: number = 0
-  paraTimeOut: number = AdvanceConstant.ADV_PARA_GROUP_TIMEOUT //组超时时间，单位毫秒
+  protected adOption: AdvanceOption
+  protected commListener ?: AdvanceCommListener
+  protected adSlotType: number = 0
+  protected paraTimeOut: number = AdvanceConstant.ADV_PARA_GROUP_TIMEOUT //组超时时间，单位毫秒
   //并行策略组
-  supplierGroups: AdvanceParaGroup[] = []
+  protected supplierGroups: AdvanceParaGroup[] = []
   //当前执行的SDK组
-  runningGroup ?: AdvanceParaGroup
+  protected runningGroup ?: AdvanceParaGroup
   // currentAD ?: AdvanceADNUnitData
-  adapterMap: Map<number, AdvanceADNCommonAdapter> = new Map()
+  protected adapterMap: Map<number, AdvanceADNCommonAdapter> = new Map()
   //最优adn
-  tempBestAdn: AdvanceADNUnitData | undefined
+  protected tempBestAdn: AdvanceADNUnitData | undefined
   //当前组可用数量，用来判断是否组内全部失败
-  currentGroupAbleSize: number = 0;
+  protected currentGroupAbleSize: number = 0;
 
   constructor(option: AdvanceOption) {
     this.adOption = option
@@ -67,7 +66,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
       AdvanceRequestManger.requestStrategy(this.adOption, (err, data) => {
         if (err) {
           BYLog.error(TAG + err.msg)
-          this.baseListener?.onError(err)
+          this.commListener?.onError(err)
           return
         }
         if (!data) {
@@ -75,7 +74,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           advErr.code = ADV_ERR_DATA_NULL
           advErr.msg = '获取到得策略信息为空'
           BYLog.error(TAG + advErr.msg)
-          this.baseListener?.onError(advErr)
+          this.commListener?.onError(advErr)
           return
         }
         //将返回策略，解析成必要数据信息
@@ -102,7 +101,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
 
   //首先映射对应adnAdapter到map。再对策略进行分组，获得并发组data
-  covertData(data: AdvanceStrategyResponse) {
+  protected covertData(data: AdvanceStrategyResponse) {
     try {
       if (data.setting) {
         this.paraTimeOut = data.setting.parallel_timeout
@@ -117,10 +116,13 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
             let adnData = new AdvanceADNUnitData()
             adnData.supplier = element
             adnData.ext = new AdvanceSupplierExt()
+            //宽高属性值设置
+            adnData.ext.vpWidth = this.adOption.widthVP
+            adnData.ext.vpHeight = this.adOption.heightVP
             adnData.adType = this.adSlotType
             adnMap[element.priority] = adnData
-            // todo 是否有必要保留？？？？
-            let adapter = AdvanceADNManger.getAdnAdapter(adnData, BYConstant.context)
+            //生成用来加载广告adn的适配器，进行后续广告请求及展示操作
+            let adapter = AdvanceADNManger.generateAdnAdapter(adnData, BYConstant.context)
             //添加元素
             if (adapter) {
               this.adapterMap.set(element.priority, adapter)
@@ -129,15 +131,17 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         } else {
           BYLog.warn(TAG + " suppliers empty")
         }
-        BYLog.debug(TAG + ` update this.adapterMap , size = ${this.adapterMap.size}`)
+
+        let adapterSize = this.adapterMap.size
+        BYLog.debug(TAG + ` update this.adapterMap , size = ${adapterSize}`)
 
         //说明无适配adapter
-        if (this.adapterMap.size <= 0) {
+        if (adapterSize <= 0) {
           let advErr = new AdvanceError()
           advErr.code = ADV_ERR_NO_ADAPTER
           advErr.msg = '未找到可用广告adapter，请检查策略配置SDK与Advance已支持SDK是否一致'
           BYLog.error(TAG + advErr.msg)
-          this.baseListener?.onError(advErr)
+          this.commListener?.onError(advErr)
           return
         }
 
@@ -175,7 +179,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           advErr.code = ADV_ERR_DATA_NULL
           advErr.msg = '无可执行策略组信息'
           BYLog.error(TAG + advErr.msg)
-          this.baseListener?.onError(advErr)
+          this.commListener?.onError(advErr)
           return
         }
 
@@ -190,14 +194,14 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         advErr.code = ADV_ERR_DATA_NULL
         advErr.msg = '策略组setting信息为空'
         BYLog.error(TAG + advErr.msg)
-        this.baseListener?.onError(advErr)
+        this.commListener?.onError(advErr)
       }
     } catch (e) {
       BYLog.printE(e)
     }
   }
 
-  async loadAdn() {
+  protected async loadAdn() {
 
     try {
       if (!BYConstant.context) {
@@ -230,16 +234,6 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
             })
           }
 
-          // let task: taskpool.Task = new taskpool.Task(loadAdnAdapter, adnList[index], BYConstant.context);
-          // taskpool.execute(task).then((it) => {
-          //
-          //   BYLog.debug(TAG + `${adInf} loadAdnAdapter 执行结果：${JSON.stringify(it)}`)
-          //   let testErr = BYCacheUtil.get<AdvanceError>('test123')
-          //   BYLog.devDebug(`testErr = ${JSON.stringify(testErr.cacheValue as AdvanceError)}`)
-          //
-          //   this.updateResultPickBest(adnData, it as AdvanceAdnResult)
-          // })
-
           //上报SDK启动事件
           taskpool.execute(reportLoaded, supplier.loadedtk)
         } else {
@@ -252,10 +246,6 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
       let tim = setTimeout(() => {
         try {
-          // if (!this.runningGroup) {
-          //   BYLog.debug(TAG + `runningGroup null , skip loadAdn timeout `)
-          //   return
-          // }
           if (this.runningGroup) {
             if (this.runningGroup.isGroupAllResult || this.runningGroup.isTimeOut) {
               BYLog.debug(TAG + `组内已全部返回记过，不再校验超时`)
@@ -280,7 +270,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
 
   // 更新结果并检查是否存在最优adn胜出，胜出后将（回调广告成功）  todo biddng返回需要重排序
-  updateResultPickBest(adnData: AdvanceADNUnitData, adnResult?: AdvanceAdnResult) {
+  protected updateResultPickBest(adnData: AdvanceADNUnitData, adnResult?: AdvanceAdnResult) {
     try {
       if (!adnResult) {
         BYLog.debug(TAG + `--updateResultCheckNext-- 请求返回为空`)
@@ -406,7 +396,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           let advanceBestSupplier = AdvanceUtil.caseSupplier(tempBestAdn.supplier)
           BYLog.devDebug(TAG + `bestADN:${JSON.stringify(tempBestAdn)}`)
           BYLog.debug(TAG + `【当前最优】命中 ：${JSON.stringify(advanceBestSupplier)}`)
-          this.baseListener?.onLoaded(advanceBestSupplier)
+          this.commListener?.onLoaded(advanceBestSupplier)
 
           this.adnWin(tempBestAdn)
           //上报胜出
@@ -431,9 +421,9 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
   }
 
-  abstract adnWin(bestAdn: AdvanceADNUnitData)
+  protected abstract adnWin(bestAdn: AdvanceADNUnitData)
 
-  loadNextGroup() {
+  protected loadNextGroup() {
     try { //移除第一组
       this.supplierGroups.splice(0)
 
@@ -447,7 +437,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         err.code = ADV_ERR_ALL_FAILED
         err.msg = msg
         //回调广告失败
-        this.baseListener?.onError(err)
+        this.commListener?.onError(err)
         return
       }
       //继续执行
@@ -463,21 +453,9 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
     this.getCurrentAdapter()?.showAd(renderOP)
   }
 
-  // getBestAdn():AdvanceADNUnitData  | undefined {
-  //   if (this.runningGroup ) {
-  //     let hasResult :boolean
-  //     if (this.runningGroup.isBiddingGroup ){
-  //       hasResult = this.runningGroup.isBiddingAllResult
-  //     } else {
-  //       hasResult = this.runningGroup.isGroupAllResult
-  //     }
-  //   }
-  // return
-  // }
-
   // todo 优化AdvanceADNCommonAdapter为interface接口形式
   //根据currentAD 找到对应adapter
-  getCurrentAdapter(): AdvanceADNCommonAdapter | undefined {
+  protected getCurrentAdapter(): AdvanceADNCommonAdapter | undefined {
     try {
       //从当前执行组的最佳广告
       let key = this.runningGroup?.bestADN?.supplier?.priority
@@ -488,6 +466,10 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
       BYLog.printE(e)
     }
     return
+  }
+
+  destroy(): void {
+    this.commListener = undefined
   }
 }
 
@@ -563,35 +545,3 @@ function reportAdnFailed(urlList: string[], err: AdvanceError) {
     BYLog.printE(e)
   }
 }
-
-//
-// @Concurrent
-// async function loadAdnAdapter(adnData: AdvanceADNUnitData, context: Context): Promise<AdvanceAdnResult> {
-//   let tag = '--loadAdnAdapter--'
-//   let result = new AdvanceAdnResult()
-//   try {
-//     let adid = adnData.supplier?.adspotid
-//     BYLog.debug(tag + 'start， adspotid = ' + adid)
-//
-//     let adnSdkAdapter = AdvanceADNManger.getAdnAdapter(adnData, context)
-//     if (adnSdkAdapter) {
-//       result = await adnSdkAdapter.loadAd()
-//       BYLog.debug(tag + '  adResult = ' + JSON.stringify(result))
-//
-//
-//       // let err = new AdvanceError()
-//       // err.code = 'test123'
-//       // err.msg = 'test123'
-//       // BYCacheUtil.save('test123', err)
-//       //
-//       // let testErr = BYCacheUtil.get<AdvanceError>('test123')
-//       // BYLog.devDebug(`testErrInPool = ${JSON.stringify(testErr.cacheValue as AdvanceError)}`)
-//
-//     } else {
-//       BYLog.warn(tag + 'adnAdapter 不存在')
-//     }
-//   } catch (e) {
-//     BYLog.printE(e)
-//   }
-//   return result
-// }

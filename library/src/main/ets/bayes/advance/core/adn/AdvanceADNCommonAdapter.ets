@@ -3,7 +3,7 @@ import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../../basic/BYLog';
 import { AdvanceAdnResult } from '../../model/AdvanceSendModel';
 import { AdvanceRenderOption } from '../../config/AdvanceOption';
-import { AdvanceBaseListener } from '../AdvanceOpenListener';
+import { AdvanceBaseEventListener } from '../AdvanceOpenListener';
 import { BYStrUtil } from '../../../basic/util/BYStrUtil';
 import AdvanceNet from '../../net/AdvanceRequest';
 import { AdvanceUtil } from '../AdvanceUtil';
@@ -14,7 +14,7 @@ export abstract class AdvanceADNCommonAdapter {
   //渠道参数
   unitData: AdvanceADNUnitData
   appContext: Context
-  baseListener?: AdvanceBaseListener
+  baseListener?: AdvanceBaseEventListener
 
   constructor(supData: AdvanceADNUnitData, context: Context) {
     this.unitData = supData

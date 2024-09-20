@@ -1,4 +1,4 @@
-import { AdvancePrivacyController } from '../config/AdvancePrivacyController';
+import { AdvancePrivacyController } from '../../config/AdvancePrivacyController';
 "use shared"
 
 @Sendable

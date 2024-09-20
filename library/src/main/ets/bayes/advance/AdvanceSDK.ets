@@ -4,7 +4,7 @@ import { BYLog } from '../basic/BYLog'
 import { BYSetting } from '../basic/BYSetting'
 import { BYSingleton } from '../basic/BYSingleton'
 import { AdvancePrivacyController } from './config/AdvancePrivacyController'
-import { AdvanceSingleton } from './core/AdvanceSingleton'
+import { AdvanceSingleton } from './core/config/AdvanceSingleton'
 
 export class AdvanceSDK {
   //初始化SDK

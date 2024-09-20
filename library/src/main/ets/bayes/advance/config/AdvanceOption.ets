@@ -3,6 +3,8 @@ import { window } from '@kit.ArkUI'
 
 export class AdvanceOption {
   codeId: string
+  widthVP :number = 0
+  heightVP :number = 0
 
   constructor(codeId: string) {
     this.codeId = codeId

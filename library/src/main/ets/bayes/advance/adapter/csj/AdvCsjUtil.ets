@@ -5,7 +5,7 @@ import { BYSingleton } from '../../../basic/BYSingleton'
 import { ADV_ERR_ADN_INIT_FAILED_INT } from '../../model/AdvanceError'
 import { BYLog } from '../../../basic/BYLog'
 import { AdvanceADNCommonAdapter } from '../../core/adn/AdvanceADNCommonAdapter'
-import { AdvanceSetting } from '../../core/AdvanceSetting'
+import { AdvanceSetting } from '../../core/config/AdvanceSetting'
 import { AdvanceAdnInitResult } from '../../core/adn/AdvanceAdnInitResult'
 
 const TAG = `[AdvCsjUtil] `

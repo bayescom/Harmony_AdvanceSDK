@@ -1,6 +1,6 @@
 import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import { AdvancePrivacyController } from '../config/AdvancePrivacyController';
-import { AdvanceSingleton } from './AdvanceSingleton';
+import { AdvanceSingleton } from './config/AdvanceSingleton';
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { AdvanceSupplierModel } from '../model/AdvanceNetModel';
 import { AdvanceSupplier } from '../model/AdvanceSupplier';

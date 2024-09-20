@@ -2,6 +2,7 @@ import http from '@ohos.net.http';
 import { BYDevice } from '../../basic/BYDevice';
 import { BYLog } from '../../basic/BYLog';
 import { BYSingleton } from '../../basic/BYSingleton';
+import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import {
   ADV_ERR_NET_UNSUPPORT_TYPE,
   ADV_ERR_NET_FAILED,
@@ -64,11 +65,10 @@ async function requestSync(url: string, method: http.RequestMethod,
       })
 
       //get请求需要请求头添加ua
-      if (method == http.RequestMethod.GET) {
-        reqOption.header = { 'User-Agent': BYDevice.getUA() }
+      let ua = BYDevice.getUA()
+      if (method == http.RequestMethod.GET && BYStrUtil.isNotEmpty(ua)) {
+        reqOption.header = { 'User-Agent': ua }
       }
-
-      BYLog.debug(TAG + `reqOption.header = ${reqOption.header}`)
 
       httpRequest.request(
         url, reqOption, (err, data) => {
@@ -83,7 +83,13 @@ async function requestSync(url: string, method: http.RequestMethod,
           }
           // todo 请求http返回状态码为500 ，会导致app crash，如何避免？https://issuereporter.developer.huawei.com/detail/240914190446130/comment
           if (data && data.responseCode === 200) {
-            BYLog.debug(TAG + `request success, url: ${url}, result: ${JSON.stringify(data, undefined, undefined)}`)
+            BYLog.debug(TAG + `request success`)
+
+            //post请求才打印返回信息
+            if (method == http.RequestMethod.POST) {
+              BYLog.devDebug(TAG +
+                `request success, url: ${url}, result: ${JSON.stringify(data, undefined, undefined)}`)
+            }
 
             if (data.resultType === http.HttpDataType.STRING) {
               let obj: AdvanceStrategyResponse = JSON.parse(JSON.stringify(data.result))

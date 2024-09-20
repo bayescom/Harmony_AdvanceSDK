@@ -12,15 +12,15 @@ export class AdvanceSplash extends AdvanceAdBase {
     this.adSlotType = AdvanceConstant.ADV_AD_TYPE_SPLASH
   }
 
-  mListener?: AdvanceSplashListener
+  protected mListener?: AdvanceSplashListener
 
   setListener(spl: AdvanceSplashListener) {
-    this.baseListener = spl
+    this.commListener = spl
     this.mListener = spl
   }
 
 
-  adnWin(bestAdn: AdvanceADNUnitData): void {
+  protected adnWin(bestAdn: AdvanceADNUnitData): void {
     //设置监听回调方法
     try {
       if (this.mListener) {

@@ -4,4 +4,6 @@ export interface AdvanceBaseOpenFuc {
   loadStrategy(): void
 
   getWinSupplier():AdvanceSupplier |undefined
+
+  destroy(): void
 }
