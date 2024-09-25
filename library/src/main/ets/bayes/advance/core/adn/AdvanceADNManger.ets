@@ -1,10 +1,10 @@
 import { BYLog } from '../../../basic/BYLog'
-import { BYCacheUtil } from '../../../basic/util/BYCacheUtil'
 import { AdvCSJSplashAdapter } from '../../adapter/csj/AdvCsjSplashAdapter'
 import { AdvanceADNUnitData } from './AdvanceADNUnitData'
 import AdvanceConstant from '../../model/AdvanceConstant'
 import { AdvanceADNCommonAdapter } from './AdvanceADNCommonAdapter'
 import { AdvCsjFeedAdapter } from '../../adapter/csj/AdvCsjFeedAdapter'
+import { AdvCsjNativeAdapter } from '../../adapter/csj/AdvCsjNativeAdapter'
 
 export class AdvanceADNManger {
   //生成对应adapter实现类
@@ -25,13 +25,17 @@ export class AdvanceADNManger {
             result = new AdvCsjFeedAdapter(adnData, context.getApplicationContext())
           }
           break
+        case AdvanceConstant.ADV_AD_TYPE_NATIVE:
+          if (sdkId == AdvanceConstant.ADV_SDK_ID_CSJ) {
+            result = new AdvCsjNativeAdapter(adnData, context.getApplicationContext())
+          }
+          break
       }
     } catch (e) {
       BYLog.printE(e)
     }
-    BYLog.debug(`getAdnAdapter , result = ${result}`)
+    BYLog.debug(`generateAdnAdapter , result = ${result}`)
 
     return result
   }
-
 }

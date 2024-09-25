@@ -1,7 +1,6 @@
 import { BYLocation } from '../BYLocation'
 
 
-@Sendable
 export abstract class BYPrivacyController {
   /**
    * app在项目中配置权限。在适当时机申请权限，然后用户授权。
@@ -24,8 +23,8 @@ export abstract class BYPrivacyController {
 
   /**
    * app在项目中配置权限。并在合适时机动态申请权限，用户授权。
-   * 1：当isCanUseLocation()返回false。当sdk需要地理位置信息时，使用getTTLocation()返回的值。
-   * 2：当isCanUseLocation()返回true。当sdk需要地理位置信息时，先去检查是否已经得到用户授权，如果是则获取系统地理位置信息，如果否则使用getTTLocation()返回的值。
+   * 1：当isCanUseLocation()返回false。当sdk需要地理位置信息时，使用  getCusLocation()返回的值。
+   * 2：当isCanUseLocation()返回true。当sdk需要地理位置信息时，先去检查是否已经得到用户授权，如果是则获取系统地理位置信息，如果否则使用  getCusLocation()返回的值。
    * @returns 是否允许SDK获取系统地理位置信息
    */
   isCanUseLocation(): boolean {

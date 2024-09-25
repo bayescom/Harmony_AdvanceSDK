@@ -5,6 +5,10 @@ import { systemDateTime } from '@kit.BasicServicesKit';
 import { AdvanceSupplierModel } from '../model/AdvanceNetModel';
 import { AdvanceSupplier } from '../model/AdvanceSupplier';
 import { AdvanceError } from '../model/AdvanceError';
+import { window } from '@kit.ArkUI';
+import { AdvanceRenderOption } from '../config/AdvanceOption';
+import BYConstant from '../../basic/BYConstant';
+import { BYLog } from '../../basic/BYLog';
 
 export class AdvanceUtil {
   static getAdvancePrivacy(): AdvancePrivacyController | undefined {
@@ -40,5 +44,21 @@ export class AdvanceUtil {
     } catch (e) {
       return ori
     }
+  }
+
+  static getWindowStage(advanceRenderOP: AdvanceRenderOption): window.WindowStage |undefined{
+    let result : window.WindowStage |undefined = undefined
+    try {
+      if (advanceRenderOP) {
+        result = advanceRenderOP.windowStage
+      }
+      //尝试使用基础库中获取到的窗口实例
+      if (!result) {
+        result = BYConstant.windowStage
+      }
+    } catch (e) {
+      BYLog.printE(e)
+    }
+    return result
   }
 }

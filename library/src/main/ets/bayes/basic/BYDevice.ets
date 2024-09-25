@@ -13,7 +13,7 @@ import AAID from '@hms.core.AAID';
 import { BYPermissionUtil } from './util/BYPermissionUtil';
 import wifiManager from '@ohos.wifiManager';
 import { BYSetting } from './BYSetting';
-import { BY_CACHE_KEY_AAID, BY_CACHE_KEY_OAID, BY_CACHE_KEY_ODID, BY_CACHE_KEY_UA } from './BYConstant';
+import BYConstant, { BY_CACHE_KEY_AAID, BY_CACHE_KEY_OAID, BY_CACHE_KEY_ODID, BY_CACHE_KEY_UA } from './BYConstant';
 import { BYCacheResult, BYCacheUtil, CACHE_TIME_MONTH } from './util/BYCacheUtil';
 
 const TAG: string = "BYDevice---"
@@ -338,7 +338,7 @@ export class BYDevice {
   static async getMacAddress(): Promise<string> {
     let result: string = ""
     try {
-      let cusPrivacy = BYSingleton.get().privacyController
+      let cusPrivacy = BYConstant.privacyController
       let customMac: string = ''
       if (cusPrivacy) {
         customMac = cusPrivacy.getMacAddress() ?? ""

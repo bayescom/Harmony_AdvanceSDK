@@ -7,6 +7,7 @@ import { BYLog } from '../../../basic/BYLog'
 import { AdvanceADNCommonAdapter } from '../../core/adn/AdvanceADNCommonAdapter'
 import { AdvanceSetting } from '../../core/config/AdvanceSetting'
 import { AdvanceAdnInitResult } from '../../core/adn/AdvanceAdnInitResult'
+import AdvanceConstant from '../../model/AdvanceConstant'
 
 const TAG = `[AdvCsjUtil] `
 
@@ -18,9 +19,9 @@ export class AdvCsjUtil {
       // 0 成功。4200 重复初始化
       if (csjInitResult.code == 0 || csjInitResult.code == 4200) {
         result.initSucc = true
-        AdvanceSetting.get().csjInitStatus = 1
+        AdvanceSetting.get().csjInitStatus = AdvanceConstant.ADV_ADN_INIT_SUCCESS
       } else {
-        AdvanceSetting.get().csjInitStatus = -2
+        AdvanceSetting.get().csjInitStatus = AdvanceConstant.ADV_ADN_INIT_FAILED
       }
       result.errCode = csjInitResult.code + ''
       result.errMsg = csjInitResult.msg
@@ -36,14 +37,14 @@ export class AdvCsjUtil {
       try {
         let csjStatus = AdvanceSetting.get().csjInitStatus
         //请求中需等待，防止多次调用执行异常
-        if (csjStatus == 0) {
+        if (csjStatus == AdvanceConstant.ADV_ADN_INIT_LOADING) {
           try { //间隔 Nms 执行一次检查SDK回调状态
             let totalWaitMs = 1500
             let perMs = 30
             let intervalID = setInterval(() => {
               totalWaitMs -= perMs
 
-              let isCsjSucc = AdvanceSetting.get().csjInitStatus == 1
+              let isCsjSucc = AdvanceSetting.get().csjInitStatus == AdvanceConstant.ADV_ADN_INIT_SUCCESS
               let isTimeout = totalWaitMs <= 0
               BYLog.debug(TAG + ` init interval check status, isCsjSucc = ${isCsjSucc} , isTimeout = ${isTimeout} `)
               if (isTimeout || isCsjSucc) {
@@ -67,7 +68,7 @@ export class AdvCsjUtil {
           }
 
           return
-        } else if (csjStatus == 1) {
+        } else if (csjStatus == AdvanceConstant.ADV_ADN_INIT_SUCCESS) {
           let result = new StartResult(0, '已成功初始化过')
           resolve(result)
           return
@@ -97,7 +98,7 @@ export class AdvCsjUtil {
 
           let csjResult = CSJAdSdk.start()
           //代表请求中
-          AdvanceSetting.get().csjInitStatus = 0
+          AdvanceSetting.get().csjInitStatus = AdvanceConstant.ADV_ADN_INIT_LOADING
           resolve(csjResult)
           return
         }

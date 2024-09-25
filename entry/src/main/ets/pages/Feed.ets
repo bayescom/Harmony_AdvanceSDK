@@ -1,9 +1,7 @@
-import { AdvanceFeed } from 'advSDK'
-import { AdvanceOption } from 'advSDK/src/main/ets/bayes/advance/config/AdvanceOption';
-import { AdvanceDislike } from 'advSDK/src/main/ets/bayes/advance/core/AdvanceDislike';
-import { AdvanceError } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceError';
-import { AdvanceSupplier } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceSupplier';
 import { logToast } from '../util/Toast';
+import { AdvanceDislike, AdvanceError, AdvanceFeed, AdvanceOption, AdvanceSupplier } from 'advSDK'
+import { router } from '@kit.ArkUI';
+import { DemoUtil } from '../util/DemoUtil';
 
 @Entry
 @Component
@@ -13,11 +11,20 @@ export struct Feed {
   @State private dislikeStatus: boolean = false;
 
   aboutToAppear(): void {
+
+    let posId = router.getParams() as string
+    if (DemoUtil.isEmpty(posId)) {
+      posId = '10011073'
+    }
+
+    //模拟正常信息流内容
     for (let index = 0; index < 20; index++) {
       this.listArray.push(`测试item：${index}`)
     }
 
-    let op = new AdvanceOption('10011073')
+
+    //请求聚合广告
+    let op = new AdvanceOption(posId)
     // op.widthVP = 390
     // op.heightVP = 0
     let advFeed = new AdvanceFeed(op)
@@ -27,9 +34,14 @@ export struct Feed {
       },
       onDislike: (dislike: AdvanceDislike): void => {
         logToast(`onDislike , dislike = ${JSON.stringify(dislike)}`)
+
+        //同步关闭状态
+        this.dislikeStatus = true
       },
       onLoaded: (supplier: AdvanceSupplier): void => {
         logToast(`onLoaded , supplier : ${JSON.stringify(supplier)}`)
+
+        //开始渲染广告
         advFeed.render(this.getUIContext())
         //插入当前信息流对象
         this.listArray.splice(3, 0, advFeed)
@@ -94,7 +106,7 @@ export struct Feed {
   BuildCommonItem(text: string) {
     Row() {
       Text(text)
-        .height(50)
+        .height(60)
         .width('100%')
         .key("key")
         .textAlign(TextAlign.Center)

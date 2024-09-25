@@ -12,10 +12,16 @@ import { AdvanceAdnResult } from '../../model/AdvanceSendModel';
 import { AdvCsjUtil } from './AdvCsjUtil';
 import AdvanceConstant from '../../model/AdvanceConstant';
 import { BYDisplay } from '../../../basic/BYDisplay';
-import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_RENDER } from '../../model/AdvanceError';
+import {
+  AdvanceError,
+  ADV_ERR_DATA_NULL,
+  ADV_ERR_EXCEPTION_LOAD,
+  ADV_ERR_EXCEPTION_RENDER
+} from '../../model/AdvanceError';
 import { AdvanceRenderOption } from '../../config/AdvanceOption';
 import { AdvanceADNCommonSplashAdapter } from '../../core/adn/AdvanceADNCommonSplashAdapter';
 import { AdvanceCloseType } from '../../model/AdvanceCloseType';
+import { AdvanceUtil } from '../../core/AdvanceUtil';
 
 const TAG = `[AdvCSJSplashAdapter] `
 
@@ -24,11 +30,19 @@ export class AdvCSJSplashAdapter extends AdvanceADNCommonSplashAdapter {
 
   showAd(advanceRenderOP: AdvanceRenderOption): void {
     try {
-      if (this.mSplashAd) {
-        BYLog.debug(TAG + `showAd ,windowStage = ${advanceRenderOP.windowStage}`)
-        this.mSplashAd.showSplashAd(advanceRenderOP.windowStage, advanceRenderOP.customBottomBuilder,
-          advanceRenderOP.customSkipBuilder)
+      if (!this.mSplashAd) {
+        this.callAdRenderFailed(new AdvanceError(ADV_ERR_EXCEPTION_RENDER, '为获取到广告 '))
+        return
       }
+
+      let windowStage = AdvanceUtil.getWindowStage(advanceRenderOP)
+      if (!windowStage) {
+        this.callAdRenderFailed(new AdvanceError(ADV_ERR_EXCEPTION_RENDER, '为获取到窗口信息 '))
+        return
+      }
+      BYLog.debug(TAG + `showAd ,windowStage = ${windowStage}`)
+      this.mSplashAd.showSplashAd(windowStage, advanceRenderOP.customBottomBuilder,
+        advanceRenderOP.customSkipBuilder)
     } catch (e) {
       BYLog.printE(e)
       let err = e as Error
@@ -39,8 +53,8 @@ export class AdvCSJSplashAdapter extends AdvanceADNCommonSplashAdapter {
   loadAd(): Promise<AdvanceAdnResult> {
     BYLog.devDebug(TAG + ` loadAd start`)
     return new Promise<AdvanceAdnResult>(async (resolve, reject) => {
+      let result = new AdvanceAdnResult()
       try {
-        let result = new AdvanceAdnResult()
         let initResult = await AdvCsjUtil.canLoadAD(this)
         BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
 
@@ -162,6 +176,13 @@ export class AdvCSJSplashAdapter extends AdvanceADNCommonSplashAdapter {
         // BYLog.devDebug(`AdvCSJSplashAdapter loadAd mock , random = ${random} ,randomResultStatus = ${randomResult} , delayTime = ` +
         //   delayTime)
       } catch (e) {
+        BYLog.printE(e)
+        if (result.resultStatus >= 0) {
+          return
+        }
+        result.errCode = ADV_ERR_EXCEPTION_LOAD
+        result.errMsg = 'adn请求时，代码异常'
+        resolve(result)
       }
 
 

@@ -1,9 +1,11 @@
 import { NodeController } from '@kit.ArkUI'
-import { AdvanceSplash } from 'advSDK'
-import { AdvanceOption, AdvanceRenderOption } from 'advSDK/src/main/ets/bayes/advance/config/AdvanceOption'
-import { AdvanceCloseType } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceCloseType'
-import { AdvanceError } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceError'
-import { AdvanceSupplier } from 'advSDK/src/main/ets/bayes/advance/model/AdvanceSupplier'
+import {
+  AdvanceCloseType,
+  AdvanceError,
+  AdvanceOption,
+  AdvanceRenderOption,
+  AdvanceSplash,
+  AdvanceSupplier } from 'advSDK'
 import { DemoConstants } from '../entryability/DemoConstants'
 import { logToast, toast } from '../util/Toast'
 

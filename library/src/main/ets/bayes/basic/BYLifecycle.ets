@@ -1,5 +1,6 @@
 import { AbilityLifecycleCallback, ApplicationStateChangeCallback, Context, UIAbility } from '@kit.AbilityKit'
 import { window } from '@kit.ArkUI'
+import BYConstant from './BYConstant'
 import { BYLog } from './BYLog'
 import { BYSingleton } from './BYSingleton'
 
@@ -36,6 +37,9 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
     // 在这里可以执行WindowStage创建后的初始化操作
     // ...
 
+    if (windowStage) {
+      BYConstant.windowStage = windowStage
+    }
     BYLog.devDebug(TAG +
       `--BYAbilityLifecycleCallback-- onWindowStageCreate (WindowStage创建) ，ability = ${ability} , windowStage = ${windowStage}`)
 
@@ -45,6 +49,9 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
   onWindowStageActive(ability: UIAbility, windowStage: window.WindowStage): void {
     // 在这里可以执行页面激活时的操作，如恢复状态、刷新数据等
     // ...
+    if (windowStage) {
+      BYConstant.windowStage = windowStage
+    }
 
     BYLog.devDebug(TAG +
       `--BYAbilityLifecycleCallback-- onWindowStageActive (WindowStage获取到焦点) ，ability = ${ability} , windowStage = ${windowStage}`)

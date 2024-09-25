@@ -5,19 +5,10 @@ import { NodeController, UIContext } from '@kit.ArkUI';
 import { AdvCsjUtil } from './AdvCsjUtil';
 import { BYLog } from '../../../basic/BYLog';
 import { BYDisplay } from '../../../basic/BYDisplay';
-import {
-  AdSlotBuilder,
-  CSJAdCreator,
-  CSJAdSdk,
-  CSJNativeExpressAd,
-  CSJSplashAd,
-  CSJSplashAdCloseType,
-  CSJSplashAdLoadParam
-} from '@csj/openadsdk';
+import { AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJNativeExpressAd } from '@csj/openadsdk';
 import { ArrayList } from '@kit.ArkTS';
 import AdvanceConstant from '../../model/AdvanceConstant';
-import { AdvanceCloseType } from '../../model/AdvanceCloseType';
-import { AdvanceError, ADV_ERR_DATA_NULL } from '../../model/AdvanceError';
+import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../../model/AdvanceError';
 import { AdvanceDislike } from '../../core/AdvanceDislike';
 
 const TAG = `[AdvCsjFeedAdapter] `
@@ -32,8 +23,8 @@ export class AdvCsjFeedAdapter extends AdvanceADNCommonFeedAdapter {
   loadAd(): Promise<AdvanceAdnResult> {
     BYLog.devDebug(TAG + ` loadAd start`)
     return new Promise<AdvanceAdnResult>(async (resolve, reject) => {
+      let result = new AdvanceAdnResult()
       try {
-        let result = new AdvanceAdnResult()
         let initResult = await AdvCsjUtil.canLoadAD(this)
         BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
 
@@ -72,8 +63,8 @@ export class AdvCsjFeedAdapter extends AdvanceADNCommonFeedAdapter {
                */
               onError: (code: number, message: string) => {
                 BYLog.debug(TAG + "加载expressFeed 广告失败，code=" + code + "，message=" + message);
-                result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
 
+                result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
                 result.errCode = code + ''
                 result.errMsg = message
                 resolve(result)
@@ -174,7 +165,7 @@ export class AdvCsjFeedAdapter extends AdvanceADNCommonFeedAdapter {
                 result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_SUCCESS
                 resolve(result)
 
-                BYLog.devDebug(TAG+'after resolve')
+                BYLog.devDebug(TAG + 'after resolve')
               }
             })
           } else {
@@ -192,6 +183,13 @@ export class AdvCsjFeedAdapter extends AdvanceADNCommonFeedAdapter {
           resolve(result)
         }
       } catch (e) {
+        BYLog.printE(e)
+        if (result.resultStatus >= 0) {
+          return
+        }
+        result.errCode = ADV_ERR_EXCEPTION_LOAD
+        result.errMsg = 'adn请求时，代码异常'
+        resolve(result)
       }
 
     })

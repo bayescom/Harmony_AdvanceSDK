@@ -23,6 +23,31 @@ export abstract class AdvanceADNCommonAdapter {
   }
 
 
+  /**
+   *  loadAd 子类抽象实现模板
+   *
+   *
+   loadAd(): Promise<AdvanceAdnResult> {
+   BYLog.devDebug(TAG + ` loadAd start`)
+   return new Promise<AdvanceAdnResult>(async (resolve, reject) => {
+   let result = new AdvanceAdnResult()
+   try {
+   } catch (e) {
+   BYLog.printE(e)
+   if (result.resultStatus >= 0) {
+   return
+   }
+   result.errCode = ADV_ERR_EXCEPTION_LOAD
+   result.errMsg = 'adn请求时，代码异常'
+   resolve(result)
+   }
+
+   })
+   }
+
+   * @returns
+   */
+
   abstract loadAd(): Promise<AdvanceAdnResult>
 
   abstract showAd(advanceRenderOP: AdvanceRenderOption)
@@ -48,6 +73,7 @@ export abstract class AdvanceADNCommonAdapter {
     this.reportClick()
   }
 
+  // todo 去重
   private reportShow() {
     try {
       let urls = this.unitData.supplier?.imptk
@@ -59,6 +85,7 @@ export abstract class AdvanceADNCommonAdapter {
 
   }
 
+  // todo 去重
   private reportClick() {
     try {
       let urls = this.unitData.supplier?.clicktk
@@ -84,13 +111,16 @@ export abstract class AdvanceADNCommonAdapter {
 @Concurrent
 function reportAdnRenderErr(urlList: string[], err: AdvanceError) {
   try {
-    BYLog.debug(`广告曝光成功上报发起`)
+    if (!urlList) {
+      BYLog.debug('reportAdnRenderErr null')
+      return
+    }
+    BYLog.debug(`广告曝光失败上报发起`)
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportUrl')
-        // todo 宏替换
-        let url = AdvanceUtil.appendFailedReason(element,err)
+        BYLog.debug('start reportAdnRenderErr')
+        let url = AdvanceUtil.appendFailedReason(element, err)
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(url))
       }
     }
@@ -102,12 +132,15 @@ function reportAdnRenderErr(urlList: string[], err: AdvanceError) {
 @Concurrent
 function reportAdnShow(urlList: string[]) {
   try {
+    if (!urlList) {
+      BYLog.debug('reportAdnShow null')
+      return
+    }
     BYLog.debug(`广告曝光成功上报发起`)
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportUrl')
-        // todo 宏替换
+        BYLog.debug('start reportAdnShow')
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
     }
@@ -119,12 +152,15 @@ function reportAdnShow(urlList: string[]) {
 @Concurrent
 function reportAdnClick(urlList: string[]) {
   try {
+    if (!urlList) {
+      BYLog.debug('reportAdnClick null')
+      return
+    }
     BYLog.debug(`广告点击成功上报发起`)
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportUrl')
-        // todo 宏替换
+        BYLog.debug('start reportAdnClick')
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
     }

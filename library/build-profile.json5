@@ -16,7 +16,13 @@
           "consumerFiles": [
             "./consumer-rules.txt"
           ]
-        }
+        },
+//        "runtimeOnly": {
+//          "packages": [
+//            "@csj/openadsdk"
+//            // 仅用于使用变量动态import其他模块名场景，静态import或常量动态import无需配置。
+//          ]
+//        }
       },
     },
   ],

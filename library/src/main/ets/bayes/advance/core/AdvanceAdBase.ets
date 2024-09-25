@@ -396,9 +396,11 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           let advanceBestSupplier = AdvanceUtil.caseSupplier(tempBestAdn.supplier)
           BYLog.devDebug(TAG + `bestADN:${JSON.stringify(tempBestAdn)}`)
           BYLog.debug(TAG + `【当前最优】命中 ：${JSON.stringify(advanceBestSupplier)}`)
-          this.commListener?.onLoaded(advanceBestSupplier)
 
+          //先设置adn中的listener
           this.adnWin(tempBestAdn)
+          //执行回调给开发者
+          this.commListener?.onLoaded(advanceBestSupplier)
           //上报胜出
           taskpool.execute(reportWin, tempBestAdn.supplier.wintk)
         } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_RESULT_LOADING) {
@@ -447,7 +449,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
     }
   }
 
-  abstract init()
+  protected abstract init()
 
   protected callShow(renderOP: AdvanceRenderOption) {
     this.getCurrentAdapter()?.showAd(renderOP)
@@ -477,12 +479,17 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 @Concurrent
 function reportLoaded(urlList: string[]) {
   try {
+    if (!urlList) {
+      BYLog.debug('reportLoaded null')
+      return
+    }
+
     BYLog.debug(`广告启动上报发起`)
 
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportUrl')
+        BYLog.debug('start reportLoaded')
         // todo 宏替换
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
@@ -495,12 +502,15 @@ function reportLoaded(urlList: string[]) {
 @Concurrent
 function reportWin(urlList: string[]) {
   try {
+    if (!urlList) {
+      BYLog.debug('reportWin null')
+      return
+    }
     BYLog.debug(`广告竞胜上报发起`)
-
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportUrl')
+        BYLog.debug('start reportWin')
         // todo 宏替换
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
@@ -513,11 +523,15 @@ function reportWin(urlList: string[]) {
 @Concurrent
 function reportAdnSucc(urlList: string[]) {
   try {
+    if (!urlList) {
+      BYLog.debug('reportAdnSucc null')
+      return
+    }
     BYLog.debug(`广告成功上报发起`)
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportUrl')
+        BYLog.debug('start reportAdnSucc')
         // todo 宏替换
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
@@ -530,11 +544,15 @@ function reportAdnSucc(urlList: string[]) {
 @Concurrent
 function reportAdnFailed(urlList: string[], err: AdvanceError) {
   try {
+    if (!urlList) {
+      BYLog.debug('reportAdnFailed null')
+      return
+    }
     BYLog.debug(`广告失败上报发起`)
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportUrl')
+        BYLog.debug('start reportAdnFailed')
         // todo 宏替换
 
         let url = AdvanceUtil.appendFailedReason(element, err)

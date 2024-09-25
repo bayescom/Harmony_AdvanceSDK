@@ -23,3 +23,10 @@ export interface AdvanceSplashListener extends AdvanceBaseEventListener {
 export interface AdvanceFeedListener extends AdvanceBaseEventListener {
   onDislike: (dislike: AdvanceDislike) => void //广告关闭回调
 }
+
+
+export interface AdvanceNativeListener extends AdvanceBaseEventListener {
+  onDislike: (dislike: AdvanceDislike) => void //广告关闭回调
+
+}
+

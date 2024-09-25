@@ -8,13 +8,13 @@ import { BYUtil } from '../../basic/BYUtil';
 
 import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import { BYSecurity } from '../../basic/BYSecurity';
-import { BYSingleton } from '../../basic/BYSingleton';
 import { BYSetting } from '../../basic/BYSetting';
 import { AdvanceSingleton } from '../core/config/AdvanceSingleton';
 import { AdvanceOption } from '../config/AdvanceOption';
 import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../model/AdvanceError';
 import AdvanceConstant from '../model/AdvanceConstant';
+import BYConstant from '../../basic/BYConstant';
 
 export class AdvanceRequestManger {
   static async prepareReqAdData(adConfig: AdvanceOption): Promise<AdvanceReqModel> {
@@ -91,7 +91,7 @@ export class AdvanceRequestManger {
 
   private static async prepareOAID(deviceInf: AdvanceDeviceModel) {
     try {
-      let cusPrivacy = BYSingleton.get().privacyController
+      let cusPrivacy = BYConstant.privacyController
       let customOAID: string | undefined = ''
       if (cusPrivacy) {
         customOAID = cusPrivacy.getCusOaid()

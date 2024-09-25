@@ -8,18 +8,10 @@ import { AdvanceADNUnitData } from '../adn/AdvanceADNUnitData';
 import { AdvanceADNCommonSplashAdapter } from '../adn/AdvanceADNCommonSplashAdapter';
 
 export class AdvanceSplash extends AdvanceAdBase {
-  init(): void {
+  protected init(): void {
     this.adSlotType = AdvanceConstant.ADV_AD_TYPE_SPLASH
   }
-
   protected mListener?: AdvanceSplashListener
-
-  setListener(spl: AdvanceSplashListener) {
-    this.commListener = spl
-    this.mListener = spl
-  }
-
-
   protected adnWin(bestAdn: AdvanceADNUnitData): void {
     //设置监听回调方法
     try {
@@ -30,6 +22,11 @@ export class AdvanceSplash extends AdvanceAdBase {
     } catch (e) {
       BYLog.printE(e)
     }
+  }
+
+  setListener(spl: AdvanceSplashListener) {
+    this.commListener = spl
+    this.mListener = spl
   }
 
 

@@ -7,18 +7,10 @@ import { AdvanceADNUnitData } from '../adn/AdvanceADNUnitData';
 import { AdvanceADNCommonFeedAdapter } from '../adn/AdvanceADNCommonFeedAdapter';
 
 export class AdvanceFeed extends AdvanceAdBase {
-  init(): void {
+  protected init(): void {
     this.adSlotType = AdvanceConstant.ADV_AD_TYPE_FEED
   }
-
-  mListener?: AdvanceFeedListener
-
-  setListener(spl: AdvanceFeedListener) {
-    this.commListener = spl
-    this.mListener = spl
-  }
-
-
+  private mListener?: AdvanceFeedListener
   protected adnWin(bestAdn: AdvanceADNUnitData) {
     //设置监听回调方法
     try {
@@ -32,6 +24,10 @@ export class AdvanceFeed extends AdvanceAdBase {
   }
 
 
+  setListener(spl: AdvanceFeedListener) {
+    this.commListener = spl
+    this.mListener = spl
+  }
   getAdComponent(): NodeController | undefined {
     try {
       let adapter = this.getCurrentAdapter()

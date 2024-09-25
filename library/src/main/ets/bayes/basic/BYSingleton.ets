@@ -9,7 +9,6 @@ import { BYPrivacyController } from './itf/BYPrivacyController';
 export class BYSingleton {
   public debug : boolean = false
   public useHttps : boolean = false
-  public privacyController : BYPrivacyController | undefined = undefined //隐私设置
 
   private static instance: BYSingleton;
 

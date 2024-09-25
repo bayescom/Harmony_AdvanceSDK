@@ -1,10 +1,10 @@
 import BYConstant from '../basic/BYConstant'
 import { BYLifecycle } from '../basic/BYLifecycle'
 import { BYLog } from '../basic/BYLog'
-import { BYSetting } from '../basic/BYSetting'
 import { BYSingleton } from '../basic/BYSingleton'
 import { AdvancePrivacyController } from './config/AdvancePrivacyController'
 import { AdvanceSingleton } from './core/config/AdvanceSingleton'
+import AdvanceConstant from './model/AdvanceConstant'
 
 export class AdvanceSDK {
   //初始化SDK
@@ -25,6 +25,11 @@ export class AdvanceSDK {
     //聚合统一隐私设置
     AdvanceSingleton.get().advancePrivacy = advPri
     //BY基础库隐私设置
-    BYSingleton.get().privacyController = advPri
+    BYConstant.privacyController = advPri
+  }
+
+  //当前版本号
+  getVersion(): string {
+    return AdvanceConstant.ADV_SDK_VERSION_NAME
   }
 }

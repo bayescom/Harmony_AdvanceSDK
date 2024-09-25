@@ -24,7 +24,7 @@ struct Index {
         router.pushUrl({ url: "pages/Splash" })
       })
       Button('信息流广告').margin(10).onClick((ev) => {
-        router.pushUrl({ url: "pages/Feed" })
+        router.pushUrl({ url: "pages/FeedChoose" })
       })
     }
     .height('100%')
