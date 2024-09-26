@@ -61,7 +61,6 @@ export struct Feed {
     })
     advFeed.loadStrategy()
 
-
   }
 
   /**

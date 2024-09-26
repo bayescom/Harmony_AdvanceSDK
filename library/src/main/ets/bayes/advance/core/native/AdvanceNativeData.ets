@@ -8,7 +8,7 @@ export interface AdvanceNativeData {
 
   getVideoCoverImageUrl(): string;
 
-  getAdLogo(): Resource | string;
+  getAdLogo(): Resource | string; //todo 修改为NodeController 方式返回，方便兼容多家adn返回结构
 
   getTitle(): string;
 
