@@ -1,10 +1,17 @@
 import { router } from '@kit.ArkUI'
+import { AdInf } from '../util/DemoUtil'
 
 @Entry
 @Component
 export struct FeedChoose {
-  private adExpressId = '' //
-  private adNativeId = '' //
+  private adExpressId:string = '' //
+  private adNativeId :string= '' //
+  private adinf :AdInf =  new AdInf()
+
+  aboutToAppear(): void {
+
+  }
+
 
   build() {
     Column() {
@@ -12,6 +19,7 @@ export struct FeedChoose {
         Text("模板广告位id：")
         TextInput({ placeholder: "adm" })
           .width("80%")
+          .type(InputType.Number)
           .onChange((value) => {
             this.adExpressId = value
             console.log(`csjAdm onChanage ${value}`)
@@ -24,9 +32,10 @@ export struct FeedChoose {
           top: 20
         })
         .onClick(() => {
+          this.adinf.adId = this.adExpressId
           router.pushUrl({
             url: "pages/Feed",
-            params: this.adExpressId
+            params: this.adinf,
           })
         })
 
@@ -34,6 +43,7 @@ export struct FeedChoose {
         Text("自渲染广告位id：")
         TextInput({ placeholder: "adm" })
           .width("80%")
+          .type(InputType.Number)
           .onChange((value) => {
             this.adNativeId = value
             console.log(`csjAdm onChanage ${value}`)
@@ -46,9 +56,10 @@ export struct FeedChoose {
           top: 20
         })
         .onClick(() => {
+          this.adinf.adId = this.adNativeId
           router.pushUrl({
             url: "pages/Native",
-            params: this.adNativeId
+            params: this.adinf
           })
         })
     }

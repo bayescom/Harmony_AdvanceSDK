@@ -18,3 +18,6 @@ export class DemoUtil{
     return false == DemoUtil.isEmpty(str);
   }
 }
+export class AdInf{
+  adId:string = ''
+}

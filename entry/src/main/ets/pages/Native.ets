@@ -1,12 +1,16 @@
-import { AdvanceNative } from 'advSDK/src/main/ets/bayes/advance/core/native/AdvanceNative';
 import { router } from '@kit.ArkUI';
-import { AdvanceDislike, AdvanceError, AdvanceOption, AdvanceSupplier } from 'advSDK';
-import { DemoUtil } from '../util/DemoUtil';
-import { ArrayList, util } from '@kit.ArkTS';
-import { AdvanceNativeData } from 'advSDK/src/main/ets/bayes/advance/core/native/AdvanceNativeData';
 import {
+  AdvanceDislike,
+  AdvanceError,
+  AdvanceOption,
+  AdvanceSupplier,
+  AdvanceNativeData,
+  AdvanceNative,
   AdvanceNativeInteractionModel
-} from 'advSDK/src/main/ets/bayes/advance/core/native/AdvanceNativeInteractionModel';
+} from 'advSDK';
+import { AdInf, DemoUtil } from '../util/DemoUtil';
+import { ArrayList, util } from '@kit.ArkTS';
+
 import { logToast } from '../util/Toast';
 
 @Entry
@@ -18,7 +22,9 @@ export struct Native {
 
   aboutToAppear(): void {
 
-    let posId = router.getParams() as string
+    let posId = ''
+    let adinf = router.getParams() as AdInf
+    posId = adinf.adId
     if (DemoUtil.isEmpty(posId)) {
       posId = '10011085'
     }
@@ -31,6 +37,7 @@ export struct Native {
 
     //请求聚合广告
     let op = new AdvanceOption(posId)
+    op.widthVP = 360
     let advNative = new AdvanceNative(op)
     let data: AdvanceNativeData | undefined = undefined
     advNative.setListener({

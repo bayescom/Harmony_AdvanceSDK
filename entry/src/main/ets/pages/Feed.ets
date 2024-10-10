@@ -1,7 +1,9 @@
 import { logToast } from '../util/Toast';
 import { AdvanceDislike, AdvanceError, AdvanceFeed, AdvanceOption, AdvanceSupplier } from 'advSDK'
 import { router } from '@kit.ArkUI';
-import { DemoUtil } from '../util/DemoUtil';
+import { AdInf, DemoUtil } from '../util/DemoUtil';
+
+// import{AdSlot, AdSlotBuilder} from 'csjSDK'
 
 @Entry
 @Component
@@ -10,13 +12,15 @@ export struct Feed {
   @State private errorMsg: string | undefined = undefined;
   @State private dislikeStatus: boolean = false;
 
-  aboutToAppear(): void {
 
-    let posId = router.getParams() as string
+  aboutToAppear(): void {
+    let posId = ''
+
+    let adinf = router.getParams() as AdInf
+    posId = adinf.adId
     if (DemoUtil.isEmpty(posId)) {
       posId = '10011073'
     }
-
     //模拟正常信息流内容
     for (let index = 0; index < 20; index++) {
       this.listArray.push(`测试item：${index}`)
@@ -60,6 +64,7 @@ export struct Feed {
       }
     })
     advFeed.loadStrategy()
+
 
   }
 
