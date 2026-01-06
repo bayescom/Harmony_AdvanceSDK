@@ -6,7 +6,7 @@ export class BYMockUtil {
   static canMock(): boolean {
     let result = false
     result = BYSetting.get().isDev && BYSetting.get().canMock && BYSingleton.get().debug
-    BYLog.debug("canMock:" + result)
+    BYLog.devDebug("canMock:" + result)
     return result
   }
 }

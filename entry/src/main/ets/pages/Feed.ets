@@ -29,8 +29,8 @@ export struct Feed {
 
     //请求聚合广告
     let op = new AdvanceOption(posId)
-    // op.widthVP = 390
-    // op.heightVP = 0
+    op.widthVP = 390
+    op.heightVP = 0
     let advFeed = new AdvanceFeed(op)
     advFeed.setListener({
       onShow: (): void => {

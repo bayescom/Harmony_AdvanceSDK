@@ -33,6 +33,42 @@ export class BYDisplay {
     return result
   }
 
+  static getScreenHVP(): number {
+    let result = 0
+
+    try {
+      let des = BYDisplay.getScreenDensity()
+      result = BYDisplay.getScreenHPX() / des
+    } catch (e) {
+      BYLog.printE(e)
+    }
+
+    return result
+  }
+
+
+  static getScreenWVP(): number {
+    let result = 0
+
+    try {
+      let des = BYDisplay.getScreenDensity()
+      result = BYDisplay.getScreenWPX() / des
+    } catch (e) {
+      BYLog.printE(e)
+    }
+
+    return result
+  }
+
+//   static getStatusHeight():number{
+//     let result = 0
+//
+//   const statusBarAvoidArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+//     result = statusBarAvoidArea.topRect.height;
+//
+//     return result
+// }
+
 
   static getScreenDPI(): number {
     let result = 0

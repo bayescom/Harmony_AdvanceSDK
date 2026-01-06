@@ -5,7 +5,6 @@ import { deviceInfo, systemDateTime } from '@kit.BasicServicesKit';
 import { connection } from '@kit.NetworkKit';
 import { radio } from '@kit.TelephonyKit';
 import { BYStrUtil } from './util/BYStrUtil';
-import { BYSingleton } from './BYSingleton';
 
 import { fileIo as fs, ReadOptions } from '@kit.CoreFileKit';
 import { buffer } from '@kit.ArkTS';
@@ -14,7 +13,7 @@ import { BYPermissionUtil } from './util/BYPermissionUtil';
 import wifiManager from '@ohos.wifiManager';
 import { BYSetting } from './BYSetting';
 import BYConstant, { BY_CACHE_KEY_AAID, BY_CACHE_KEY_OAID, BY_CACHE_KEY_ODID, BY_CACHE_KEY_UA } from './BYConstant';
-import { BYCacheResult, BYCacheUtil, CACHE_TIME_MONTH } from './util/BYCacheUtil';
+import { BYCacheResult, BYCacheUtil, CACHE_TIME_MONTH } from './cache/BYCacheUtil';
 
 const TAG: string = "BYDevice---"
 
@@ -47,7 +46,7 @@ export class BYDevice {
     try {
       let saved = BYCacheUtil.get<string>(BY_CACHE_KEY_UA, CACHE_TIME_MONTH)
       //未获取到缓存值，或者缓存值为空，或者需要刷新
-      if (saved == undefined || saved.needRefresh || BYStrUtil.isEmpty(saved.cacheValue)) {
+      if (!saved  || saved.needRefresh || BYStrUtil.isEmpty(saved.cacheValue)) {
         result = true
       }
     } catch (e) {

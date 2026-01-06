@@ -50,8 +50,8 @@ export class BYLocationUtil {
           BYLog.devDebug(`getLocation start  getLastLocation`)
           let loc: geoLocationManager.Location | undefined
           // loc = geoLocationManager.getLastLocation()
-          if (loc == undefined) {
-            BYLog.devDebug(`getLocation start getCurrentLocationEasy when loc == undefined`)
+          if (!loc) {
+            BYLog.devDebug(`getLocation start getCurrentLocationEasy when 'Location' empty`)
             BYLocationUtil.getCurrentLocationEasy((location) => {
               BYLog.devDebug(`getLocation use getCurrentLocation`)
               value(location)
@@ -70,6 +70,7 @@ export class BYLocationUtil {
               value(location)
             })
           } catch (e) {
+            BYLog.devDebug(`getCurrentLocationEasy catch err`)
             BYLog.printE(e)
             value(undefined)
           }

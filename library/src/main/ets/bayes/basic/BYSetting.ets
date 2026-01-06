@@ -16,6 +16,10 @@ export class BYSetting {
   public canMock: boolean = false //mock模式
   public savedDeviceEncrypt: string = '' //单例记录加密后得设备信息，用于请求时复用
   public statusBarHeightVP: number = 0
+  public navigationBarHeightVP: number = 0
+
+  public isAppForeground :boolean = true
+
   private static instance: BYSetting;
 
   private constructor() {

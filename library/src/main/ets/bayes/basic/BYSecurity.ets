@@ -27,20 +27,20 @@ export class BYSecurity {
   }
 
 
-  static async decrypt(content: string): Promise<string> {
+  static  decrypt(content: string): string {
     try {
       //0.base64
       let that = new util.Base64Helper();
       //1.创建密钥生成器
       let generator = cryptoFramework.createSymKeyGenerator('AES128')
       //2.使用密钥生成器将密钥转换成 cryptoFramework.SymKey
-      let key = await generator.convertKey({ data: BYSecurity.stringToUint8Array(KEY) })
+      let key = generator.convertKeySync({ data: BYSecurity.stringToUint8Array(KEY) })
       //3.创建cipher
       let aesCipher = cryptoFramework.createCipher('AES128|ECB|PKCS5')
       //4.init cipher
-      await aesCipher.init(cryptoFramework.CryptoMode.DECRYPT_MODE, key, BYSecurity.genIvParamsSpec())
+       aesCipher.initSync(cryptoFramework.CryptoMode.DECRYPT_MODE, key, BYSecurity.genIvParamsSpec())
       //5.解密
-      let clearText = await aesCipher.doFinal({ data: BYSecurity.stringToUint8Array(content) })
+      let clearText = aesCipher.doFinalSync({ data: BYSecurity.stringToUint8Array(content) })
       //6.返回解密结果
       return that.encodeToStringSync(clearText.data)
     } catch (error) {

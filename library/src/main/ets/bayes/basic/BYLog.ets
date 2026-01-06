@@ -12,7 +12,7 @@ export class BYLog {
   private static domain: number = LOGGER_DOMAIN
   private static tag: string = LOGGER_TAG //日志Tag
   private static format: string = '%{public}s'
-  private static showLog: boolean = true //是否显示打印日志
+  private static showLog: boolean = false //是否显示打印日志
 
 
   /**
@@ -57,15 +57,22 @@ export class BYLog {
    */
   static debug(...args: string[]): void {
     if (BYLog.showLog) {
-      hilog.debug(BYLog.domain, BYLog.tag, BYLog.format.repeat(args.length), args)
+      BYLog.logInfo(args.toString())
+      // hilog.debug(BYLog.domain, BYLog.tag, BYLog.format.repeat(args.length), args)
     }
   }
 
   static devDebug(...args: string[]): void {
-    if (BYLog.showLog && BYSetting.get().isDev && BYSingleton.get().debug) {
-      hilog.debug(BYLog.domain, BYLog.tag + "-dev", BYLog.format.repeat(args.length), args)
+    if (BYLog.showDevLog()) {
+      BYLog.logInfo("-dev-" + args.toString())
+      // hilog.debug(BYLog.domain, BYLog.tag + "-dev", BYLog.format.repeat(args.length), args)
     }
   }
+
+  static showDevLog(): boolean {
+    return BYLog.showLog && BYSetting.get().isDev && BYSingleton.get().debug
+  }
+
 
   /**
    * 打印INFO级别日志
@@ -158,7 +165,26 @@ export class BYLog {
   //   }
   // }
 
+  static logInfo(content: string) {
+    const maxSize = 3072; // 日志内容的最大长度限制
 
+    // 如果内容长度小于等于最大长度限制，直接打印
+    if (content.length <= maxSize) {
+      hilog.info(BYLog.domain, BYLog.tag, '%{public}s', content);
+    } else {
+      // 循环分段打印
+      while (content.length > maxSize) {
+        let logContent = content.substring(0, maxSize); // 获取当前段的内容
+        content = content.substring(maxSize); // 更新剩余内容（注意这里使用substring而不是replace）
+        hilog.info(BYLog.domain, BYLog.tag, '%{public}s', logContent); // 打印当前段
+      }
+
+      // 打印剩余日志（如果最后一段不为空）
+      if (content.length > 0) {
+        hilog.info(BYLog.domain, BYLog.tag, '%{public}s', content);
+      }
+    }
+  }
 }
 
 // export default new LogUtil() //单例（在ES6模块中，当你使用 import 导入一个模块时，实际上是在导入该模块的值的一个引用。这意味着在另一个模块中修改该值会影响原始模块中的值。）

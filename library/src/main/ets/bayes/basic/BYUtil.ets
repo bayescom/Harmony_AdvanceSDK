@@ -10,9 +10,13 @@ import { window } from '@kit.ArkUI';
 import { BYSetting } from './BYSetting';
 import BYConstant, { BY_CACHE_KEY_UA } from './BYConstant';
 import { BYDisplay } from './BYDisplay';
-import { BYCacheUtil, CACHE_TIME_MONTH } from './util/BYCacheUtil';
+import { BYCacheUtil, CACHE_TIME_MONTH } from './cache/BYCacheUtil';
 
 export class BYUtil {
+  static isDev(): boolean {
+    return BYSetting.get().isDev
+  }
+
   /**
    * 运行异步获取指定类型得方法，用catch方法包裹 避免出现crash
    * @param getter
@@ -45,8 +49,6 @@ export class BYUtil {
   }
 
 
-
-
   /**
    * MD5摘要，同步
    * @param data 待摘要的数据
@@ -74,23 +76,52 @@ export class BYUtil {
       //减去0.5以后进行向上取整
       let calNum = oriNum - 0.5
       result = new Decimal(calNum).ceil().toNumber()
-      BYLog.devDebug(`caseNumberInt ,oriNum = ${oriNum} ,calNum = ${calNum} , result = ${result}`)
+      // BYLog.devDebug(`caseNumberInt ,oriNum = ${oriNum} ,calNum = ${calNum} , result = ${result}`)
     } catch (e) {
       BYLog.printE(e)
     }
     return result
   }
 
+  //将number保留两位有效数字
+  static keep2PointNumber(oriNum: number): number {
+    let result = oriNum
+    try {
+      let intResult = BYUtil.caseNumberInt(oriNum * 100)
+      result = intResult / 100
+    } catch (e) {
+    }
+
+    return result
+  }
+
+  static keep1PointNumber(oriNum: number): number {
+    let result = oriNum
+    try {
+      let intResult = BYUtil.caseNumberInt(oriNum * 10)
+      result = intResult / 10
+    } catch (e) {
+    }
+
+    return result
+  }
+
   static async initStatusHeight() {
     try {
       let windowStage = BYConstant.windowStage
-      let statusBarAvoidArea =
-        (await windowStage.getMainWindow()).getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
+      let mainWin = await windowStage.getMainWindow()
+      let statusBarAvoidArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
       let h = statusBarAvoidArea.topRect.height
       //源单位是px
-      let vh = BYDisplay.px2VP(h)
-      BYSetting.get().statusBarHeightVP = vh
-      BYLog.devDebug(`initStatusHeight result h = ${h} , vh = ${vh} `)
+      let barHVP = BYDisplay.px2VP(h)
+      BYSetting.get().statusBarHeightVP = barHVP
+
+      let navigationBarAvoidArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+      let navH = navigationBarAvoidArea.bottomRect.height;
+      let navHVP = BYDisplay.px2VP(navH)
+      BYSetting.get().navigationBarHeightVP = navHVP;
+
+      BYLog.devDebug(`initStatusHeight result navHVP = ${navHVP} , barHVP = ${barHVP} `)
     } catch (e) {
     }
   }
