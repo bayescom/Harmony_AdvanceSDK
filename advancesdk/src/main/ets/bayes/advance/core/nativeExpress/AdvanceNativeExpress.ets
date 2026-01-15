@@ -1,21 +1,21 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
-import { AdvanceFeedListener } from '../AdvanceOpenListener';
+import { AdvanceNativeExpressListener } from '../AdvanceOpenListener';
 import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../../basic/BYLog';
-import { AdvanceConstant } from '../../model/AdvanceConstant';
 import { AdvanceADNUnitData } from '../adn/AdvanceADNUnitData';
-import { AdvanceADNCommonFeedAdapter } from '../adn/AdvanceADNCommonFeedAdapter';
+import { AdvanceNativeExpressCommonAdapter } from '../adn/AdvanceNativeExpressCommonAdapter';
+import { AdvanceAdType } from '../../define/AdvanceDefine';
 
-export class AdvanceFeed extends AdvanceAdBase {
+export class AdvanceNativeExpress extends AdvanceAdBase {
   protected init(): void {
-    this.adSlotType = AdvanceConstant.ADV_AD_TYPE_NativeExpress
+    this.adSlotType = AdvanceAdType.nativeExpress
   }
-  private mListener?: AdvanceFeedListener
+  private mListener?: AdvanceNativeExpressListener
   protected adnWin(bestAdn: AdvanceADNUnitData) {
     //设置监听回调方法
     try {
       if (this.mListener) {
-        let adapter = this.getCurrentAdapter() as AdvanceADNCommonFeedAdapter
+        let adapter = this.getCurrentAdapter() as AdvanceNativeExpressCommonAdapter
         adapter.setFeedListener(this.mListener)
       }
     } catch (e) {
@@ -24,7 +24,7 @@ export class AdvanceFeed extends AdvanceAdBase {
   }
 
 
-  setListener(spl: AdvanceFeedListener) {
+  setListener(spl: AdvanceNativeExpressListener) {
     this.commListener = spl
     this.mListener = spl
   }
@@ -40,7 +40,7 @@ export class AdvanceFeed extends AdvanceAdBase {
 
   render(context: UIContext) {
     try {
-      let adapter = this.getCurrentAdapter() as AdvanceADNCommonFeedAdapter
+      let adapter = this.getCurrentAdapter() as AdvanceNativeExpressCommonAdapter
       adapter.render(context)
     } catch (e) {
       BYLog.printE(e)

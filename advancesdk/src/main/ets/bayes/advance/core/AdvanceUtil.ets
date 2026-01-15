@@ -4,7 +4,7 @@ import { AdvanceSingleton } from './config/AdvanceSingleton';
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { AdvanceSupplierModel } from '../model/AdvanceNetModel';
 import { AdvanceSupplier } from '../model/AdvanceSupplier';
-import { AdvanceError } from '../model/AdvanceError';
+import { AdvanceError } from '../define/AdvanceError';
 import { window } from '@kit.ArkUI';
 import { AdvanceRenderOption } from '../config/AdvanceOption';
 import BYConstant from '../../basic/BYConstant';

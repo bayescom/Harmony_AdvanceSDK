@@ -1,5 +1,5 @@
-import { AdvanceConstant } from './AdvanceConstant'
-import { AdvanceError } from './AdvanceError'
+import { AdvanceConstant } from '../define/AdvanceConstant'
+import { AdvanceError } from '../define/AdvanceError'
 
 @Sendable
 export class AdvanceAdnResult {

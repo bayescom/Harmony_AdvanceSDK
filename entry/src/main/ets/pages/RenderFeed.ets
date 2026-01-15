@@ -4,8 +4,8 @@ import {
   AdvanceError,
   AdvanceOption,
   AdvanceSupplier,
-  AdvanceNativeData,
-  AdvanceNative,
+  AdvanceRenderFeedData,
+  AdvanceRenderFeed,
   AdvanceNativeInteractionModel
 } from 'AdvanceSDK';
 import { AdInf, DemoUtil } from '../util/DemoUtil';
@@ -15,8 +15,8 @@ import { logToast } from '../util/Toast';
 
 @Entry
 @Component
-export struct Native {
-  @State private listArray: Array<string | AdvanceNativeData> = new Array();
+export struct RenderFeed {
+  @State private listArray: Array<string | AdvanceRenderFeedData> = new Array();
   @State private errorMsg: string | undefined = undefined;
   @State private dislikeStatus: boolean = false;
 
@@ -38,8 +38,8 @@ export struct Native {
     //请求聚合广告
     let op = new AdvanceOption(posId)
     op.widthVP = 360
-    let advNative = new AdvanceNative(op)
-    let data: AdvanceNativeData | undefined = undefined
+    let advNative = new AdvanceRenderFeed(op)
+    let data: AdvanceRenderFeedData | undefined = undefined
     advNative.setListener({
       onShow: (): void => {
         logToast(`onShow`)
@@ -89,7 +89,7 @@ export struct Native {
         Text(this.errorMsg).fontSize(12).fontColor(Color.Red).margin(5)
       }
       List() {
-        ForEach(this.listArray, (item: string | AdvanceNativeData) => {
+        ForEach(this.listArray, (item: string | AdvanceRenderFeedData) => {
           ListItem() {
             if (typeof item === 'string') {
               this.BuildCommonItem(item)
@@ -109,7 +109,7 @@ export struct Native {
               item.destroy(); //释放资源
             }
           })
-        }, (item: string | AdvanceNativeData, index: number) => {
+        }, (item: string | AdvanceRenderFeedData, index: number) => {
           return item.toString() + "_" + index
         })
       }.divider({ strokeWidth: 1, color: Color.Gray }).scrollBar(BarState.Off)
@@ -137,7 +137,7 @@ export struct Native {
    * @param ad
    */
   @Builder
-  private buildAdLayout(ad: AdvanceNativeData, clickViewIds: ArrayList<string> = new ArrayList(),
+  private buildAdLayout(ad: AdvanceRenderFeedData, clickViewIds: ArrayList<string> = new ArrayList(),
     creativeViewIds: ArrayList<string> = new ArrayList(), rootComponentId: string = util.generateRandomUUID()) {
     Column() {
       Row() {
@@ -251,7 +251,7 @@ export struct Native {
    * @param ad
    */
   @Builder
-  buildImageLayout(ad: AdvanceNativeData, creativeViewIds: ArrayList<string>) {
+  buildImageLayout(ad: AdvanceRenderFeedData, creativeViewIds: ArrayList<string>) {
     if (ad.getImageUrlList().length > 1) {
       Row({ space: 10 }) {
         ForEach((ad.getImageUrlList() ?? new ArrayList<string>()).convertToArray(), (url: string) => {

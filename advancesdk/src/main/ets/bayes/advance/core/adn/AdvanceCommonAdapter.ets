@@ -8,9 +8,9 @@ import { BYStrUtil } from '../../../basic/util/BYStrUtil';
 import AdvanceNet from '../../net/AdvanceRequest';
 import { AdvanceUtil } from '../AdvanceUtil';
 import { taskpool } from '@kit.ArkTS';
-import { AdvanceError } from '../../model/AdvanceError';
+import { AdvanceError } from '../../define/AdvanceError';
 
-export abstract class AdvanceADNCommonAdapter {
+export abstract class AdvanceCommonAdapter {
   //渠道参数
   unitData: AdvanceADNUnitData
   appContext: Context
@@ -19,7 +19,7 @@ export abstract class AdvanceADNCommonAdapter {
   constructor(supData: AdvanceADNUnitData, context: Context) {
     this.unitData = supData
     this.appContext = context
-    BYLog.debug('AdvanceADNCommonAdapter init')
+    BYLog.debug('AdvanceCommonAdapter init')
   }
 
 

@@ -1,5 +1,5 @@
 // {
-import { AdvanceConstant } from './AdvanceConstant'
+import { AdvanceConstant } from '../define/AdvanceConstant'
 
 // 	"version": "3.1.0",
 // 	"sdk_version": "5.1.1",

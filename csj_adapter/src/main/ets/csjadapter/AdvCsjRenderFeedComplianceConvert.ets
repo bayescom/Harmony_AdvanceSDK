@@ -1,7 +1,7 @@
 import { CSJComplianceInfo } from '@csj/openadsdk';
 import { AdvanceNativeCompliance } from 'AdvanceSDK';
 
-export class AdvCsjNativeComplianceConvert implements AdvanceNativeCompliance {
+export class AdvCsjRenderFeedComplianceConvert implements AdvanceNativeCompliance {
   csjAppInf: CSJComplianceInfo
 
   constructor(csjAppInf: CSJComplianceInfo) {

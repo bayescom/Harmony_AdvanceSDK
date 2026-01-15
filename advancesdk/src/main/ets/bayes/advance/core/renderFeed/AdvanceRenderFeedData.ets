@@ -4,7 +4,7 @@ import { AdvanceNativeCompliance } from './AdvanceNativeCompliance';
 import { AdvanceNativeInteractionModel } from './AdvanceNativeInteractionModel';
 
 //自渲染对外暴露参数设置
-export interface AdvanceNativeData {
+export interface AdvanceRenderFeedData {
 
   getVideoCoverImageUrl(): string;
 

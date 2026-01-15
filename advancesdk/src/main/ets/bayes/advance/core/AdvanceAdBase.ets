@@ -7,11 +7,11 @@ import {
   ADV_ERR_ALL_FAILED,
   ADV_ERR_DATA_NULL,
   ADV_ERR_NO_ADAPTER
-} from '../model/AdvanceError'
+} from '../define/AdvanceError'
 import { AdvanceParaGroup } from '../model/AdvanceGroup'
 import { AdvanceStrategyResponse } from '../model/AdvanceNetModel'
 import { AdvanceRequestManger } from '../net/AdvanceRequestManger'
-import { AdvanceADNCommonAdapter } from './adn/AdvanceADNCommonAdapter'
+import { AdvanceCommonAdapter } from './adn/AdvanceCommonAdapter'
 import { AdvanceBaseOpenFuc } from './AdvanceOpenFuc'
 import { AdvanceCommListener } from './AdvanceOpenListener'
 import { taskpool } from '@kit.ArkTS'
@@ -19,7 +19,7 @@ import { AdvanceAdnResult } from '../model/AdvanceSendModel'
 import AdvanceNet from '../net/AdvanceRequest'
 import { BYStrUtil } from '../../basic/util/BYStrUtil'
 import { AdvanceADNManger } from './adn/AdvanceADNManger'
-import { AdvanceConstant } from '../model/AdvanceConstant'
+import { AdvanceConstant } from '../define/AdvanceConstant'
 import { AdvanceSupplier } from '../model/AdvanceSupplier'
 import { AdvanceUtil } from './AdvanceUtil'
 import BYConstant from '../../basic/BYConstant'
@@ -37,7 +37,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
   //当前执行的SDK组
   protected runningGroup ?: AdvanceParaGroup
   // currentAD ?: AdvanceADNUnitData
-  protected adapterMap: Map<number, AdvanceADNCommonAdapter> = new Map()
+  protected adapterMap: Map<number, AdvanceCommonAdapter> = new Map()
   //最优adn
   protected tempBestAdn: AdvanceADNUnitData | undefined
   //当前组可用数量，用来判断是否组内全部失败
@@ -457,7 +457,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
   // todo 优化AdvanceADNCommonAdapter为interface接口形式
   //根据currentAD 找到对应adapter
-  protected getCurrentAdapter(): AdvanceADNCommonAdapter | undefined {
+  protected getCurrentAdapter(): AdvanceCommonAdapter | undefined {
     try {
       //从当前执行组的最佳广告
       let key = this.runningGroup?.bestADN?.supplier?.priority

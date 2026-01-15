@@ -1,5 +1,5 @@
-import { AdvanceCloseType } from '../model/AdvanceCloseType'
-import { AdvanceError } from '../model/AdvanceError'
+import { AdvanceCloseType } from '../define/AdvanceDefine'
+import { AdvanceError } from '../define/AdvanceError'
 import { AdvanceSupplier } from '../model/AdvanceSupplier'
 import { AdvanceDislike } from './AdvanceDislike'
 
@@ -20,12 +20,12 @@ export interface AdvanceSplashListener extends AdvanceBaseEventListener {
   onClose: (closeType: AdvanceCloseType) => void //广告关闭回调
 }
 
-export interface AdvanceFeedListener extends AdvanceBaseEventListener {
+export interface AdvanceNativeExpressListener extends AdvanceBaseEventListener {
   onDislike: (dislike: AdvanceDislike) => void //广告关闭回调
 }
 
 
-export interface AdvanceNativeListener extends AdvanceBaseEventListener {
+export interface AdvanceRenderFeedListener extends AdvanceBaseEventListener {
   onDislike: (dislike: AdvanceDislike) => void //广告关闭回调
 
 }

@@ -1,13 +1,13 @@
-import { AdvanceRenderOption, AdvanceADNCommonFeedAdapter, AdvanceAdnResult, BYLog, BYDisplay, AdvanceError,
+import { AdvanceRenderOption, AdvanceNativeExpressCommonAdapter, AdvanceAdnResult, BYLog, BYDisplay, AdvanceError,
   ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD, AdvanceDislike, AdvanceConstant } from 'AdvanceSDK';
 import { NodeController, UIContext } from '@kit.ArkUI';
 import { AdvCsjUtil } from './AdvCsjUtil';
 import { AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJNativeExpressAd } from '@csj/openadsdk';
 import { ArrayList } from '@kit.ArkTS';
 
-const TAG = `[AdvCsjFeedAdapter] `
+const TAG = `[AdvCsjNativeExpressAdapter] `
 
-export class AdvCsjFeedAdapter extends AdvanceADNCommonFeedAdapter {
+export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter {
   mFeedAd ?: CSJNativeExpressAd
 
   render(context: UIContext): void {

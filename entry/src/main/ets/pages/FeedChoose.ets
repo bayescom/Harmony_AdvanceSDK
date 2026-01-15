@@ -34,7 +34,7 @@ export struct FeedChoose {
         .onClick(() => {
           this.adinf.adId = this.adExpressId
           router.pushUrl({
-            url: "pages/Feed",
+            url: "pages/NativeExpress",
             params: this.adinf,
           })
         })
@@ -58,7 +58,7 @@ export struct FeedChoose {
         .onClick(() => {
           this.adinf.adId = this.adNativeId
           router.pushUrl({
-            url: "pages/Native",
+            url: "pages/RenderFeed",
             params: this.adinf
           })
         })

@@ -1,7 +1,7 @@
 import { AdvanceSplashListener } from '../AdvanceOpenListener';
-import { AdvanceADNCommonAdapter } from './AdvanceADNCommonAdapter';
+import { AdvanceCommonAdapter } from './AdvanceCommonAdapter';
 
-export abstract class AdvanceADNCommonSplashAdapter extends AdvanceADNCommonAdapter {
+export abstract class AdvanceSplashCommonAdapter extends AdvanceCommonAdapter {
   splashListener?: AdvanceSplashListener
 
   setSplashListener(splashListener: AdvanceSplashListener) {

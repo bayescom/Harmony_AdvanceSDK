@@ -1,5 +1,5 @@
 import { logToast } from '../util/Toast';
-import { AdvanceDislike, AdvanceError, AdvanceFeed, AdvanceOption, AdvanceSupplier } from 'AdvanceSDK'
+import { AdvanceDislike, AdvanceError, AdvanceNativeExpress, AdvanceOption, AdvanceSupplier } from 'AdvanceSDK'
 import { router } from '@kit.ArkUI';
 import { AdInf, DemoUtil } from '../util/DemoUtil';
 
@@ -7,8 +7,8 @@ import { AdInf, DemoUtil } from '../util/DemoUtil';
 
 @Entry
 @Component
-export struct Feed {
-  @State private listArray: Array<string | AdvanceFeed> = new Array();
+export struct NativeExpress {
+  @State private listArray: Array<string | AdvanceNativeExpress> = new Array();
   @State private errorMsg: string | undefined = undefined;
   @State private dislikeStatus: boolean = false;
 
@@ -31,7 +31,7 @@ export struct Feed {
     let op = new AdvanceOption(posId)
     op.widthVP = 390
     op.heightVP = 0
-    let advFeed = new AdvanceFeed(op)
+    let advFeed = new AdvanceNativeExpress(op)
     advFeed.setListener({
       onShow: (): void => {
         logToast(`onShow`)
@@ -77,7 +77,7 @@ export struct Feed {
         Text(this.errorMsg).fontSize(18).fontColor(Color.Red).margin(10);
       }
       List() {
-        ForEach(this.listArray, (item: string | AdvanceFeed) => {
+        ForEach(this.listArray, (item: string | AdvanceNativeExpress) => {
           ListItem() {
             if (typeof item === 'string') {
               this.BuildCommonItem(item)
@@ -93,7 +93,7 @@ export struct Feed {
               item.destroy(); //释放资源
             }
           })
-        }, (item: string | AdvanceFeed, index: number) => {
+        }, (item: string | AdvanceNativeExpress, index: number) => {
           return item.toString() + "_" + index
         })
       }.divider({ strokeWidth: 1, color: Color.Gray }).scrollBar(BarState.Off).align(Alignment.Center)

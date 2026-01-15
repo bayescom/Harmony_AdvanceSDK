@@ -1,6 +1,6 @@
 import { NodeController } from '@kit.ArkUI';
 import { BYLog, AdvanceAdnResult, AdvanceConstant, BYDisplay, AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD,
-  ADV_ERR_EXCEPTION_RENDER, AdvanceRenderOption, AdvanceADNCommonSplashAdapter, AdvanceCloseType, AdvanceUtil } from 'AdvanceSDK';
+  ADV_ERR_EXCEPTION_RENDER, AdvanceRenderOption, AdvanceSplashCommonAdapter, AdvanceCloseType, AdvanceUtil } from 'AdvanceSDK';
 import {
   AdSlotBuilder,
   CSJAdCreator,
@@ -13,7 +13,7 @@ import { AdvCsjUtil } from './AdvCsjUtil';
 
 const TAG = `[AdvCSJSplashAdapter] `
 
-export class AdvCSJSplashAdapter extends AdvanceADNCommonSplashAdapter {
+export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
   mSplashAd ?: CSJSplashAd
 
   showAd(advanceRenderOP: AdvanceRenderOption): void {

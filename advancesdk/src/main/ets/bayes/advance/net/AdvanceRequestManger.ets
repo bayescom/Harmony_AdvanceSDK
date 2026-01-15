@@ -12,8 +12,8 @@ import { BYSetting } from '../../basic/BYSetting';
 import { AdvanceSingleton } from '../core/config/AdvanceSingleton';
 import { AdvanceOption } from '../config/AdvanceOption';
 import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyResponse } from '../model/AdvanceNetModel';
-import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../model/AdvanceError';
-import { AdvanceConstant } from '../model/AdvanceConstant';
+import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../define/AdvanceError';
+import { AdvanceConstant } from '../define/AdvanceConstant';
 import BYConstant from '../../basic/BYConstant';
 
 export class AdvanceRequestManger {

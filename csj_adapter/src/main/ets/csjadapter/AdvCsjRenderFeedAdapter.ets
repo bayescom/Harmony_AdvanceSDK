@@ -1,18 +1,18 @@
-import { AdvanceRenderOption, AdvanceADNCommonNativeAdapter, AdvanceAdnResult, AdvanceNativeData, BYLog, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD,
+import { AdvanceRenderOption, AdvanceRenderFeedCommonAdapter, AdvanceAdnResult, AdvanceRenderFeedData, BYLog, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD,
   AdvanceConstant, BYDisplay, AdvanceDislike } from 'AdvanceSDK';
 import { NodeController } from '@kit.ArkUI';
 import { CSJAdSdk } from '@csj/openadsdk/src/main/ets/b/c/i/o';
 import { AdSlot, AdSlotBuilder, CSJAdCreator, CSJFeedAd, CSJNativeAd } from '@csj/openadsdk';
 import { AdvCsjUtil } from './AdvCsjUtil';
 import { ArrayList } from '@kit.ArkTS';
-import { AdvCsjNativeConvert } from './AdvCsjNativeConvert';
+import { AdvCsjRenderFeedConvert } from './AdvCsjRenderFeedConvert';
 
-const TAG = `[AdvCsjNativeAdapter] `
+const TAG = `[AdvCsjRenderFeedAdapter] `
 
-export class AdvCsjNativeAdapter extends AdvanceADNCommonNativeAdapter {
-  mNativeData: AdvanceNativeData | undefined
+export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
+  mNativeData: AdvanceRenderFeedData | undefined
 
-  getNativeData(): AdvanceNativeData | undefined {
+  getNativeData(): AdvanceRenderFeedData | undefined {
     return this.mNativeData
   }
 
@@ -112,7 +112,7 @@ export class AdvCsjNativeAdapter extends AdvanceADNCommonNativeAdapter {
 
   private onLoaded(nativeAd: CSJFeedAd) {
     try { //赋值转换后数据信息
-      this.mNativeData = new AdvCsjNativeConvert(nativeAd)
+      this.mNativeData = new AdvCsjRenderFeedConvert(nativeAd)
       nativeAd.setExpressRenderListener({
         onRenderSuccess: (width: number, height: number, isExpress: boolean) => {
           BYLog.debug(TAG +

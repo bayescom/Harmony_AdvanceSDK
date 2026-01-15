@@ -1,10 +1,11 @@
-import { AdvanceConstant } from '../../model/AdvanceConstant'
+import { AdvanceConstant } from '../../define/AdvanceConstant'
+import { AdvanceAdType } from '../../define/AdvanceDefine'
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
 
 //聚合adn侧使用的
 export class AdvanceADNUnitData {
   groupID: number = 0 //广告位所属组
-  adType: number = 0 //广告位类型，默认0 未知， 1开屏、2 模版信息流 3 自渲染信息流
+  adType: AdvanceAdType = AdvanceAdType.unknown // 广告位类型
   //adn渠道策略信息
   supplier?: AdvanceSupplierModel
   //补充内容

@@ -8,7 +8,7 @@ import {
   ADV_ERR_NET_FAILED,
   ADV_ERR_NET_EXCEPTION,
   ADV_ERR_NET_TIME_OUT
-} from '../model/AdvanceError';
+} from '../define/AdvanceError';
 import { AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 
 

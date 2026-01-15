@@ -1,8 +1,8 @@
 import { CSJAdSdk, SDKConfig, SDKConfigBuilder, StartResult } from '@csj/openadsdk'
-import { AdvanceUtil, BYSingleton, ADV_ERR_ADN_INIT_FAILED_INT, BYLog, AdvanceADNCommonAdapter, AdvanceConstant, AdvanceSetting, AdvanceAdnInitResult,
-  AdvanceADNUnitData } from 'AdvanceSDK'
-import { AdvCsjFeedAdapter } from './AdvCsjFeedAdapter'
-import { AdvCsjNativeAdapter } from './AdvCsjNativeAdapter'
+import { AdvanceUtil, BYSingleton, ADV_ERR_ADN_INIT_FAILED_INT, BYLog, AdvanceCommonAdapter, AdvanceConstant, AdvanceSetting, AdvanceAdnInitResult,
+  AdvanceADNUnitData, AdvanceAdType} from 'AdvanceSDK'
+import { AdvCsjNativeExpressAdapter } from './AdvCsjNativeExpressAdapter'
+import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
 import { AdvCsjPrivacy } from './AdvCsjPrivacy'
 import { AdvCSJSplashAdapter } from './AdvCsjSplashAdapter'
 
@@ -10,20 +10,20 @@ const TAG = `[AdvCsjUtil] `
 
 export class AdvCsjUtil {
 
-  static getCsjAdAdapter(adType: number, supData: AdvanceADNUnitData, context: Context) {
+  static getCsjAdAdapter(adType: AdvanceAdType, supData: AdvanceADNUnitData, context: Context) {
     switch (adType) {
-      case AdvanceConstant.ADV_AD_TYPE_SPLASH:
+      case AdvanceAdType.splash:
         return new AdvCSJSplashAdapter(supData, context)
-      case AdvanceConstant.ADV_AD_TYPE_NativeExpress:
-        return new AdvCsjFeedAdapter(supData, context)
-      case AdvanceConstant.ADV_AD_TYPE_SelfRender:
-        return new AdvCsjNativeAdapter(supData, context)
+      case AdvanceAdType.nativeExpress:
+        return new AdvCsjNativeExpressAdapter(supData, context)
+      case AdvanceAdType.selfRender:
+        return new AdvCsjRenderFeedAdapter(supData, context)
       default:
         return undefined
     }
   }
 
-  static canLoadAD(adapter: AdvanceADNCommonAdapter): Promise<AdvanceAdnInitResult> {
+  static canLoadAD(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
     return new Promise<AdvanceAdnInitResult>(async (resolve) => {
       let csjInitResult = await AdvCsjUtil.init(adapter)
       let result = new AdvanceAdnInitResult()
@@ -41,7 +41,7 @@ export class AdvCsjUtil {
 
   }
 
-  static init(adapter: AdvanceADNCommonAdapter): Promise<StartResult> {
+  static init(adapter: AdvanceCommonAdapter): Promise<StartResult> {
     return new Promise<StartResult>((resolve) => {
       let defaultErr = '未知错误'
 

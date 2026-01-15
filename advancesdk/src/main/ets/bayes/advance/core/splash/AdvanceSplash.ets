@@ -2,21 +2,21 @@ import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceSplashListener } from '../AdvanceOpenListener';
 import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../../basic/BYLog';
-import { AdvanceConstant } from '../../model/AdvanceConstant';
+import { AdvanceAdType } from '../../define/AdvanceDefine';
 import { AdvanceRenderOption } from '../../config/AdvanceOption';
 import { AdvanceADNUnitData } from '../adn/AdvanceADNUnitData';
-import { AdvanceADNCommonSplashAdapter } from '../adn/AdvanceADNCommonSplashAdapter';
+import { AdvanceSplashCommonAdapter } from '../adn/AdvanceSplashCommonAdapter';
 
 export class AdvanceSplash extends AdvanceAdBase {
   protected init(): void {
-    this.adSlotType = AdvanceConstant.ADV_AD_TYPE_SPLASH
+    this.adSlotType = AdvanceAdType.splash
   }
   protected mListener?: AdvanceSplashListener
   protected adnWin(bestAdn: AdvanceADNUnitData): void {
     //设置监听回调方法
     try {
       if (this.mListener) {
-        let adapter = this.getCurrentAdapter() as AdvanceADNCommonSplashAdapter
+        let adapter = this.getCurrentAdapter() as AdvanceSplashCommonAdapter
         adapter.setSplashListener(this.mListener)
       }
     } catch (e) {

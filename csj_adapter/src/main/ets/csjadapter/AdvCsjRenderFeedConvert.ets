@@ -1,12 +1,12 @@
 import { CSJArrayList, CSJConstant, CSJFeedAd, CSJImage } from '@csj/openadsdk';
-import { AdvanceNativeData, BYStrUtil, AdvanceNativeCompliance, AdvanceNativeInteractionModel, BYLog } from 'AdvanceSDK';
+import { AdvanceRenderFeedData, BYStrUtil, AdvanceNativeCompliance, AdvanceNativeInteractionModel, BYLog } from 'AdvanceSDK';
 import { UIContext } from '@ohos.arkui.UIContext';
 import ArrayList from '@ohos.util.ArrayList';
 import { NodeController } from '@kit.ArkUI';
-import { AdvCsjNativeComplianceConvert } from './AdvCsjNativeComplianceConvert';
+import { AdvCsjRenderFeedComplianceConvert } from './AdvCsjRenderFeedComplianceConvert';
 
 //将获取的穿山甲数据类，转换成advance对外暴露的属性信息
-export class AdvCsjNativeConvert implements AdvanceNativeData {
+export class AdvCsjRenderFeedConvert implements AdvanceRenderFeedData {
   mData: CSJFeedAd
 
   constructor(adData: CSJFeedAd) {
@@ -98,7 +98,7 @@ export class AdvCsjNativeConvert implements AdvanceNativeData {
   getComplianceInfo(): AdvanceNativeCompliance | undefined {
     let csjCompliance = this.mData.getComplianceInfo()
     if (csjCompliance) {
-      return new AdvCsjNativeComplianceConvert(csjCompliance)
+      return new AdvCsjRenderFeedComplianceConvert(csjCompliance)
     }
     return
   }

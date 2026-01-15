@@ -1,24 +1,24 @@
 export * from './src/main/ets/bayes/advance/AdvanceSDK'
 export * from './src/main/ets/bayes/advance/core/splash/AdvanceSplash'
-export * from './src/main/ets/bayes/advance/core/feed/AdvanceFeed'
-export * from './src/main/ets/bayes/advance/core/native/AdvanceNative'
-export * from './src/main/ets/bayes/advance/core/native/AdvanceNativeCompliance'
-export * from './src/main/ets/bayes/advance/core/native/AdvanceNativeData'
-export * from './src/main/ets/bayes/advance/core/native/AdvanceNativeInteractionModel'
-export * from './src/main/ets/bayes/advance/model/AdvanceCloseType'
+export * from './src/main/ets/bayes/advance/core/nativeExpress/AdvanceNativeExpress'
+export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceRenderFeed'
+export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceNativeCompliance'
+export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceRenderFeedData'
+export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceNativeInteractionModel'
+export * from './src/main/ets/bayes/advance/define/AdvanceDefine'
 export * from './src/main/ets/bayes/advance/core/AdvanceDislike';
-export * from './src/main/ets/bayes/advance/model/AdvanceError';
+export * from './src/main/ets/bayes/advance/define/AdvanceError';
 export * from './src/main/ets/bayes/advance/model/AdvanceSupplier';
 export { AdvanceOption, AdvanceRenderOption } from './src/main/ets/bayes/advance/config/AdvanceOption';
 export * from './src/main/ets/bayes/advance/core/AdvanceOpenListener';
 export * from './src/main/ets/bayes/advance/config/AdvancePrivacyController'
-export * from './src/main/ets/bayes/advance/core/adn/AdvanceADNCommonFeedAdapter'
-export * from './src/main/ets/bayes/advance/core/adn/AdvanceADNCommonNativeAdapter'
-export * from './src/main/ets/bayes/advance/core/adn/AdvanceADNCommonSplashAdapter'
-export * from './src/main/ets/bayes/advance/core/adn/AdvanceADNCommonAdapter'
+export * from './src/main/ets/bayes/advance/core/adn/AdvanceNativeExpressCommonAdapter'
+export * from './src/main/ets/bayes/advance/core/adn/AdvanceRenderFeedCommonAdapter'
+export * from './src/main/ets/bayes/advance/core/adn/AdvanceSplashCommonAdapter'
+export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonAdapter'
 export { AdvanceAdnResult } from './src/main/ets/bayes/advance/model/AdvanceSendModel'
-export { AdvanceConstant } from './src/main/ets/bayes/advance/model/AdvanceConstant'
-export * from './src/main/ets/bayes/advance/model/AdvanceError'
+export { AdvanceConstant } from './src/main/ets/bayes/advance/define/AdvanceConstant'
+export * from './src/main/ets/bayes/advance/define/AdvanceError'
 export * from './src/main/ets/bayes/advance/core/AdvanceDislike'
 export * from './src/main/ets/bayes/advance/core/AdvanceUtil'
 export * from './src/main/ets/bayes/advance/core/config/AdvanceSetting'
