@@ -1,5 +1,5 @@
 import { logToast } from '../util/Toast';
-import { AdvanceDislike, AdvanceError, AdvanceFeed, AdvanceOption, AdvanceSupplier } from 'advSDK'
+import { AdvanceDislike, AdvanceError, AdvanceFeed, AdvanceOption, AdvanceSupplier } from 'AdvanceSDK'
 import { router } from '@kit.ArkUI';
 import { AdInf, DemoUtil } from '../util/DemoUtil';
 

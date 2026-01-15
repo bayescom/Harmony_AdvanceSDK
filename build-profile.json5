@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "/Users/ms/.ohos/config/default_Advance_2o1mDpsDyUfz7Q3OkReX1HAVU9vCtoNnOOBV7DRlovc=.cer",
-          "storePassword": "0000001AA3A96DD30113161F2F0BC655BD8E65FB962D195CCC31EAFAE39DEB08DEBA720F9C105C4A0532",
+          "certpath": "/Users/guangyao/.ohos/config/default_harmony_advancesdk_6dOT_evF_rDPKHeLdHMc5ZM2i2kRh3FNKTHKl5UV2oo=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001A7363A68C6A83F61A7761488BAC44DCBD91CB80602F08B617ED2AEBCBCF132244EB0CA35B82F8",
-          "profile": "/Users/ms/.ohos/config/default_Advance_2o1mDpsDyUfz7Q3OkReX1HAVU9vCtoNnOOBV7DRlovc=.p7b",
+          "keyPassword": "0000001BA4A736B689A5DEF81C4AC776A27BB503B675FDB37ADE455202BCBA67F39D82C0138CB5B4380031",
+          "profile": "/Users/guangyao/.ohos/config/default_harmony_advancesdk_6dOT_evF_rDPKHeLdHMc5ZM2i2kRh3FNKTHKl5UV2oo=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/ms/.ohos/config/default_Advance_2o1mDpsDyUfz7Q3OkReX1HAVU9vCtoNnOOBV7DRlovc=.p12"
+          "storeFile": "/Users/guangyao/.ohos/config/default_harmony_advancesdk_6dOT_evF_rDPKHeLdHMc5ZM2i2kRh3FNKTHKl5UV2oo=.p12",
+          "storePassword": "0000001BCC8B6CA3D7453D24CB0FC46F466D4985497E96E6E48234033B0E747DE9FA18FB881671B5823CFF"
         }
       }
     ],
@@ -46,8 +46,12 @@
       ]
     },
     {
-      "name": "library",
-      "srcPath": "./library",
+      "name": "advancesdk",
+      "srcPath": "./advancesdk"
+    },
+    {
+      "name": "csj_adapter",
+      "srcPath": "./csj_adapter"
     }
   ]
 }

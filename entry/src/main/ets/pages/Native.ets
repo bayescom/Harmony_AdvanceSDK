@@ -7,7 +7,7 @@ import {
   AdvanceNativeData,
   AdvanceNative,
   AdvanceNativeInteractionModel
-} from 'advSDK';
+} from 'AdvanceSDK';
 import { AdInf, DemoUtil } from '../util/DemoUtil';
 import { ArrayList, util } from '@kit.ArkTS';
 

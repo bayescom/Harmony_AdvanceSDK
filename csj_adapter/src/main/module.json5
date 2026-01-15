@@ -1,0 +1,11 @@
+{
+  "module": {
+    "name": "csj_adapter",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet",
+      "2in1",
+    ]
+  }
+}

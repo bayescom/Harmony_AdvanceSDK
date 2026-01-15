@@ -1,4 +1,4 @@
-import { AdvancePrivacyController } from 'advSDK';
+import { AdvancePrivacyController } from 'AdvanceSDK';
 
 export class MyPrivacy extends AdvancePrivacyController{
 

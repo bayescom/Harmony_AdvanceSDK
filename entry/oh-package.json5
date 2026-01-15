@@ -6,7 +6,8 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "advSDK": "file:../library"
+    "AdvanceSDK": "file:../advancesdk",
+    "CSJAdapter": "file:../csj_adapter"
   }
 }
 

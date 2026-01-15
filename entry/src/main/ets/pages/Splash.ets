@@ -5,7 +5,7 @@ import {
   AdvanceOption,
   AdvanceRenderOption,
   AdvanceSplash,
-  AdvanceSupplier } from 'advSDK'
+  AdvanceSupplier } from 'AdvanceSDK'
 import { DemoConstants } from '../entryability/DemoConstants'
 import { logToast, toast } from '../util/Toast'
 
