@@ -1,41 +1,52 @@
 import { CSJAdSdk, SDKConfig, SDKConfigBuilder, StartResult } from '@csj/openadsdk'
-import { AdvanceUtil, BYSingleton, ADV_ERR_ADN_INIT_FAILED_INT, BYLog, AdvanceCommonAdapter, AdvanceConstant, AdvanceSetting, AdvanceAdnInitResult,
-  AdvanceADNUnitData, AdvanceAdType} from 'AdvanceSDK'
+import {
+  AdvanceUtil,
+  BYSingleton,
+  ADV_ERR_ADN_INIT_FAILED,
+  BYLog,
+  BYApp,
+  AdvanceCommonAdapter,
+  AdvanceConstant,
+  AdvanceSetting,
+  AdvanceAdnInitResult,
+  AdvanceADNUnitData,
+  AdvanceAdType,
+  BYConstant
+} from 'AdvanceSDK'
 import { AdvCsjNativeExpressAdapter } from './AdvCsjNativeExpressAdapter'
 import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
 import { AdvCsjPrivacy } from './AdvCsjPrivacy'
-import { AdvCSJSplashAdapter } from './AdvCsjSplashAdapter'
+import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
 
-const TAG = `[AdvCsjUtil] `
+const TAG = `[AdvCSJUtil] `
 
-export class AdvCsjUtil {
-
-  static getCsjAdAdapter(adType: AdvanceAdType, supData: AdvanceADNUnitData, context: Context) {
+export class AdvCSJUtil {
+  static getCSJAdAdapter(adType: AdvanceAdType, supData: AdvanceADNUnitData) {
     switch (adType) {
       case AdvanceAdType.splash:
-        return new AdvCSJSplashAdapter(supData, context)
+        return new AdvCSJSplashAdapter(supData)
       case AdvanceAdType.nativeExpress:
-        return new AdvCsjNativeExpressAdapter(supData, context)
+        return new AdvCsjNativeExpressAdapter(supData)
       case AdvanceAdType.selfRender:
-        return new AdvCsjRenderFeedAdapter(supData, context)
+        return new AdvCsjRenderFeedAdapter(supData)
       default:
         return undefined
     }
   }
 
-  static canLoadAD(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
+  static loadCSJSDK(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
     return new Promise<AdvanceAdnInitResult>(async (resolve) => {
-      let csjInitResult = await AdvCsjUtil.init(adapter)
+      let csjInitResult = await AdvCSJUtil.init(adapter)
       let result = new AdvanceAdnInitResult()
       // 0 成功。4200 重复初始化
       if (csjInitResult.code == 0 || csjInitResult.code == 4200) {
-        result.initSucc = true
+        result.initSuccess = true
         AdvanceSetting.get().csjInitStatus = AdvanceConstant.ADV_ADN_INIT_SUCCESS
       } else {
         AdvanceSetting.get().csjInitStatus = AdvanceConstant.ADV_ADN_INIT_FAILED
       }
-      result.errCode = csjInitResult.code + ''
-      result.errMsg = csjInitResult.msg
+      result.code = csjInitResult.code + ''
+      result.msg = csjInitResult.msg
       resolve(result)
     });
 
@@ -87,7 +98,6 @@ export class AdvCsjUtil {
           BYLog.debug(TAG + `开始执行初始化 ， csjStatus = ${csjStatus}`)
         }
         let adData = adapter.unitData
-        let ctx = adapter.appContext
         if (adData && adData.supplier) {
           let adConfigBuilder = new SDKConfigBuilder()
           let appID = adData.supplier.mediaid
@@ -105,7 +115,7 @@ export class AdvCsjUtil {
           }
 
           let config: SDKConfig = configBuilder.build()
-          CSJAdSdk.init(ctx, config)
+          CSJAdSdk.init(BYConstant.context, config)
 
           let csjResult = CSJAdSdk.start()
           //代表请求中
@@ -118,7 +128,7 @@ export class AdvCsjUtil {
         defaultErr = `初始化执行异常`
       }
 
-      let result = new StartResult(ADV_ERR_ADN_INIT_FAILED_INT, defaultErr)
+      let result = new StartResult(Number(ADV_ERR_ADN_INIT_FAILED), defaultErr)
       resolve(result)
     })
   }

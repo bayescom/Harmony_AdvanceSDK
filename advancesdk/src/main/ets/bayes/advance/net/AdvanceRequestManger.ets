@@ -14,7 +14,7 @@ import { AdvanceOption } from '../config/AdvanceOption';
 import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../define/AdvanceError';
 import { AdvanceConstant } from '../define/AdvanceConstant';
-import BYConstant from '../../basic/BYConstant';
+import { BYConstant } from '../../basic/BYConstant';
 
 export class AdvanceRequestManger {
   static async prepareReqAdData(adConfig: AdvanceOption): Promise<AdvanceReqModel> {

@@ -8,15 +8,15 @@ export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceNativeInterac
 export * from './src/main/ets/bayes/advance/define/AdvanceDefine'
 export * from './src/main/ets/bayes/advance/core/AdvanceDislike';
 export * from './src/main/ets/bayes/advance/define/AdvanceError';
-export * from './src/main/ets/bayes/advance/model/AdvanceSupplier';
+export * from './src/main/ets/bayes/advance/model/AdvanceAdInfo';
 export { AdvanceOption, AdvanceRenderOption } from './src/main/ets/bayes/advance/config/AdvanceOption';
-export * from './src/main/ets/bayes/advance/core/AdvanceOpenListener';
+export * from './src/main/ets/bayes/advance/core/AdvanceAdOpenListener';
 export * from './src/main/ets/bayes/advance/config/AdvancePrivacyController'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceNativeExpressCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceRenderFeedCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceSplashCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonAdapter'
-export { AdvanceAdnResult } from './src/main/ets/bayes/advance/model/AdvanceSendModel'
+export { AdvanceAdnStatusResult } from './src/main/ets/bayes/advance/model/AdvanceSendModel'
 export { AdvanceConstant } from './src/main/ets/bayes/advance/define/AdvanceConstant'
 export * from './src/main/ets/bayes/advance/define/AdvanceError'
 export * from './src/main/ets/bayes/advance/core/AdvanceDislike'
@@ -25,7 +25,8 @@ export * from './src/main/ets/bayes/advance/core/config/AdvanceSetting'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceAdnInitResult'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceADNUnitData'
 
-
+export * from './src/main/ets/bayes/basic/BYConstant'
+export * from './src/main/ets/bayes/basic/BYApp'
 export * from './src/main/ets/bayes/basic/BYLog'
 export * from './src/main/ets/bayes/basic/BYSetting'
 export * from './src/main/ets/bayes/basic/BYLocation'

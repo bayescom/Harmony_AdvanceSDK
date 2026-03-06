@@ -13,13 +13,13 @@ export class AdvanceConstant {
   public static readonly ADV_PARA_GROUP_TIMEOUT: number = 5000
 
   //广告返回状态标记
-  public static readonly ADV_ADN_RESULT_LOADING: number = -1
-  public static readonly ADV_ADN_RESULT_FAILED: number = 0
-  public static readonly ADV_ADN_RESULT_SUCCESS: number = 1
+  public static readonly ADV_ADN_STATUS_LOADING: number = -1
+  public static readonly ADV_ADN_STATUS_FAILED: number = 0
+  public static readonly ADV_ADN_STATUS_SUCCESS: number = 1
 
   // adn广告初始化状态标记
-  public static readonly ADV_ADN_INIT_DEFAULT: number = -1
-  public static readonly ADV_ADN_INIT_LOADING: number = 0
+  public static readonly ADV_ADN_INIT_LOADING: number = -1
+  public static readonly ADV_ADN_INIT_DEFAULT: number = 0
   public static readonly ADV_ADN_INIT_SUCCESS: number = 1
-  public static readonly ADV_ADN_INIT_FAILED: number = -2
+  public static readonly ADV_ADN_INIT_FAILED: number = 2
 }

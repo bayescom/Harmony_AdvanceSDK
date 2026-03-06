@@ -3,16 +3,28 @@ import { AdvancePrivacyController } from '../config/AdvancePrivacyController';
 import { AdvanceSingleton } from './config/AdvanceSingleton';
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { AdvanceSupplierModel } from '../model/AdvanceNetModel';
-import { AdvanceSupplier } from '../model/AdvanceSupplier';
+import { AdvanceAdInfo } from '../model/AdvanceAdInfo';
 import { AdvanceError } from '../define/AdvanceError';
 import { window } from '@kit.ArkUI';
 import { AdvanceRenderOption } from '../config/AdvanceOption';
-import BYConstant from '../../basic/BYConstant';
+import { BYConstant } from '../../basic/BYConstant';
 import { BYLog } from '../../basic/BYLog';
 
 export class AdvanceUtil {
   static getAdvancePrivacy(): AdvancePrivacyController | undefined {
     return AdvanceSingleton.get().advancePrivacy
+  }
+
+  static getAdvanceAdInfo(inSup: AdvanceSupplierModel): AdvanceAdInfo {
+    let result = new AdvanceAdInfo()
+    if (inSup) {
+      result.adnID = inSup.id
+      result.adnName = inSup.name
+      result.appID = inSup.mediaid
+      result.adSlotID = inSup.adspotid
+      result.price = inSup.sdk_price
+    }
+    return result
   }
 
   static getTimeReplacedTk(ori: string): string {
@@ -24,19 +36,6 @@ export class AdvanceUtil {
     }
   }
 
-  static caseSupplier(inSup: AdvanceSupplierModel): AdvanceSupplier {
-    let result = new AdvanceSupplier()
-    if (inSup) {
-      result.adnID = inSup.id
-      result.adnName = inSup.name
-      result.appID = inSup.mediaid
-      result.adSlotID = inSup.adspotid
-      result.price = inSup.sdk_price
-    }
-    return result
-
-  }
-
   static appendFailedReason(ori: string, err: AdvanceError): string {
     try {
       let extErr = `&t_msg=err_${err?.code}`
@@ -44,21 +43,5 @@ export class AdvanceUtil {
     } catch (e) {
       return ori
     }
-  }
-
-  static getWindowStage(advanceRenderOP: AdvanceRenderOption): window.WindowStage |undefined{
-    let result : window.WindowStage |undefined = undefined
-    try {
-      if (advanceRenderOP) {
-        result = advanceRenderOP.windowStage
-      }
-      //尝试使用基础库中获取到的窗口实例
-      if (!result) {
-        result = BYConstant.windowStage
-      }
-    } catch (e) {
-      BYLog.printE(e)
-    }
-    return result
   }
 }

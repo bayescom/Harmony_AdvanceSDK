@@ -3,7 +3,7 @@ import {
   AdvanceDislike,
   AdvanceError,
   AdvanceOption,
-  AdvanceSupplier,
+  AdvanceAdInfo,
   AdvanceRenderFeedData,
   AdvanceRenderFeed,
   AdvanceNativeInteractionModel
@@ -41,8 +41,11 @@ export struct RenderFeed {
     let advNative = new AdvanceRenderFeed(op)
     let data: AdvanceRenderFeedData | undefined = undefined
     advNative.setListener({
-      onShow: (): void => {
-        logToast(`onShow`)
+      onAdShow: (): void => {
+        logToast(`onAdShow`)
+      },
+      onAdClose: () => {
+
       },
       onDislike: (dislike: AdvanceDislike): void => {
         logToast(`onDislike , dislike = ${JSON.stringify(dislike)}`)
@@ -50,15 +53,15 @@ export struct RenderFeed {
         //同步关闭状态
         this.dislikeStatus = true
       },
-      onLoaded: (supplier: AdvanceSupplier): void => {
-        logToast(`onLoaded , supplier : ${JSON.stringify(supplier)}`)
+      onAdLoaded: (supplier: AdvanceAdInfo): void => {
+        logToast(`onAdLoaded , supplier : ${JSON.stringify(supplier)}`)
 
         //进行渲染操作
         data = advNative.getNativeData()
         data?.render(this.getUIContext())
       },
-      onClick: (): void => {
-        logToast(`onClick`)
+      onAdClick: (): void => {
+        logToast(`onAdClick`)
       },
       onRenderSuccess: (): void => {
         logToast(`onRenderSuccess`)
@@ -71,12 +74,12 @@ export struct RenderFeed {
       onRenderFail: (err: AdvanceError): void => {
         logToast(`onRenderFail , ${err.toString()}`)
       },
-      onError: (err: AdvanceError): void => {
-        logToast(`onError , err = ${err.toString()}`)
+      onAdLoadFailed: (err: AdvanceError): void => {
+        logToast(`onAdLoadFailed , err = ${err.toString()}`)
       }
     })
 
-    advNative.loadStrategy()
+    // advNative.loadStrategy()
 
   }
 

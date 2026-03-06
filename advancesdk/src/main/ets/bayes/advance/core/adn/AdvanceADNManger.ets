@@ -11,7 +11,7 @@ export class AdvanceADNManger {
       case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
         const harName = 'CSJAdapter';
         const ns: ESObject = await import(harName);
-        result = ns.AdvCsjUtil.getCsjAdAdapter(adnData.adType, adnData, context.getApplicationContext())
+        result = ns.AdvCSJUtil.getCSJAdAdapter(adnData.adType, adnData)
         return result
       }
       default:

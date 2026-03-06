@@ -1,2 +1,2 @@
 
-export { AdvCsjUtil } from './src/main/ets/csjadapter/AdvCsjUtil';
+export { AdvCSJUtil } from './src/main/ets/csjadapter/AdvCSJUtil';

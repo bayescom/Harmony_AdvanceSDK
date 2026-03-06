@@ -12,24 +12,23 @@ import { AdvanceParaGroup } from '../model/AdvanceGroup'
 import { AdvanceStrategyResponse } from '../model/AdvanceNetModel'
 import { AdvanceRequestManger } from '../net/AdvanceRequestManger'
 import { AdvanceCommonAdapter } from './adn/AdvanceCommonAdapter'
-import { AdvanceBaseOpenFuc } from './AdvanceOpenFuc'
-import { AdvanceCommListener } from './AdvanceOpenListener'
+import { AdvanceAdLoadListener } from './AdvanceAdOpenListener'
 import { taskpool } from '@kit.ArkTS'
-import { AdvanceAdnResult } from '../model/AdvanceSendModel'
+import { AdvanceAdnStatusResult } from '../model/AdvanceSendModel'
 import AdvanceNet from '../net/AdvanceRequest'
 import { BYStrUtil } from '../../basic/util/BYStrUtil'
 import { AdvanceADNManger } from './adn/AdvanceADNManger'
 import { AdvanceConstant } from '../define/AdvanceConstant'
-import { AdvanceSupplier } from '../model/AdvanceSupplier'
 import { AdvanceUtil } from './AdvanceUtil'
-import BYConstant from '../../basic/BYConstant'
+import { BYConstant } from '../../basic/BYConstant'
+import { window } from '@kit.ArkUI'
 
 
 const TAG = `[AdvanceAdBase] `
 
-export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
+export abstract class AdvanceAdBase {
   protected adOption: AdvanceOption
-  protected commListener ?: AdvanceCommListener
+  protected loadListener ?: AdvanceAdLoadListener
   protected adSlotType: number = 0
   protected paraTimeOut: number = AdvanceConstant.ADV_PARA_GROUP_TIMEOUT //组超时时间，单位毫秒
   //并行策略组
@@ -43,17 +42,13 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
   //当前组可用数量，用来判断是否组内全部失败
   protected currentGroupAbleSize: number = 0;
 
+  protected abstract adnWin()
+
   constructor(option: AdvanceOption) {
     this.adOption = option
-    // try {
-    //
-    // } catch (e) {
-    //   BYLog.printE(e)
-    // }
-    this.init()
   }
 
-  loadStrategy(): void {
+  protected loadStrategy(): void {
     try {
       if (!BYConstant.context) {
         let advErr = new AdvanceError()
@@ -66,7 +61,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
       AdvanceRequestManger.requestStrategy(this.adOption, (err, data) => {
         if (err) {
           BYLog.error(TAG + err.msg)
-          this.commListener?.onError(err)
+          this.loadListener?.onAdLoadFailed(err)
           return
         }
         if (!data) {
@@ -74,7 +69,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           advErr.code = ADV_ERR_DATA_NULL
           advErr.msg = '获取到得策略信息为空'
           BYLog.error(TAG + advErr.msg)
-          this.commListener?.onError(advErr)
+          this.loadListener?.onAdLoadFailed(advErr)
           return
         }
         //将返回策略，解析成必要数据信息
@@ -86,18 +81,18 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
     }
   }
 
-  //获取当前胜出的渠道信息
-  getWinSupplier(): AdvanceSupplier | undefined {
-    try {
-      let bestSup = this.runningGroup?.bestADN?.supplier
-      if (bestSup) {
-        return AdvanceUtil.caseSupplier(bestSup)
-      }
-    } catch (e) {
-      BYLog.printE(e)
-    }
-    return
-  }
+  // //获取当前胜出的渠道信息
+  // getWinSupplier(): AdvanceAdInfo | undefined {
+  //   try {
+  //     let bestSup = this.runningGroup?.bestADN?.supplier
+  //     if (bestSup) {
+  //       return AdvanceUtil.caseSupplier(bestSup)
+  //     }
+  //   } catch (e) {
+  //     BYLog.printE(e)
+  //   }
+  //   return
+  // }
 
 
   //首先映射对应adnAdapter到map。再对策略进行分组，获得并发组data
@@ -141,7 +136,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           advErr.code = ADV_ERR_NO_ADAPTER
           advErr.msg = '未找到可用广告adapter，请检查策略配置SDK与Advance已支持SDK是否一致'
           BYLog.error(TAG + advErr.msg)
-          this.commListener?.onError(advErr)
+          this.loadListener?.onAdLoadFailed(advErr)
           return
         }
 
@@ -179,7 +174,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           advErr.code = ADV_ERR_DATA_NULL
           advErr.msg = '无可执行策略组信息'
           BYLog.error(TAG + advErr.msg)
-          this.commListener?.onError(advErr)
+          this.loadListener?.onAdLoadFailed(advErr)
           return
         }
 
@@ -194,7 +189,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         advErr.code = ADV_ERR_DATA_NULL
         advErr.msg = '策略组setting信息为空'
         BYLog.error(TAG + advErr.msg)
-        this.commListener?.onError(advErr)
+        this.loadListener?.onAdLoadFailed(advErr)
       }
     } catch (e) {
       BYLog.printE(e)
@@ -227,15 +222,15 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
           let adnAdapter = this.adapterMap.get(supplier.priority)
           if (adnAdapter) {
-            adnAdapter.loadAd().then((it) => {
+            adnAdapter.adapter_loadAd().then((it) => {
               BYLog.debug(TAG + `${adInf} loadAdnAdapter 执行结果：${JSON.stringify(it)}`)
 
-              this.updateResultPickBest(adnData, it as AdvanceAdnResult)
+              this.updateResultPickBest(adnData, it as AdvanceAdnStatusResult)
             })
           }
 
           //上报SDK启动事件
-          taskpool.execute(reportLoaded, supplier.loadedtk)
+          taskpool.execute(reportAdnLoaded, supplier.loadedtk)
         } else {
           BYLog.warn(TAG + `未找到可执行sup`)
         }
@@ -270,7 +265,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
 
   // 更新结果并检查是否存在最优adn胜出，胜出后将（回调广告成功）  todo biddng返回需要重排序
-  protected updateResultPickBest(adnData: AdvanceADNUnitData, adnResult?: AdvanceAdnResult) {
+  protected updateResultPickBest(adnData: AdvanceADNUnitData, adnResult?: AdvanceAdnStatusResult) {
     try {
       if (!adnResult) {
         BYLog.debug(TAG + `--updateResultCheckNext-- 请求返回为空`)
@@ -288,7 +283,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
       }
 
       //更新状态信息
-      adnData.resultStatus = adnResult.resultStatus
+      adnData.resultStatus = adnResult.status
 
       let currentSup = adnData.supplier
       if (currentSup) {
@@ -299,14 +294,14 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           currentSup.sdk_price = adnResult.bidPrice
         }
 
-        let currentAdnInf = JSON.stringify(AdvanceUtil.caseSupplier(currentSup))
+        let currentAdnInf = JSON.stringify(AdvanceUtil.getAdvanceAdInfo(currentSup))
         //上报广告成功、失败
-        if (adnData.resultStatus == AdvanceConstant.ADV_ADN_RESULT_SUCCESS) {
+        if (adnData.resultStatus == AdvanceConstant.ADV_ADN_STATUS_SUCCESS) {
           BYLog.debug(TAG + `adn广告获取成功：${currentAdnInf}`)
-          taskpool.execute(reportAdnSucc, currentSup.succeedtk)
-        } else if (adnData.resultStatus == AdvanceConstant.ADV_ADN_RESULT_FAILED) {
+          taskpool.execute(reportAdnSuccess, currentSup.succeedtk)
+        } else if (adnData.resultStatus == AdvanceConstant.ADV_ADN_STATUS_FAILED) {
           BYLog.warn(TAG +
-            `adn广告获取失败：${currentAdnInf}， errCode: ${adnResult.errCode}， errMsg: ${adnResult.errMsg}`)
+            `adn广告获取失败：${currentAdnInf}， code: ${adnResult.errCode}， msg: ${adnResult.errMsg}`)
           taskpool.execute(reportAdnFailed, currentSup.failedtk, new AdvanceError(adnResult.errCode, adnResult.errMsg))
         }
       }
@@ -326,7 +321,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
           const eleSup = element.supplier
 
           //校验失败逻辑
-          if (element.resultStatus == AdvanceConstant.ADV_ADN_RESULT_FAILED) {
+          if (element.resultStatus == AdvanceConstant.ADV_ADN_STATUS_FAILED) {
             this.currentGroupAbleSize--
             if (eleSup && this.tempBestAdn) {
               let isBest = false
@@ -345,7 +340,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
             continue
           }
           //存在且成功返回
-          if (eleSup && element.resultStatus != AdvanceConstant.ADV_ADN_RESULT_FAILED) {
+          if (eleSup && element.resultStatus != AdvanceConstant.ADV_ADN_STATUS_FAILED) {
             if (!this.tempBestAdn) {
               this.tempBestAdn = element
               BYLog.debug(TAG + ` 临时最优Adn赋值， sup_priority = ${eleSup?.priority}`)
@@ -390,22 +385,22 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
         let tempBestAdn = this.tempBestAdn
         // todo biding需要全部返回且重排序后队首
-        if (tempBestAdn && tempBestAdn.supplier && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_RESULT_SUCCESS) {
+        if (tempBestAdn && tempBestAdn.supplier && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_STATUS_SUCCESS) {
           tempBestAdn.chooseBest = true
           this.runningGroup.bestADN = tempBestAdn
-          let advanceBestSupplier = AdvanceUtil.caseSupplier(tempBestAdn.supplier)
+          let advanceBestSupplier = AdvanceUtil.getAdvanceAdInfo(tempBestAdn.supplier)
           BYLog.devDebug(TAG + `bestADN:${JSON.stringify(tempBestAdn)}`)
           BYLog.debug(TAG + `【当前最优】命中 ：${JSON.stringify(advanceBestSupplier)}`)
 
           //先设置adn中的listener
-          this.adnWin(tempBestAdn)
+          this.adnWin()
           //执行回调给开发者
-          this.commListener?.onLoaded(advanceBestSupplier)
+          this.loadListener?.onAdLoaded(advanceBestSupplier)
           //上报胜出
-          taskpool.execute(reportWin, tempBestAdn.supplier.wintk)
-        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_RESULT_LOADING) {
+          taskpool.execute(reportAdnBidWin, tempBestAdn.supplier.wintk)
+        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_STATUS_LOADING) {
           BYLog.debug(TAG + `【临时最优】仍在请求中……`)
-        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_RESULT_FAILED) {
+        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_STATUS_FAILED) {
           BYLog.debug(TAG + `【临时最优】请求失败……`)
         } else {
           BYLog.debug(TAG + `未找到最优ADN……`)
@@ -423,8 +418,6 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
 
   }
 
-  protected abstract adnWin(bestAdn: AdvanceADNUnitData)
-
   protected loadNextGroup() {
     try { //移除第一组
       this.supplierGroups.splice(0)
@@ -439,7 +432,7 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
         err.code = ADV_ERR_ALL_FAILED
         err.msg = msg
         //回调广告失败
-        this.commListener?.onError(err)
+        this.loadListener?.onAdLoadFailed(err)
         return
       }
       //继续执行
@@ -449,13 +442,6 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
     }
   }
 
-  protected abstract init()
-
-  protected callShow(renderOP: AdvanceRenderOption) {
-    this.getCurrentAdapter()?.showAd(renderOP)
-  }
-
-  // todo 优化AdvanceADNCommonAdapter为interface接口形式
   //根据currentAD 找到对应adapter
   protected getCurrentAdapter(): AdvanceCommonAdapter | undefined {
     try {
@@ -471,16 +457,38 @@ export abstract class AdvanceAdBase implements AdvanceBaseOpenFuc {
   }
 
   destroy(): void {
-    this.commListener = undefined
+    this.loadListener = undefined
   }
+
+  protected reportBestAdnShowTask() {
+    let urls = this.tempBestAdn?.supplier?.imptk
+    if (urls) {
+      taskpool.execute(reportAdnShow, urls)
+    }
+  }
+
+  protected reportBestAdnShowFailedTask(error: AdvanceError) {
+    let urls = this.tempBestAdn?.supplier?.failedtk
+    if (urls) {
+      taskpool.execute(reportAdnFailed, urls, error)
+    }
+  }
+
+  protected reportBestAdnClickTask() {
+    let urls = this.tempBestAdn?.supplier?.clicktk
+    if (urls) {
+      taskpool.execute(reportAdnClick, urls)
+    }
+  }
+
 }
 
 
 @Concurrent
-function reportLoaded(urlList: string[]) {
+function reportAdnLoaded(urlList: string[]) {
   try {
     if (!urlList) {
-      BYLog.debug('reportLoaded null')
+      BYLog.debug('reportAdnLoaded null')
       return
     }
 
@@ -489,7 +497,7 @@ function reportLoaded(urlList: string[]) {
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportLoaded')
+        BYLog.debug('start reportAdnLoaded')
         // todo 宏替换
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
@@ -499,39 +507,19 @@ function reportLoaded(urlList: string[]) {
   }
 }
 
-@Concurrent
-function reportWin(urlList: string[]) {
-  try {
-    if (!urlList) {
-      BYLog.debug('reportWin null')
-      return
-    }
-    BYLog.debug(`广告竞胜上报发起`)
-    for (let index = 0; index < urlList.length; index++) {
-      const element = urlList[index];
-      if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportWin')
-        // todo 宏替换
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
-      }
-    }
-  } catch (e) {
-    BYLog.printE(e)
-  }
-}
 
 @Concurrent
-function reportAdnSucc(urlList: string[]) {
+function reportAdnSuccess(urlList: string[]) {
   try {
     if (!urlList) {
-      BYLog.debug('reportAdnSucc null')
+      BYLog.debug('reportAdnSuccess null')
       return
     }
     BYLog.debug(`广告成功上报发起`)
     for (let index = 0; index < urlList.length; index++) {
       const element = urlList[index];
       if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportAdnSucc')
+        BYLog.debug('start reportAdnSuccess')
         // todo 宏替换
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
@@ -557,6 +545,67 @@ function reportAdnFailed(urlList: string[], err: AdvanceError) {
 
         let url = AdvanceUtil.appendFailedReason(element, err)
         AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(url))
+      }
+    }
+  } catch (e) {
+    BYLog.printE(e)
+  }
+}
+
+@Concurrent
+function reportAdnBidWin(urlList: string[]) {
+  try {
+    if (!urlList) {
+      BYLog.debug('reportAdnBidWin null')
+      return
+    }
+    BYLog.debug(`广告竞胜上报发起`)
+    for (let index = 0; index < urlList.length; index++) {
+      const element = urlList[index];
+      if (BYStrUtil.isNotEmpty(element)) {
+        BYLog.debug('start reportAdnBidWin')
+        // todo 宏替换
+        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
+      }
+    }
+  } catch (e) {
+    BYLog.printE(e)
+  }
+}
+
+@Concurrent
+function reportAdnShow(urlList: string[]) {
+  try {
+    if (!urlList) {
+      BYLog.debug('reportAdnShow null')
+      return
+    }
+    BYLog.debug(`广告曝光成功上报发起`)
+    for (let index = 0; index < urlList.length; index++) {
+      const element = urlList[index];
+      if (BYStrUtil.isNotEmpty(element)) {
+        BYLog.debug('start reportAdnShow')
+        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
+      }
+    }
+  } catch (e) {
+    BYLog.printE(e)
+  }
+}
+
+@Concurrent
+function reportAdnClick(urlList: string[]) {
+  try {
+    if (!urlList) {
+      BYLog.debug('reportAdnClick null')
+      return
+    }
+    BYLog.debug(`广告点击成功上报发起`)
+    for (let index = 0; index < urlList.length; index++) {
+      const element = urlList[index];
+      if (BYStrUtil.isNotEmpty(element)) {
+        BYLog.debug('start reportAdnClick')
+        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
       }
     }
   } catch (e) {

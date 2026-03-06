@@ -1,5 +1,5 @@
 import { logToast } from '../util/Toast';
-import { AdvanceDislike, AdvanceError, AdvanceNativeExpress, AdvanceOption, AdvanceSupplier } from 'AdvanceSDK'
+import { AdvanceDislike, AdvanceError, AdvanceNativeExpress, AdvanceOption, AdvanceAdInfo } from 'AdvanceSDK'
 import { router } from '@kit.ArkUI';
 import { AdInf, DemoUtil } from '../util/DemoUtil';
 
@@ -33,8 +33,11 @@ export struct NativeExpress {
     op.heightVP = 0
     let advFeed = new AdvanceNativeExpress(op)
     advFeed.setListener({
-      onShow: (): void => {
-        logToast(`onShow`)
+      onAdShow: (): void => {
+        logToast(`onAdShow`)
+      },
+      onAdClose: () => {
+
       },
       onDislike: (dislike: AdvanceDislike): void => {
         logToast(`onDislike , dislike = ${JSON.stringify(dislike)}`)
@@ -42,16 +45,16 @@ export struct NativeExpress {
         //同步关闭状态
         this.dislikeStatus = true
       },
-      onLoaded: (supplier: AdvanceSupplier): void => {
-        logToast(`onLoaded , supplier : ${JSON.stringify(supplier)}`)
+      onAdLoaded: (supplier: AdvanceAdInfo): void => {
+        logToast(`onAdLoaded , supplier : ${JSON.stringify(supplier)}`)
 
         //开始渲染广告
         advFeed.render(this.getUIContext())
         //插入当前信息流对象
         this.listArray.splice(3, 0, advFeed)
       },
-      onClick: (): void => {
-        logToast(`onClick`)
+      onAdClick: (): void => {
+        logToast(`onAdClick`)
       },
       onRenderSuccess: (): void => {
         logToast(`onRenderSuccess`)
@@ -59,11 +62,11 @@ export struct NativeExpress {
       onRenderFail: (err: AdvanceError): void => {
         logToast(`onRenderFail , ${err.toString()}`)
       },
-      onError: (err: AdvanceError): void => {
-        logToast(`onError , err = ${err.toString()}`)
+      onAdLoadFailed: (err: AdvanceError): void => {
+        logToast(`onAdLoadFailed , err = ${err.toString()}`)
       }
     })
-    advFeed.loadStrategy()
+    // advFeed.loadStrategy()
 
 
   }

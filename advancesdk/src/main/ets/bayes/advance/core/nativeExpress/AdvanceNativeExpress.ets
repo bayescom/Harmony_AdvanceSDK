@@ -1,5 +1,5 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
-import { AdvanceNativeExpressListener } from '../AdvanceOpenListener';
+import { AdvanceNativeExpressListener } from '../AdvanceAdOpenListener';
 import { NodeController } from '@kit.ArkUI';
 import { BYLog } from '../../../basic/BYLog';
 import { AdvanceADNUnitData } from '../adn/AdvanceADNUnitData';
@@ -11,7 +11,7 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
     this.adSlotType = AdvanceAdType.nativeExpress
   }
   private mListener?: AdvanceNativeExpressListener
-  protected adnWin(bestAdn: AdvanceADNUnitData) {
+  protected override adnWin() {
     //设置监听回调方法
     try {
       if (this.mListener) {
@@ -25,13 +25,13 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
 
 
   setListener(spl: AdvanceNativeExpressListener) {
-    this.commListener = spl
+    this.loadListener = spl
     this.mListener = spl
   }
   getAdComponent(): NodeController | undefined {
     try {
       let adapter = this.getCurrentAdapter()
-      return adapter?.getAdComponent()
+      return adapter?.adapter_getAdComponent()
     } catch (e) {
       BYLog.printE(e)
     }

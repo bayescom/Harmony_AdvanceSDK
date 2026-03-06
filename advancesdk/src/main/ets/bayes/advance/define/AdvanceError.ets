@@ -14,14 +14,12 @@ export const ADV_ERR_NET_EXCEPTION = 1002;
 export const ADV_ERR_NET_UNSUPPORT_TYPE = 1003;
 
 //广告位id信息为空
-
 export const ADV_ERR_DATA_NULL = "9901";
 export const ADV_ERR_EXCEPTION_LOAD = "9902";
 export const ADV_ERR_EXCEPTION_SHOW = "9903";
 export const ADV_ERR_EXCEPTION_RENDER = "9904";
 export const ADV_ERR_NO_ADAPTER = "9905";
 export const ADV_ERR_ALL_FAILED = "9906"; //全部渠道加载失败
-export const ADV_ERR_ADN_INIT_FAILED_INT = 9907; //adn渠道初始化失败
 export const ADV_ERR_ADN_INIT_FAILED = "9907"; //adn渠道初始化失败
 export const ADV_ERR_ADN_INIT_MISS = "9908"; //advance未初始化
 
@@ -30,7 +28,7 @@ export class AdvanceError {
   msg: string = ''
 
 
-  constructor(code?:number|string,msg ?:string) {
+  constructor(code?: number|string, msg?: string) {
     if (code) {
       this.code = `${code}`
     }

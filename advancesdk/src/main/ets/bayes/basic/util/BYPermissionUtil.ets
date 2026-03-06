@@ -2,7 +2,7 @@ import abilityAccessCtrl, { PermissionRequestResult, Permissions } from '@ohos.a
 import { bundleManager } from '@kit.AbilityKit';
 import { BusinessError } from '@ohos.base';
 import { BYLog } from '../../basic/BYLog';
-import BYConstant from '../BYConstant';
+import { BYConstant } from '../../../../../../Index';
 
 
 /**

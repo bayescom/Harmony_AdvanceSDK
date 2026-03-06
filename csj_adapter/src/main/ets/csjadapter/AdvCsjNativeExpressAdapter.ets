@@ -1,7 +1,7 @@
-import { AdvanceRenderOption, AdvanceNativeExpressCommonAdapter, AdvanceAdnResult, BYLog, BYDisplay, AdvanceError,
+import { AdvanceRenderOption, AdvanceNativeExpressCommonAdapter, AdvanceAdnStatusResult, BYLog, BYDisplay, AdvanceError,
   ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD, AdvanceDislike, AdvanceConstant } from 'AdvanceSDK';
-import { NodeController, UIContext } from '@kit.ArkUI';
-import { AdvCsjUtil } from './AdvCsjUtil';
+import { NodeController, UIContext, window } from '@kit.ArkUI';
+import { AdvCSJUtil } from './AdvCSJUtil';
 import { AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJNativeExpressAd } from '@csj/openadsdk';
 import { ArrayList } from '@kit.ArkTS';
 
@@ -14,16 +14,20 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
     this.mFeedAd?.render(context)
   }
 
-  loadAd(): Promise<AdvanceAdnResult> {
-    BYLog.devDebug(TAG + ` loadAd start`)
-    return new Promise<AdvanceAdnResult>(async (resolve, reject) => {
-      let result = new AdvanceAdnResult()
+  adapter_isAdValid(): boolean {
+    return true
+  }
+
+  adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
+    BYLog.devDebug(TAG + ` adapter_loadAd start`)
+    return new Promise<AdvanceAdnStatusResult>(async (resolve, reject) => {
+      let result = new AdvanceAdnStatusResult()
       try {
-        let initResult = await AdvCsjUtil.canLoadAD(this)
+        let initResult = await AdvCSJUtil.loadCSJSDK(this)
         BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
 
         //
-        if (initResult.initSucc == true) {
+        if (initResult.initSuccess == true) {
           //执行广告加载流程
           let sup = this.unitData.supplier
 
@@ -58,7 +62,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
               onError: (code: number, message: string) => {
                 BYLog.debug(TAG + "加载expressFeed 广告失败，code=" + code + "，message=" + message);
 
-                result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
+                result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
                 result.errCode = code + ''
                 result.errMsg = message
                 resolve(result)
@@ -74,7 +78,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                 BYLog.debug(TAG + "   onNativeExpressAdLoad......success");
 
                 if (!ads || ads.length == 0 || !ads[0]) {
-                  result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
+                  result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
 
                   result.errCode = ADV_ERR_DATA_NULL
                   result.errMsg = '广告返回内容为空'
@@ -91,7 +95,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                   onAdClicked: (type: number) => {
                     BYLog.debug(TAG + "   onAdClicked......");
 
-                    this.callAdClick()
+                    // this.callAdClick()
                   },
 
                   /**
@@ -101,7 +105,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                   onAdShow: (type: number) => {
                     BYLog.debug(TAG + "   onAdShow......");
 
-                    this.callAdShow()
+                    // this.callAdShow()
                   },
 
                   /**
@@ -110,7 +114,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                   onRenderFail: (code: number, msg: string) => {
                     BYLog.debug(TAG + "   onRenderFail...code=" + code + ",msg=" + msg);
 
-                    this.callAdRenderFailed(new AdvanceError(code, msg))
+                    // this.callAdRenderFailed(new AdvanceError(code, msg))
                   },
 
                   /**
@@ -122,7 +126,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
 
                     BYLog.debug(TAG + "   onRenderSuccess......width=" + width + ",height=" + height);
 
-                    this.callAdRenderSuccess()
+                    // this.callAdRenderSuccess()
                   }
                 })
                 this.mFeedAd?.setDislikeCallback({
@@ -156,14 +160,14 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                   }
                 })
 
-                result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_SUCCESS
+                result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
                 resolve(result)
 
                 BYLog.devDebug(TAG + 'after resolve')
               }
             })
           } else {
-            result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
+            result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
 
             result.errCode = ADV_ERR_DATA_NULL
             result.errMsg = '未找到该adn策略信息'
@@ -171,14 +175,14 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
           }
 
         } else {
-          result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
-          result.errCode = initResult.errCode
-          result.errMsg = initResult.errMsg
+          result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+          result.errCode = initResult.code
+          result.errMsg = initResult.msg
           resolve(result)
         }
       } catch (e) {
         BYLog.printE(e)
-        if (result.resultStatus >= 0) {
+        if (result.status >= 0) {
           return
         }
         result.errCode = ADV_ERR_EXCEPTION_LOAD
@@ -189,12 +193,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
     })
   }
 
-  //信息流用不到此方法
-  showAd(advanceRenderOP: AdvanceRenderOption): void {
-    // throw new Error('Method not implemented.');
-  }
-
-  getAdComponent(): NodeController | undefined {
+  adapter_getAdComponent(): NodeController | undefined {
     return this.mFeedAd?.getAdComponent()
   }
 }

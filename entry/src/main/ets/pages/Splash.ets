@@ -1,11 +1,10 @@
 import { NodeController } from '@kit.ArkUI'
 import {
-  AdvanceCloseType,
   AdvanceError,
   AdvanceOption,
   AdvanceRenderOption,
   AdvanceSplash,
-  AdvanceSupplier } from 'AdvanceSDK'
+  AdvanceAdInfo } from 'AdvanceSDK'
 import { DemoConstants } from '../entryability/DemoConstants'
 import { logToast, toast } from '../util/Toast'
 
@@ -35,30 +34,27 @@ struct Splash {
           .onClick(() => {
             let opt = new AdvanceOption(this.adID)
             this.splash = new AdvanceSplash(opt)
-            this.splash.setListener({
-              onShow: (): void => {
-                logToast(`onShow`)
+            this.splash.setAdListener({
+              onAdLoaded: (adInfo: AdvanceAdInfo) => {
+                logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
               },
-              onClose: (closeType: AdvanceCloseType): void => {
-                logToast(`onClose , closeType = ${closeType}`)
+              onAdLoadFailed: (err: AdvanceError) => {
+                logToast(`onAdLoadFailed, err: ${err.toString()}`)
               },
-              onLoaded: (supplier: AdvanceSupplier): void => {
-                logToast(`onLoaded , supplier : ${JSON.stringify(supplier)}`)
+              onAdShow: () => {
+                logToast(`onAdShow`)
               },
-              onClick: (): void => {
-                logToast(`onClick`)
+              onAdShowFailed: (error: AdvanceError) => {
+                logToast(`onAdShowFailed, err: ${error.toString()}`)
               },
-              onRenderSuccess: (): void => {
-                logToast(`onRenderSuccess`)
+              onAdClick: () => {
+                logToast(`onAdClick`)
               },
-              onRenderFail: (err: AdvanceError): void => {
-                logToast(`onRenderFail , ${err.toString()}`)
+              onAdClose: () => {
+                logToast(`onAdClose`)
               },
-              onError: (err: AdvanceError): void => {
-                logToast(`onError , err = ${err.toString()}`)
-              }
             })
-            this.splash.loadStrategy()
+            this.splash.loadAd()
           })
           .margin({
             top: 20
@@ -70,8 +66,10 @@ struct Splash {
               toast(`请先请求广告`)
               return
             }
-            let renOp = new AdvanceRenderOption(DemoConstants.windowStage)
-            this.splash?.showAd(renOp)
+            // let renOp = new AdvanceRenderOption(DemoConstants.windowStage)
+            if (this.splash.isAdValid()) {
+              this.splash.showAd()
+            }
           }).margin({
           top: 20
         })
@@ -83,7 +81,7 @@ struct Splash {
             //   toast(`请先请求广告`)
             //   return
             // }
-            this.splashAdComponent = this.splash?.getAdComponent()
+            // this.splashAdComponent = this.splash?.getAdComponent()
 
           }).margin({
           top: 20

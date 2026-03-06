@@ -1,6 +1,6 @@
 import { AbilityLifecycleCallback, ApplicationStateChangeCallback, Context, UIAbility } from '@kit.AbilityKit'
 import { window } from '@kit.ArkUI'
-import BYConstant from './BYConstant'
+import { BYConstant } from './BYConstant'
 import { BYEventBus, BY_EVENT_KEY_APP_STATE_CHANGE, BY_EVENT_KEY_WINDOW_FOCUS_LOST,
   BY_EVENT_KEY_WINDOW_FOCUS_RESUME } from './BYEventBus'
 import { BYLog } from './BYLog'

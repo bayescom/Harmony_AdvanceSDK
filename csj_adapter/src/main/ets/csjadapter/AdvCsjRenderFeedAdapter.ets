@@ -1,9 +1,8 @@
-import { AdvanceRenderOption, AdvanceRenderFeedCommonAdapter, AdvanceAdnResult, AdvanceRenderFeedData, BYLog, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD,
+import { AdvanceRenderOption, AdvanceRenderFeedCommonAdapter, AdvanceAdnStatusResult, AdvanceRenderFeedData, BYLog, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD,
   AdvanceConstant, BYDisplay, AdvanceDislike } from 'AdvanceSDK';
-import { NodeController } from '@kit.ArkUI';
-import { CSJAdSdk } from '@csj/openadsdk/src/main/ets/b/c/i/o';
-import { AdSlot, AdSlotBuilder, CSJAdCreator, CSJFeedAd, CSJNativeAd } from '@csj/openadsdk';
-import { AdvCsjUtil } from './AdvCsjUtil';
+import { NodeController, window } from '@kit.ArkUI';
+import { AdSlot, AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJFeedAd, CSJNativeAd } from '@csj/openadsdk';
+import { AdvCSJUtil } from './AdvCSJUtil';
 import { ArrayList } from '@kit.ArkTS';
 import { AdvCsjRenderFeedConvert } from './AdvCsjRenderFeedConvert';
 
@@ -16,19 +15,23 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
     return this.mNativeData
   }
 
-  loadAd(): Promise<AdvanceAdnResult> {
-    BYLog.devDebug(TAG + ` loadAd start`)
-    return new Promise<AdvanceAdnResult>(async (resolve, reject) => {
-      let result = new AdvanceAdnResult()
+  adapter_isAdValid(): boolean {
+    return true
+  }
+
+  adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
+    BYLog.devDebug(TAG + ` adapter_loadAd start`)
+    return new Promise<AdvanceAdnStatusResult>(async (resolve, reject) => {
+      let result = new AdvanceAdnStatusResult()
       try {
 
-        let initResult = await AdvCsjUtil.canLoadAD(this)
+        let initResult = await AdvCSJUtil.loadCSJSDK(this)
         BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
-        if (initResult.initSucc == true) {
+        if (initResult.initSuccess == true) {
           //执行广告加载流程
           let sup = this.unitData.supplier
           if (!sup) {
-            result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
+            result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
 
             result.errCode = ADV_ERR_DATA_NULL
             result.errMsg = '未找到该adn策略信息'
@@ -58,7 +61,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
             onError: (code: number, message: string) => {
               BYLog.debug(TAG + "  code=" + code + ",message-" + message);
 
-              result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
+              result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
               result.errCode = code + ''
               result.errMsg = message
               resolve(result)
@@ -73,7 +76,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
 
 
               if (!ads || ads.length == 0 || !ads[0]) {
-                result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
+                result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
 
                 result.errCode = ADV_ERR_DATA_NULL
                 result.errMsg = '广告返回内容为空'
@@ -83,22 +86,22 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
 
               this.onLoaded(ads[0])
 
-              result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_SUCCESS
+              result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
               resolve(result)
             }
           })
 
         } else {
-          result.resultStatus = AdvanceConstant.ADV_ADN_RESULT_FAILED
-          result.errCode = initResult.errCode
-          result.errMsg = initResult.errMsg
+          result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+          result.errCode = initResult.code
+          result.errMsg = initResult.msg
           resolve(result)
         }
 
 
       } catch (e) {
         BYLog.printE(e)
-        if (result.resultStatus >= 0) {
+        if (result.status >= 0) {
           return
         }
         result.errCode = ADV_ERR_EXCEPTION_LOAD
@@ -118,7 +121,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
           BYLog.debug(TAG +
             `---setExpressRenderListener---  onRenderSuccess...... isExpress = ${isExpress} , width = ${width} , height = ${height} `);
 
-          this.callAdRenderSuccess()
+          // this.callAdRenderSuccess()
         }
       })
 
@@ -156,7 +159,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
         onAdClicked: (ad: CSJNativeAd) => {
           BYLog.debug(TAG + "   onAdClicked......");
 
-          this.callAdClick()
+          // this.callAdClick()
         },
 
         /**
@@ -166,7 +169,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
         onAdCreativeClick: (ad: CSJNativeAd) => {
           BYLog.debug(TAG + "   onAdCreativeClick......");
 
-          this.callAdClick()
+          // this.callAdClick()
         },
 
         /**
@@ -176,7 +179,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
         onAdShow: (ad: CSJNativeAd) => {
           BYLog.debug(TAG + "   onAdShow......");
 
-          this.callAdShow()
+          // this.callAdShow()
         }
       })
     } catch (e) {
@@ -185,16 +188,4 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
 
   }
 
-
-  /**
-   *  以下方法可忽略使用
-   */
-  showAd(advanceRenderOP: AdvanceRenderOption): void {
-    // throw new Error('Method not implemented.');
-  }
-
-  getAdComponent(): NodeController | undefined {
-    // throw new Error('Method not implemented.');
-    return
-  }
 }

@@ -1,11 +1,18 @@
-import { AdvanceSplashListener } from '../AdvanceOpenListener';
+import { AdvanceError } from '../../../../../../../Index';
 import { AdvanceCommonAdapter } from './AdvanceCommonAdapter';
 
-export abstract class AdvanceSplashCommonAdapter extends AdvanceCommonAdapter {
-  splashListener?: AdvanceSplashListener
+// adapter内各回调结果通知给开屏广告位
+export interface AdvanceSplashAdapterBridge {
+  splashAdapter_didAdShow: () => void
+  splashAdapter_didAdShowFailed: (error: AdvanceError) => void
+  splashAdapter_didAdClick: () => void
+  splashAdapter_didAdClose: () => void
+}
 
-  setSplashListener(splashListener: AdvanceSplashListener) {
-    this.splashListener = splashListener
-    this.baseListener = splashListener
+export abstract class AdvanceSplashCommonAdapter extends AdvanceCommonAdapter {
+  bridge?: AdvanceSplashAdapterBridge
+
+  setSplashAdapterBridge(bridge: AdvanceSplashAdapterBridge) {
+    this.bridge = bridge
   }
 }

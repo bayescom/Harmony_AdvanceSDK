@@ -22,5 +22,5 @@ export class AdvanceRenderOption {
   //底部自定义布局 --开屏logo区域
   customBottomBuilder?: WrappedBuilder<[]>
   //跳过|关闭按钮的自定义布局
-  customSkipBuilder?: WrappedBuilder<[]>
+  // customSkipBuilder?: WrappedBuilder<[]>
 }

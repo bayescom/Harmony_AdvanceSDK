@@ -1,8 +1,10 @@
 import { AdvanceConstant } from '../../define/AdvanceConstant';
 
 export class AdvanceSetting {
-  public csjInitStatus: number = AdvanceConstant.ADV_ADN_INIT_DEFAULT // -1 默认状态。-2 初始化失败 ;0 请求发起中  1.成功请求 ，  ；状态为0、1时不可重复发起，等待状态变更后再执行
+  public csjInitStatus: number = AdvanceConstant.ADV_ADN_INIT_DEFAULT
 
+  // 渠道SDK初始化与否的记录 key: channelid, value: 0 or 1
+  public initializedMap: Record<string, number> = {}
 
   private static instance: AdvanceSetting;
 

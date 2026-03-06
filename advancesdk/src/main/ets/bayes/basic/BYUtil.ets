@@ -8,7 +8,7 @@ import { BYStrUtil } from './util/BYStrUtil';
 import { BYDevice } from './BYDevice';
 import { window } from '@kit.ArkUI';
 import { BYSetting } from './BYSetting';
-import BYConstant, { BY_CACHE_KEY_UA } from './BYConstant';
+import { BYConstant, BY_CACHE_KEY_UA } from './BYConstant';
 import { BYDisplay } from './BYDisplay';
 import { BYCacheUtil, CACHE_TIME_MONTH } from './cache/BYCacheUtil';
 

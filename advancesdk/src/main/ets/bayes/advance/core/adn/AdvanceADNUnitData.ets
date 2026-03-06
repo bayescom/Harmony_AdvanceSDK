@@ -10,7 +10,7 @@ export class AdvanceADNUnitData {
   supplier?: AdvanceSupplierModel
   //补充内容
   ext?: AdvanceSupplierExt
-  resultStatus: number = AdvanceConstant.ADV_ADN_RESULT_LOADING //1代表成功返回
+  resultStatus: number = AdvanceConstant.ADV_ADN_STATUS_LOADING //1代表成功返回
 
   //被选中为最优
   chooseBest: boolean = false

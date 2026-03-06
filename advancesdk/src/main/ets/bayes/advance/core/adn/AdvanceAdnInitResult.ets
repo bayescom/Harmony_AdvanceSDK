@@ -1,5 +1,5 @@
 export class AdvanceAdnInitResult{
-  initSucc:boolean =false
-  errCode :string = ''
-  errMsg :string = ''
+  initSuccess: boolean = false
+  code: string = ''
+  msg: string = ''
 }

@@ -1,5 +1,5 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
-import { AdvanceRenderFeedListener } from '../AdvanceOpenListener';
+import { AdvanceRenderFeedListener } from '../AdvanceAdOpenListener';
 import { BYLog } from '../../../basic/BYLog';
 import { AdvanceADNUnitData } from '../adn/AdvanceADNUnitData';
 import { AdvanceRenderFeedCommonAdapter } from '../adn/AdvanceRenderFeedCommonAdapter';
@@ -13,7 +13,7 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
 
   private mListener?: AdvanceRenderFeedListener
 
-  protected adnWin(bestAdn: AdvanceADNUnitData) {
+  protected override adnWin() {
     //设置监听回调方法
     try {
       if (this.mListener) {
@@ -27,7 +27,7 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
 
 
   setListener(spl: AdvanceRenderFeedListener) {
-    this.commListener = spl
+    this.loadListener = spl
     this.mListener = spl
   }
 
