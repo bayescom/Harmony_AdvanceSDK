@@ -51,7 +51,7 @@ struct Splash {
                 logToast(`onAdClick`)
               },
               onAdClose: () => {
-                logToast(`onAdClose`)
+                // logToast(`onAdClose`)
               },
             })
             this.splash.loadAd()

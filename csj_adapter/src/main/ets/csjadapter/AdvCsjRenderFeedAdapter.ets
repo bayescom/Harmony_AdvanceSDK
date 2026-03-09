@@ -27,7 +27,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
 
         let initResult = await AdvCSJUtil.loadCSJSDK(this)
         BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
-        if (initResult.initSuccess == true) {
+        if (initResult.success == true) {
           //执行广告加载流程
           let sup = this.unitData.supplier
           if (!sup) {

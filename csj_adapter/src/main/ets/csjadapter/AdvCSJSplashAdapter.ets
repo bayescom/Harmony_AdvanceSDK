@@ -7,6 +7,7 @@ import {
   AdvanceError,
   ADV_ERR_DATA_NULL,
   AdvanceSplashCommonAdapter,
+  BYApp,
 } from 'AdvanceSDK';
 import {
   AdSlotBuilder,
@@ -34,7 +35,7 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
       let initResult = await AdvCSJUtil.loadCSJSDK(this)
       BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
 
-      if (initResult.initSuccess) { // 初始化成功
+      if (initResult.success) { // 初始化成功
         //执行广告加载流程
         let sup = this.unitData.supplier
 
@@ -79,13 +80,7 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
                 onVideoDidPlayFail: () => {
                   BYLog.debug(TAG + "开屏回调 - onVideoDidPlayFail")
                 },
-                onRenderSuccess: () => {
-                  BYLog.debug(TAG + "开屏回调 - onRenderSuccess")
-                },
-                onRenderFail: (code: number, message: string) => {
-                  BYLog.debug(TAG + "开屏回调 - onRenderFail")
-                  this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(code, message))
-                },
+
               })
 
               result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
@@ -99,8 +94,15 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
               result.errMsg = message
               resolve(result)
             },
+            onRenderSuccess: () => {
+              BYLog.debug(TAG + "开屏回调 - onRenderSuccess")
+            },
+            onRenderFail: (code: number, message: string) => {
+              BYLog.debug(TAG + "开屏回调 - onRenderFail")
+              this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(code, message))
+            },
 
-          }, sup.timeout)
+          }, BYApp.getUIContext(), sup.timeout)
 
           mAdCreator.loadSplashAd(param)
 

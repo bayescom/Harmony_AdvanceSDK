@@ -18,8 +18,8 @@ export class AdvanceConstant {
   public static readonly ADV_ADN_STATUS_SUCCESS: number = 1
 
   // adn广告初始化状态标记
-  public static readonly ADV_ADN_INIT_LOADING: number = -1
   public static readonly ADV_ADN_INIT_DEFAULT: number = 0
+  public static readonly ADV_ADN_INIT_LOADING: number = -1
   public static readonly ADV_ADN_INIT_SUCCESS: number = 1
   public static readonly ADV_ADN_INIT_FAILED: number = 2
 }

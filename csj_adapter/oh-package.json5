@@ -6,7 +6,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@csj/openadsdk": "file:libs/openadsdk.har",
+    "@csj/openadsdk": "file:libs/openadsdk_7.3.0.har",
     "AdvanceSDK": "file:../advancesdk"
   }
 }
