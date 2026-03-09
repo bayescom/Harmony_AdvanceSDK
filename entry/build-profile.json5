@@ -4,7 +4,8 @@
     "arkOptions": {
       "runtimeOnly": {
         "packages": [
-          "CSJAdapter",
+          "csj_adapter",
+          "gdt_adapter",
         ]
       }
     }

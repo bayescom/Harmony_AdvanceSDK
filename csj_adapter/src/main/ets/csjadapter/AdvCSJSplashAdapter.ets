@@ -15,6 +15,7 @@ import {
   CSJAdSdk,
   CSJSplashAd,
   CSJSplashAdCloseType,
+  CSJSplashAdInteractionListener,
   CSJSplashAdLoadParam
 } from '@csj/openadsdk';
 import { AdvCSJUtil } from './AdvCSJUtil';
@@ -22,7 +23,7 @@ import { AdvCSJUtil } from './AdvCSJUtil';
 const TAG = `[AdvCSJSplashAdapter]`
 
 export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
-  csj_ad?: CSJSplashAd
+  protected csj_ad?: CSJSplashAd
 
   adapter_isAdValid(): boolean {
     return true
@@ -61,32 +62,9 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
             onAdLoaded: (splashAd: CSJSplashAd) => {
               BYLog.debug(TAG + "开屏回调 - onAdLoaded")
               this.csj_ad = splashAd
-              this.csj_ad.setInteractionListener({
-                onDidShow: () => {
-                  BYLog.debug(TAG + "开屏回调 - onDidShow")
-                  this.bridge?.splashAdapter_didAdShow()
-                },
-                onDidClose: (closeType: CSJSplashAdCloseType) => {
-                  BYLog.debug(TAG + `开屏回调 - onDidClose 关闭原因：${closeType}`)
-                  this.bridge?.splashAdapter_didAdClose()
-                },
-                onDidClick: () => {
-                  BYLog.debug(TAG + "开屏回调 - onDidClick")
-                  this.bridge?.splashAdapter_didAdClick()
-                },
-                onVideoDidPlayFinish: () => {
-                  BYLog.debug(TAG + "开屏回调 - onVideoDidPlayFinish")
-                },
-                onVideoDidPlayFail: () => {
-                  BYLog.debug(TAG + "开屏回调 - onVideoDidPlayFail")
-                },
-
-              })
-
               result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
               resolve(result)
             },
-
             onError: (code: number, message: string) => {
               BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${code} message: ${message}`)
               result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
@@ -123,7 +101,29 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
   }
 
   adapter_showAd(windowStage: window.WindowStage) {
+    this.csj_ad?.setInteractionListener(this.interactionListener)
     this.csj_ad?.showSplashAd(windowStage)
+  }
+
+  protected interactionListener: CSJSplashAdInteractionListener = {
+    onDidShow: () => {
+      BYLog.debug(TAG + "开屏回调 - onDidShow")
+      this.bridge?.splashAdapter_didAdShow()
+    },
+    onDidClose: (closeType: CSJSplashAdCloseType) => {
+      BYLog.debug(TAG + `开屏回调 - onDidClose 关闭原因：${closeType}`)
+      this.bridge?.splashAdapter_didAdClose()
+    },
+    onDidClick: () => {
+      BYLog.debug(TAG + "开屏回调 - onDidClick")
+      this.bridge?.splashAdapter_didAdClick()
+    },
+    onVideoDidPlayFinish: () => {
+      BYLog.debug(TAG + "开屏回调 - onVideoDidPlayFinish")
+    },
+    onVideoDidPlayFail: () => {
+      BYLog.debug(TAG + "开屏回调 - onVideoDidPlayFail")
+    },
   }
 
   // adapter_showAd(advanceRenderOP: AdvanceRenderOption): void {

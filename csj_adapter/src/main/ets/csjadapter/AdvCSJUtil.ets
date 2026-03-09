@@ -19,8 +19,8 @@ import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
 const TAG = `[AdvCSJUtil] `
 
 export class AdvCSJUtil {
-  static getCSJAdAdapter(adType: AdvanceAdType, supData: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (adType) {
+  static getCSJAdAdapter(supData: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
+    switch (supData.adType) {
       case AdvanceAdType.splash:
         return new AdvCSJSplashAdapter(supData)
       case AdvanceAdType.nativeExpress:

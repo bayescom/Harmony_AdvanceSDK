@@ -22,6 +22,7 @@ export const ADV_ERR_NO_ADAPTER = "9905";
 export const ADV_ERR_ALL_FAILED = "9906"; //全部渠道加载失败
 export const ADV_ERR_ADN_INIT_FAILED = "9907"; //adn渠道初始化失败
 export const ADV_ERR_ADN_INIT_MISS = "9908"; //advance未初始化
+export const ADV_ERR_AD_Invalid_Expired = "9909"; //广告展示前广告已失效过期
 
 export class AdvanceError {
   code: string = ADV_ERR_UNKNOW_ERROR

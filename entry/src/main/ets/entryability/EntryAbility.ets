@@ -13,7 +13,7 @@ export default class EntryAbility extends UIAbility {
     // AdvanceSDK.setPrivacyController(new MyPrivacy())
     AdvanceSDK.debug()
     //初始化SDK
-    AdvanceSDK.initSDK(ctx, '100171')
+    AdvanceSDK.initSDK(ctx, '105015')
     //开发者模式
     // BYSetting.get().isDev = true
   }

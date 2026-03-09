@@ -6,8 +6,9 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "AdvanceSDK": "file:../advancesdk",
-    "CSJAdapter": "file:../csj_adapter"
+    "advancesdk": "file:../advancesdk",
+    "csj_adapter": "file:../csj_adapter",
+    "gdt_adapter": "file:../gdt_adapter",
   }
 }
 

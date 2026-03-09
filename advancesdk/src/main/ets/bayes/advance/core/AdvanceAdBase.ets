@@ -117,7 +117,7 @@ export abstract class AdvanceAdBase {
             adnData.adType = this.adSlotType
             adnMap[element.priority] = adnData
             //生成用来加载广告adn的适配器，进行后续广告请求及展示操作
-            let adapter = await AdvanceADNManger.generateAdnAdapter(adnData, BYConstant.context)
+            let adapter = await AdvanceADNManger.generateAdnAdapter(adnData)
             //添加元素
             if (adapter) {
               this.adapterMap.set(element.priority, adapter)

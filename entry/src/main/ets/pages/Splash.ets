@@ -11,7 +11,8 @@ import { logToast, toast } from '../util/Toast'
 @Entry
 @Component
 struct Splash {
-  @State adID: string = '10011044'
+  // @State adID: string = '10014521'// csj
+  @State adID: string = '10014522'//gdt
   @State splash?: AdvanceSplash = undefined
   @State splashAdComponent?: NodeController = undefined
 
