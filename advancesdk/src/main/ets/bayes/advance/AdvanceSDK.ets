@@ -2,15 +2,14 @@ import { BYConstant } from '../basic/BYConstant'
 import { BYLifecycle } from '../basic/BYLifecycle'
 import { BYLog } from '../basic/BYLog'
 import { BYSingleton } from '../basic/BYSingleton'
-import { AdvancePrivacyController } from './config/AdvancePrivacyController'
-import { AdvanceSingleton } from './core/config/AdvanceSingleton'
 import { AdvanceConstant } from './define/AdvanceConstant'
 import { common, UIAbility } from '@kit.AbilityKit'
+import { AdvanceSetting } from './config/AdvanceSetting'
 
 export class AdvanceSDK {
   //初始化SDK
   static initSDK(context: Context, appId: string) {
-    AdvanceSingleton.get().appId = appId
+    AdvanceSetting.get().appId = appId
     BYConstant.context = context as common.UIAbilityContext
     BYLifecycle.registerLife(context)
     BYLog.debug(`AdvanceSDK initSDK  context = ${context}`)
@@ -30,7 +29,7 @@ export class AdvanceSDK {
   // }
 
   //当前版本号
-  getVersion(): string {
+  getSDKVersion(): string {
     return AdvanceConstant.ADV_SDK_VERSION_NAME
   }
 }

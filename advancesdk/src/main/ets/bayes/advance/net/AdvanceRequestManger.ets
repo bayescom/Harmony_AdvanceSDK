@@ -9,12 +9,12 @@ import { BYUtil } from '../../basic/BYUtil';
 import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import { BYSecurity } from '../../basic/BYSecurity';
 import { BYSetting } from '../../basic/BYSetting';
-import { AdvanceSingleton } from '../core/config/AdvanceSingleton';
 import { AdvanceOption } from '../config/AdvanceOption';
 import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../define/AdvanceError';
 import { AdvanceConstant } from '../define/AdvanceConstant';
 import { BYConstant } from '../../basic/BYConstant';
+import { AdvanceSetting } from '../config/AdvanceSetting';
 
 export class AdvanceRequestManger {
   static async prepareReqAdData(adConfig: AdvanceOption): Promise<AdvanceReqModel> {
@@ -24,7 +24,7 @@ export class AdvanceRequestManger {
       req.sdk_version = AdvanceConstant.ADV_SDK_VERSION_NAME
       req.reqid = BYUtil.getReqID()
       req.time = systemDateTime.getTime(false) + ""
-      let appid = AdvanceSingleton.get().appId
+      let appid = AdvanceSetting.get().appId
       req.appid = appid
       req.adspotid = adConfig.codeId
       let bundleInfo =

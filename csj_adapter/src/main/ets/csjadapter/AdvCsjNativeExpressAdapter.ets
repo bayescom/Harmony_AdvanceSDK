@@ -1,5 +1,6 @@
-import { AdvanceRenderOption, AdvanceNativeExpressCommonAdapter, AdvanceAdnStatusResult, BYLog, BYDisplay, AdvanceError,
-  ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD, AdvanceDislike, AdvanceConstant } from 'AdvanceSDK';
+import { AdvanceRenderOption, AdvanceNativeExpressCommonAdapter, AdvanceAdnStatusResult, BYLog, BYDisplay,
+  ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD, AdvanceDislike,
+  AdvanceAdLoadState } from 'AdvanceSDK';
 import { NodeController, UIContext, window } from '@kit.ArkUI';
 import { AdvCSJUtil } from './AdvCSJUtil';
 import { AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJNativeExpressAd } from '@csj/openadsdk';
@@ -62,7 +63,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
               onError: (code: number, message: string) => {
                 BYLog.debug(TAG + "加载expressFeed 广告失败，code=" + code + "，message=" + message);
 
-                result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+                result.status = AdvanceAdLoadState.failed
                 result.errCode = code + ''
                 result.errMsg = message
                 resolve(result)
@@ -78,7 +79,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                 BYLog.debug(TAG + "   onNativeExpressAdLoad......success");
 
                 if (!ads || ads.length == 0 || !ads[0]) {
-                  result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+                  result.status = AdvanceAdLoadState.failed
 
                   result.errCode = ADV_ERR_DATA_NULL
                   result.errMsg = '广告返回内容为空'
@@ -160,14 +161,14 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                   }
                 })
 
-                result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
+                result.status = AdvanceAdLoadState.success
                 resolve(result)
 
                 BYLog.devDebug(TAG + 'after resolve')
               }
             })
           } else {
-            result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+            result.status = AdvanceAdLoadState.failed
 
             result.errCode = ADV_ERR_DATA_NULL
             result.errMsg = '未找到该adn策略信息'
@@ -175,7 +176,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
           }
 
         } else {
-          result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+          result.status = AdvanceAdLoadState.failed
           result.errCode = initResult.code
           result.errMsg = initResult.msg
           resolve(result)

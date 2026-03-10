@@ -22,6 +22,7 @@ import { AdvanceConstant } from '../define/AdvanceConstant'
 import { AdvanceUtil } from './AdvanceUtil'
 import { BYConstant } from '../../basic/BYConstant'
 import { window } from '@kit.ArkUI'
+import { AdvanceAdLoadState } from '../../../../../../Index'
 
 
 const TAG = `[AdvanceAdBase] `
@@ -296,10 +297,10 @@ export abstract class AdvanceAdBase {
 
         let currentAdnInf = JSON.stringify(AdvanceUtil.getAdvanceAdInfo(currentSup))
         //上报广告成功、失败
-        if (adnData.resultStatus == AdvanceConstant.ADV_ADN_STATUS_SUCCESS) {
+        if (adnData.resultStatus == AdvanceAdLoadState.success) {
           BYLog.debug(TAG + `adn广告获取成功：${currentAdnInf}`)
           taskpool.execute(reportAdnSuccess, currentSup.succeedtk)
-        } else if (adnData.resultStatus == AdvanceConstant.ADV_ADN_STATUS_FAILED) {
+        } else if (adnData.resultStatus == AdvanceAdLoadState.failed) {
           BYLog.warn(TAG +
             `adn广告获取失败：${currentAdnInf}， code: ${adnResult.errCode}， msg: ${adnResult.errMsg}`)
           taskpool.execute(reportAdnFailed, currentSup.failedtk, new AdvanceError(adnResult.errCode, adnResult.errMsg))
@@ -321,7 +322,7 @@ export abstract class AdvanceAdBase {
           const eleSup = element.supplier
 
           //校验失败逻辑
-          if (element.resultStatus == AdvanceConstant.ADV_ADN_STATUS_FAILED) {
+          if (element.resultStatus == AdvanceAdLoadState.failed) {
             this.currentGroupAbleSize--
             if (eleSup && this.tempBestAdn) {
               let isBest = false
@@ -340,7 +341,7 @@ export abstract class AdvanceAdBase {
             continue
           }
           //存在且成功返回
-          if (eleSup && element.resultStatus != AdvanceConstant.ADV_ADN_STATUS_FAILED) {
+          if (eleSup && element.resultStatus == AdvanceAdLoadState.success) {
             if (!this.tempBestAdn) {
               this.tempBestAdn = element
               BYLog.debug(TAG + ` 临时最优Adn赋值， sup_priority = ${eleSup?.priority}`)
@@ -385,7 +386,7 @@ export abstract class AdvanceAdBase {
 
         let tempBestAdn = this.tempBestAdn
         // todo biding需要全部返回且重排序后队首
-        if (tempBestAdn && tempBestAdn.supplier && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_STATUS_SUCCESS) {
+        if (tempBestAdn && tempBestAdn.supplier && tempBestAdn.resultStatus == AdvanceAdLoadState.success) {
           tempBestAdn.chooseBest = true
           this.runningGroup.bestADN = tempBestAdn
           let advanceBestSupplier = AdvanceUtil.getAdvanceAdInfo(tempBestAdn.supplier)
@@ -398,9 +399,9 @@ export abstract class AdvanceAdBase {
           this.loadListener?.onAdLoaded(advanceBestSupplier)
           //上报胜出
           taskpool.execute(reportAdnBidWin, tempBestAdn.supplier.wintk)
-        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_STATUS_LOADING) {
+        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceAdLoadState.loading) {
           BYLog.debug(TAG + `【临时最优】仍在请求中……`)
-        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceConstant.ADV_ADN_STATUS_FAILED) {
+        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceAdLoadState.failed) {
           BYLog.debug(TAG + `【临时最优】请求失败……`)
         } else {
           BYLog.debug(TAG + `未找到最优ADN……`)

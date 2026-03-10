@@ -1,5 +1,5 @@
-import { AdvanceRenderOption, AdvanceRenderFeedCommonAdapter, AdvanceAdnStatusResult, AdvanceRenderFeedData, BYLog, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD,
-  AdvanceConstant, BYDisplay, AdvanceDislike } from 'AdvanceSDK';
+import { AdvanceRenderFeedCommonAdapter, AdvanceAdnStatusResult, AdvanceRenderFeedData, BYLog, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD, BYDisplay, AdvanceDislike,
+  AdvanceAdLoadState } from 'AdvanceSDK';
 import { NodeController, window } from '@kit.ArkUI';
 import { AdSlot, AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJFeedAd, CSJNativeAd } from '@csj/openadsdk';
 import { AdvCSJUtil } from './AdvCSJUtil';
@@ -31,7 +31,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
           //执行广告加载流程
           let sup = this.unitData.supplier
           if (!sup) {
-            result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+            result.status = AdvanceAdLoadState.failed
 
             result.errCode = ADV_ERR_DATA_NULL
             result.errMsg = '未找到该adn策略信息'
@@ -61,7 +61,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
             onError: (code: number, message: string) => {
               BYLog.debug(TAG + "  code=" + code + ",message-" + message);
 
-              result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+              result.status = AdvanceAdLoadState.failed
               result.errCode = code + ''
               result.errMsg = message
               resolve(result)
@@ -76,7 +76,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
 
 
               if (!ads || ads.length == 0 || !ads[0]) {
-                result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+                result.status = AdvanceAdLoadState.failed
 
                 result.errCode = ADV_ERR_DATA_NULL
                 result.errMsg = '广告返回内容为空'
@@ -86,13 +86,13 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
 
               this.onLoaded(ads[0])
 
-              result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
+              result.status = AdvanceAdLoadState.success
               resolve(result)
             }
           })
 
         } else {
-          result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+          result.status = AdvanceAdLoadState.failed
           result.errCode = initResult.code
           result.errMsg = initResult.msg
           resolve(result)

@@ -1,10 +1,16 @@
-import { AdvanceConstant } from '../define/AdvanceConstant'
+import { AdvanceAdLoadState } from '../../../../../../Index'
 
 @Sendable
 export class AdvanceAdnStatusResult {
   adID: string = ''
-  status: number = AdvanceConstant.ADV_ADN_STATUS_LOADING //1代表成功返回
+  status: number = AdvanceAdLoadState.loading
   bidPrice: number = 0 //竞价价格
-  errCode: string = '' //异常code
+  errCode: string | number = '' //异常code
   errMsg: string = '' //异常msg
+}
+
+export class AdvanceAdnInitResult{
+  success: boolean = false
+  code: string | number  = ''
+  msg: string = ''
 }

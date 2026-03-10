@@ -1,19 +1,17 @@
 import { CSJAdSdk, SDKConfig, SDKConfigBuilder, StartResult } from '@csj/openadsdk'
 import {
   BYSingleton,
-  ADV_ERR_ADN_INIT_FAILED,
   BYLog,
   AdvanceCommonAdapter,
-  AdvanceConstant,
   AdvanceSetting,
   AdvanceAdnInitResult,
   AdvanceADNUnitData,
   AdvanceAdType,
-  BYConstant
+  BYConstant,
+  AdvanceAdnInitState
 } from 'AdvanceSDK'
 import { AdvCsjNativeExpressAdapter } from './AdvCsjNativeExpressAdapter'
 import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
-import { AdvCsjPrivacy } from './AdvCsjPrivacy'
 import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
 
 const TAG = `[AdvCSJUtil] `
@@ -40,43 +38,68 @@ export class AdvCSJUtil {
   static async loadCSJSDK(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
     return new Promise<AdvanceAdnInitResult>((resolve) => {
       let result = new AdvanceAdnInitResult()
-      let hasInit = AdvanceSetting.get().initializedMap[AdvanceConstant.ADV_SDK_ID_CSJ]
-      if (hasInit) {
+      let csjState = AdvanceSetting.get().csj_initState
+      if (csjState == AdvanceAdnInitState.success) {
         result.success = true
-        result.code = '0'
+        result.code = 0
         result.msg = '已成功初始化过'
         resolve(result)
-        return
-      }
-      BYLog.debug(TAG + '开始执行初始化')
-      let adData = adapter.unitData
-      if (adData && adData.supplier) {
-        let adConfigBuilder = new SDKConfigBuilder()
-        let appID = adData.supplier.mediaid
-        BYLog.debug(TAG + `穿山甲 appID = ${appID} `)
-        let config: SDKConfig = adConfigBuilder
-          .appId(appID)
-          .appName("appName")
-          .allowShowNotify(true)
-          .debug(BYSingleton.get().debug)
-          .build()
-
-        CSJAdSdk.init(BYConstant.context, config)
-        let v = AdvCSJUtil.getCSJSDKVersion()
-        BYLog.debug(TAG + `csj版本号：${v}`)
-        CSJAdSdk.start().then((res) => {
-          result.success = res.code == 0
-          result.code = `${res.code}`
-          result.msg = res.msg
-          if (res.code == 0) { // 初始化成功
-            AdvanceSetting.get().initializedMap[AdvanceConstant.ADV_SDK_ID_CSJ] = 1
-            resolve(result)
-          } else if (res.code == 4200) { // 重复初始化
-            //sdk bug: 第一次初始化先回调了4200，再回调了0；后续不会进入初始化操作走 hasInit 逻辑了
-          } else { // 初始化失败
+      } else if (csjState == AdvanceAdnInitState.loading) { //适用于配置多个CSJ广告源场景时，第一个进行初始化，后面几个需要等待第一个初始化的结果
+        let totalWaitMs = 1500
+        let perMs = 30
+        let intervalID = setInterval(() => {
+          totalWaitMs -= perMs
+          let csjSuccess = AdvanceSetting.get().csj_initState == AdvanceAdnInitState.success
+          let isTimeout = totalWaitMs <= 0
+          BYLog.debug(TAG + ` init interval check status, isCsjSucc = ${csjSuccess} , isTimeout = ${isTimeout} `)
+          if (isTimeout || csjSuccess) {
+            let msg = ``
+            if (csjSuccess) {
+              msg = '已成功初始化过;'
+            }
+            if (isTimeout) {
+              msg = '已等待超时;'
+            }
+            // 超时或成功 都进入SDK加载逻辑
+            result.success = true
+            result.code = 0
+            result.msg = msg
+            clearInterval(intervalID)
             resolve(result)
           }
-        })
+        }, perMs);
+      } else {
+        BYLog.debug(TAG + '开始执行初始化')
+        let adData = adapter.unitData
+        if (adData && adData.supplier) {
+          let adConfigBuilder = new SDKConfigBuilder()
+          let appID = adData.supplier.mediaid
+          BYLog.debug(TAG + `穿山甲 appID = ${appID} `)
+          let config: SDKConfig = adConfigBuilder
+            .appId(appID)
+            .appName("appName")
+            .allowShowNotify(true)
+            .debug(BYSingleton.get().debug)
+            .build()
+
+          CSJAdSdk.init(BYConstant.context, config)
+          let v = AdvCSJUtil.getCSJSDKVersion()
+          BYLog.debug(TAG + `csj版本号：${v}`)
+          CSJAdSdk.start().then((res) => {
+            result.code = res.code
+            result.msg = res.msg
+            if (res.code == 0 || res.code == 4200) {
+              result.success = true
+              AdvanceSetting.get().csj_initState = AdvanceAdnInitState.success
+            } else {
+              result.success = false
+              AdvanceSetting.get().csj_initState = AdvanceAdnInitState.failed
+            }
+             resolve(result)
+          })
+          // 初始化进行中
+          AdvanceSetting.get().csj_initState = AdvanceAdnInitState.loading
+        }
       }
     });
   }

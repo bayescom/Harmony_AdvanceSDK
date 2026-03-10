@@ -1,5 +1,4 @@
-import { AdvanceConstant } from '../../define/AdvanceConstant'
-import { AdvanceAdType } from '../../define/AdvanceDefine'
+import { AdvanceAdLoadState, AdvanceAdType } from '../../define/AdvanceDefine'
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
 
 //聚合adn侧使用的
@@ -10,7 +9,7 @@ export class AdvanceADNUnitData {
   supplier?: AdvanceSupplierModel
   //补充内容
   ext?: AdvanceSupplierExt
-  resultStatus: number = AdvanceConstant.ADV_ADN_STATUS_LOADING //1代表成功返回
+  resultStatus: AdvanceAdLoadState = AdvanceAdLoadState.loading
 
   //被选中为最优
   chooseBest: boolean = false

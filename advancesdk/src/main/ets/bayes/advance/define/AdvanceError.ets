@@ -25,7 +25,7 @@ export const ADV_ERR_ADN_INIT_MISS = "9908"; //advance未初始化
 export const ADV_ERR_AD_Invalid_Expired = "9909"; //广告展示前广告已失效过期
 
 export class AdvanceError {
-  code: string = ADV_ERR_UNKNOW_ERROR
+  code: string | number = ADV_ERR_UNKNOW_ERROR
   msg: string = ''
 
 

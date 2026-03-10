@@ -2,12 +2,12 @@ import { NodeController, window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceAdnStatusResult,
-  AdvanceConstant,
   BYDisplay,
   AdvanceError,
   ADV_ERR_DATA_NULL,
   AdvanceSplashCommonAdapter,
   BYApp,
+  AdvanceAdLoadState,
 } from 'AdvanceSDK';
 import {
   AdSlotBuilder,
@@ -62,12 +62,12 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
             onAdLoaded: (splashAd: CSJSplashAd) => {
               BYLog.debug(TAG + "开屏回调 - onAdLoaded")
               this.csj_ad = splashAd
-              result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
+              result.status = AdvanceAdLoadState.success
               resolve(result)
             },
             onError: (code: number, message: string) => {
               BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${code} message: ${message}`)
-              result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+              result.status = AdvanceAdLoadState.failed
               result.errCode = `${code}`
               result.errMsg = message
               resolve(result)
@@ -85,14 +85,14 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
           mAdCreator.loadSplashAd(param)
 
         } else {
-          result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+          result.status = AdvanceAdLoadState.failed
           result.errCode = ADV_ERR_DATA_NULL
           result.errMsg = '未找到该adn策略信息'
           resolve(result)
         }
 
       } else { // 初始化失败
-        result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+        result.status = AdvanceAdLoadState.failed
         result.errCode = initResult.code
         result.errMsg = initResult.msg
         resolve(result)

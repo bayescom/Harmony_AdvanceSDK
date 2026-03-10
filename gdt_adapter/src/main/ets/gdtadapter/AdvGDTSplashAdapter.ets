@@ -3,11 +3,11 @@ import { NodeController, window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceAdnStatusResult,
-  AdvanceConstant,
   AdvanceError,
   ADV_ERR_DATA_NULL,
   AdvanceSplashCommonAdapter,
   ADV_ERR_AD_Invalid_Expired,
+  AdvanceAdLoadState,
 } from 'AdvanceSDK';
 import { AdvGDTUtil } from './AdvGDTUtil';
 
@@ -44,26 +44,26 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
             onAdLoad: (ad: GDTSplashAd): void => {
               BYLog.debug(TAG + "开屏回调 - onAdLoaded")
               this.gdt_ad = ad
-              result.status = AdvanceConstant.ADV_ADN_STATUS_SUCCESS
+              result.status = AdvanceAdLoadState.success
               resolve(result)
             },
             onError: (err: GDTError): void => {
               BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-              result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+              result.status = AdvanceAdLoadState.failed
               result.errCode = `${err.code}`
               result.errMsg = err.message
               resolve(result)
             }
           })
         } else {
-          result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+          result.status = AdvanceAdLoadState.failed
           result.errCode = ADV_ERR_DATA_NULL
           result.errMsg = '未找到该adn策略信息'
           resolve(result)
         }
 
       } else { // 初始化失败
-        result.status = AdvanceConstant.ADV_ADN_STATUS_FAILED
+        result.status = AdvanceAdLoadState.failed
         result.errCode = initResult.code
         result.errMsg = initResult.msg
         resolve(result)
