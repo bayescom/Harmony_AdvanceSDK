@@ -50,7 +50,7 @@ export class AdvGDTUtil {
           totalWaitMs -= perMs
           let gdtSuccess = AdvanceSetting.get().gdt_initState == AdvanceAdnInitState.success
           let isTimeout = totalWaitMs <= 0
-          BYLog.debug(TAG + ` init interval check status, isCsjSucc = ${gdtSuccess} , isTimeout = ${isTimeout} `)
+          BYLog.debug(TAG + ` init interval check status, isGDTSuccess = ${gdtSuccess} , isTimeout = ${isTimeout} `)
           if (isTimeout || gdtSuccess) {
             let msg = ``
             if (gdtSuccess) {

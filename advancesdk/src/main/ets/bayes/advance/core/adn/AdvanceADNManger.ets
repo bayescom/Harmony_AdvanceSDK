@@ -21,6 +21,18 @@ export class AdvanceADNManger {
         result = ns.AdvGDTUtil.getGDTAdAdapter(adnData)
         return result
       }
+      case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
+        harName = 'ks_adapter';
+        const ns: ESObject = await import(harName);
+        result = ns.AdvKSUtil.getKSAdAdapter(adnData)
+        return result
+      }
+      case AdvanceConstant.ADV_SDK_ID_MERCURY:{ // 倍业
+        harName = 'mercury_adapter';
+        const ns: ESObject = await import(harName);
+        result = ns.AdvMercuryUtil.getMercuryAdAdapter(adnData)
+        return result
+      }
       default:
         return result
     }

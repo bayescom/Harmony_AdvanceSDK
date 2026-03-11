@@ -61,6 +61,14 @@
     {
       "name": "gdt_adapter",
       "srcPath": "./gdt_adapter",
+    },
+    {
+      "name": "ks_adapter",
+      "srcPath": "./ks_adapter",
+    },
+    {
+      "name": "mercury_adapter",
+      "srcPath": "./mercury_adapter",
     }
   ]
 }

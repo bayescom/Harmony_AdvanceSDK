@@ -9,6 +9,8 @@
     "advancesdk": "file:../advancesdk",
     "csj_adapter": "file:../csj_adapter",
     "gdt_adapter": "file:../gdt_adapter",
+    "ks_adapter": "file:../ks_adapter",
+    "mercury_adapter": "file:../mercury_adapter"
   }
 }
 

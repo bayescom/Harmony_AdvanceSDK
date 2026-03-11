@@ -5,6 +5,8 @@ export class AdvanceSetting {
 
   csj_initState: AdvanceAdnInitState = AdvanceAdnInitState.default
   gdt_initState: AdvanceAdnInitState = AdvanceAdnInitState.default
+  ks_initState: AdvanceAdnInitState = AdvanceAdnInitState.default
+  mercury_initState: AdvanceAdnInitState = AdvanceAdnInitState.default
 
   // 渠道SDK初始化与否的记录 key: channelid, value: 0 or 1
   //  public initializedMap: Record<string, number> = {}

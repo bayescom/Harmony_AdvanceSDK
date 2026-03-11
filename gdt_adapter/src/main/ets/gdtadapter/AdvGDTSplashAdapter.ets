@@ -50,7 +50,7 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
             onError: (err: GDTError): void => {
               BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
               result.status = AdvanceAdLoadState.failed
-              result.errCode = `${err.code}`
+              result.errCode = err.code
               result.errMsg = err.message
               resolve(result)
             }

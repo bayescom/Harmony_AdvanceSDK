@@ -6,6 +6,8 @@
         "packages": [
           "csj_adapter",
           "gdt_adapter",
+          "ks_adapter",
+          "mercury_adapter"
         ]
       }
     }

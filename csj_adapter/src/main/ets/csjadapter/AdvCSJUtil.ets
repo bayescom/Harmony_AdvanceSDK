@@ -51,7 +51,7 @@ export class AdvCSJUtil {
           totalWaitMs -= perMs
           let csjSuccess = AdvanceSetting.get().csj_initState == AdvanceAdnInitState.success
           let isTimeout = totalWaitMs <= 0
-          BYLog.debug(TAG + ` init interval check status, isCsjSucc = ${csjSuccess} , isTimeout = ${isTimeout} `)
+          BYLog.debug(TAG + ` init interval check status, isCSJSuccess = ${csjSuccess} , isTimeout = ${isTimeout} `)
           if (isTimeout || csjSuccess) {
             let msg = ``
             if (csjSuccess) {

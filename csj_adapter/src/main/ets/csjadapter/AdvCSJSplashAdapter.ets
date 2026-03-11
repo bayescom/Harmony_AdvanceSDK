@@ -68,7 +68,7 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
             onError: (code: number, message: string) => {
               BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${code} message: ${message}`)
               result.status = AdvanceAdLoadState.failed
-              result.errCode = `${code}`
+              result.errCode = code
               result.errMsg = message
               resolve(result)
             },
