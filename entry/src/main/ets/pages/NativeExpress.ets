@@ -93,7 +93,7 @@ export struct NativeExpress {
           .width('100%')
           .onDisAppear(() => {
             if (typeof item != 'string') {
-              item.destroy(); //释放资源
+              item.destroyAdapters(); //释放资源
             }
           })
         }, (item: string | AdvanceNativeExpress, index: number) => {

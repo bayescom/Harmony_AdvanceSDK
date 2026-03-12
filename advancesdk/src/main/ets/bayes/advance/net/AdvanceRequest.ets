@@ -1,8 +1,8 @@
 import http from '@ohos.net.http';
 import { BYDevice } from '../../basic/BYDevice';
 import { BYLog } from '../../basic/BYLog';
-import { BYSingleton } from '../../basic/BYSingleton';
 import { BYStrUtil } from '../../basic/util/BYStrUtil';
+import { AdvanceSetting } from '../config/AdvanceSetting';
 import {
   ADV_ERR_NET_UNSUPPORT_TYPE,
   ADV_ERR_NET_FAILED,
@@ -53,7 +53,7 @@ async function requestSync(url: string, method: http.RequestMethod,
         }
       }
       const httpRequest = http.createHttp();
-      BYLog.devDebug(TAG + `start request, url: ${url}, method: ${method}, extraData: ` +
+      BYLog.debug(TAG + `start request, url: ${url}, method: ${method}, extraData: ` +
       JSON.stringify(extraData, undefined, undefined));
 
       let reqOption: http.HttpRequestOptions;
@@ -87,7 +87,7 @@ async function requestSync(url: string, method: http.RequestMethod,
 
             //post请求才打印返回信息
             if (method == http.RequestMethod.POST) {
-              BYLog.devDebug(TAG +
+              BYLog.debug(TAG +
                 `request success, url: ${url}, result: ${JSON.stringify(data, undefined, undefined)}`)
             }
 
@@ -163,7 +163,7 @@ async function requestSync(url: string, method: http.RequestMethod,
 function getBaseUrl(): string {
   let bUrl = baseUrl
   try {
-    let useHttps = BYSingleton.get().useHttps
+    let useHttps = AdvanceSetting.get().useHttps
     if (useHttps) {
       bUrl = baseUrlHttps
     }

@@ -37,7 +37,7 @@ export abstract class AdvanceAdBase {
   //当前执行的SDK组
   protected runningGroup ?: AdvanceParaGroup
   // currentAD ?: AdvanceADNUnitData
-  protected adapterMap: Map<number, AdvanceCommonAdapter> = new Map()
+  protected adapterMap: Map<number, AdvanceCommonAdapter> | undefined = new Map()
   //最优adn
   protected tempBestAdn: AdvanceADNUnitData | undefined
   //当前组可用数量，用来判断是否组内全部失败
@@ -121,14 +121,14 @@ export abstract class AdvanceAdBase {
             let adapter = await AdvanceADNManger.generateAdnAdapter(adnData)
             //添加元素
             if (adapter) {
-              this.adapterMap.set(element.priority, adapter)
+              this.adapterMap?.set(element.priority, adapter)
             }
           }
         } else {
           BYLog.warn(TAG + " suppliers empty")
         }
 
-        let adapterSize = this.adapterMap.size
+        let adapterSize = this.adapterMap?.size ?? 0
         BYLog.debug(TAG + ` update this.adapterMap , size = ${adapterSize}`)
 
         //说明无适配adapter
@@ -221,7 +221,7 @@ export abstract class AdvanceAdBase {
           let adInf = `adspotid：${supplier.adspotid} (${supplier.priority})`
           BYLog.debug(TAG + `开始执行  ` + adInf)
 
-          let adnAdapter = this.adapterMap.get(supplier.priority)
+          let adnAdapter = this.adapterMap?.get(supplier.priority)
           if (adnAdapter) {
             adnAdapter.adapter_loadAd().then((it) => {
               BYLog.debug(TAG + `${adInf} loadAdnAdapter 执行结果：${JSON.stringify(it)}`)
@@ -291,7 +291,7 @@ export abstract class AdvanceAdBase {
         // BYLog.debug(TAG + `--updateResultCheckNext-- 渠道信息为空`)
         //更新bid价格 todo 竞价系数
         if (adnResult.bidPrice > 0 && currentSup) {
-          BYLog.devDebug(TAG + `更新价格 ， adnResult.bidPrice = ${adnResult.bidPrice}`)
+          BYLog.debug(TAG + `更新价格 ， adnResult.bidPrice = ${adnResult.bidPrice}`)
           currentSup.sdk_price = adnResult.bidPrice
         }
 
@@ -390,7 +390,7 @@ export abstract class AdvanceAdBase {
           tempBestAdn.chooseBest = true
           this.runningGroup.bestADN = tempBestAdn
           let advanceBestSupplier = AdvanceUtil.getAdvanceAdInfo(tempBestAdn.supplier)
-          BYLog.devDebug(TAG + `bestADN:${JSON.stringify(tempBestAdn)}`)
+          BYLog.debug(TAG + `bestADN:${JSON.stringify(tempBestAdn)}`)
           BYLog.debug(TAG + `【当前最优】命中 ：${JSON.stringify(advanceBestSupplier)}`)
 
           //先设置adn中的listener
@@ -434,6 +434,8 @@ export abstract class AdvanceAdBase {
         err.msg = msg
         //回调广告失败
         this.loadListener?.onAdLoadFailed(err)
+        // 销毁各渠道Adapter对象
+        this.destroyAdapters()
         return
       }
       //继续执行
@@ -449,7 +451,7 @@ export abstract class AdvanceAdBase {
       //从当前执行组的最佳广告
       let key = this.runningGroup?.bestADN?.supplier?.priority
       if (key) {
-        return this.adapterMap.get(key)
+        return this.adapterMap?.get(key)
       }
     } catch (e) {
       BYLog.printE(e)
@@ -457,8 +459,10 @@ export abstract class AdvanceAdBase {
     return
   }
 
-  destroy(): void {
+  // 销毁各渠道Adapter对象
+  destroyAdapters(): void {
     this.loadListener = undefined
+    this.adapterMap = undefined
   }
 
   protected reportBestAdnShowTask() {

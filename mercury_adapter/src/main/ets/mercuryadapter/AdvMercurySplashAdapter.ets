@@ -22,7 +22,7 @@ export class AdvMercurySplashAdapter extends AdvanceSplashCommonAdapter {
   }
 
   adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
-    BYLog.devDebug(TAG + ` adapter_loadAd start`)
+    BYLog.debug(TAG + ` adapter_loadAd start`)
     return new Promise<AdvanceAdnStatusResult>(async (resolve) => {
       let result = new AdvanceAdnStatusResult()
       let initResult = await AdvMercuryUtil.loadMercurySDK(this)

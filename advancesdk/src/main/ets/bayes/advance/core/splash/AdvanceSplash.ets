@@ -25,6 +25,8 @@ export class AdvanceSplash extends AdvanceAdBase {
       splashAdapter_didAdShowFailed: (error: AdvanceError) => {
         this.reportBestAdnShowFailedTask(error)
         this.mListener?.onAdShowFailed(error)
+        // 销毁各渠道Adapter对象
+        this.destroyAdapters()
       },
       splashAdapter_didAdClick: () => {
         this.reportBestAdnClickTask()
@@ -32,6 +34,8 @@ export class AdvanceSplash extends AdvanceAdBase {
       },
       splashAdapter_didAdClose: () => {
         this.mListener?.onAdClose()
+        // 销毁各渠道Adapter对象
+        this.destroyAdapters()
       }
     })
   }
@@ -53,10 +57,6 @@ export class AdvanceSplash extends AdvanceAdBase {
     super.loadStrategy()
   }
 
-  // showAd(renderOP: AdvanceRenderOption) {
-  //   super.showAd(renderOP)
-  // }
-
   showAd(windowStage?: window.WindowStage) {
     if (!this.isAdValid()) {
       return;
@@ -67,13 +67,4 @@ export class AdvanceSplash extends AdvanceAdBase {
     this.getCurrentAdapter()?.adapter_showAd(windowStage)
   }
 
-  // getAdComponent(): NodeController | undefined {
-  //   try {
-  //     let adapter = this.getCurrentAdapter()
-  //     return adapter?.adapter_getAdComponent()
-  //   } catch (e) {
-  //     BYLog.printE(e)
-  //   }
-  //   return
-  // }
 }

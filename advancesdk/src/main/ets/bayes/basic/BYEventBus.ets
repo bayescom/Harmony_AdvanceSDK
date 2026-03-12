@@ -20,7 +20,7 @@ export abstract class BYEventBus {
         }
       }
 
-      BYLog.devDebug(` BYEventBus send eventKey:${eventKey}, data:${eventData} `)
+      BYLog.debug(` BYEventBus send eventKey:${eventKey}, data:${eventData} `)
 
       emitter.emit(BYEventBus.generateEventID(eventKey), { priority: emitter.EventPriority.IMMEDIATE }, {
         data: {

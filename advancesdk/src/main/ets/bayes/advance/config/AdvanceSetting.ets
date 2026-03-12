@@ -2,6 +2,7 @@ import { AdvanceAdnInitState } from '../../../../../../Index';
 
 export class AdvanceSetting {
   public appId: string = ""
+  public useHttps : boolean = false
 
   csj_initState: AdvanceAdnInitState = AdvanceAdnInitState.default
   gdt_initState: AdvanceAdnInitState = AdvanceAdnInitState.default

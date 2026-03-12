@@ -1,21 +1,17 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
-import { AdvanceSDK, BYSetting } from 'AdvanceSDK';
+import { AdvanceSDK } from 'AdvanceSDK';
 import WindowUtils from '../util/WindowUtils';
-import { MyPrivacy } from './MyPrivacy';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     let ctx = this.context
 
-    // AdvanceSDK.setPrivacyController(new MyPrivacy())
     AdvanceSDK.debug()
     //初始化SDK
     AdvanceSDK.initSDK(ctx, '105015')
-    //开发者模式
-    // BYSetting.get().isDev = true
   }
 
   onDestroy(): void {

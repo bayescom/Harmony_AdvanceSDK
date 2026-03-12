@@ -76,7 +76,7 @@ export class AdvanceRequestManger {
       await AdvanceRequestManger.prepareOAID(deviceInf)
 
       let deviceOri = JSON.stringify(deviceInf)
-      BYLog.devDebug(`deviceOri = ${deviceOri}`)
+      BYLog.debug(`deviceOri = ${deviceOri}`)
       //加密
       result = await BYSecurity.encrypt(deviceOri)
       //存储

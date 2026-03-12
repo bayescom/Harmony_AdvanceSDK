@@ -25,7 +25,7 @@ export class BYDevice {
       //优先取单例中ua
       let insUA = BYSetting.get().savedUA
       if (BYStrUtil.isNotEmpty(insUA)) {
-        BYLog.devDebug(TAG + ' getUA - 使用单例存储值')
+        BYLog.debug(TAG + ' getUA - 使用单例存储值')
         return insUA
       }
       //取本地缓存值
@@ -61,14 +61,14 @@ export class BYDevice {
     try {
       let savedOAID: string = BYSetting.get().savedOAID
       if (BYStrUtil.isNotEmpty(savedOAID)) {
-        BYLog.devDebug(TAG + ' getOAID - 使用单例存储值')
+        BYLog.debug(TAG + ' getOAID - 使用单例存储值')
         return savedOAID
       }
 
       //oaid 失效期内可用直接返回
       let cacheV: BYCacheResult<string> = BYCacheUtil.get(BY_CACHE_KEY_OAID, CACHE_TIME_MONTH)
       if (!cacheV.needRefresh && cacheV.cacheValue && BYStrUtil.isNotEmpty(cacheV.cacheValue)) {
-        BYLog.devDebug(TAG + ' getOAID - 使用本地存储值')
+        BYLog.debug(TAG + ' getOAID - 使用本地存储值')
         return cacheV.cacheValue
       }
 
@@ -358,7 +358,7 @@ export class BYDevice {
       }
       let linkInf = await wifiManager.getLinkedInfo()
       result = linkInf.macAddress
-      BYLog.devDebug(TAG + "使用SDK获取到的mac信息")
+      BYLog.debug(TAG + "使用SDK获取到的mac信息")
     } catch (e) {
       BYLog.printE(e)
     }

@@ -165,7 +165,7 @@ export class BYDiskLruCache {
 
     try {
       let cacheInf = this.lruCache.get(key)
-      BYLog.devDebug(TAG + `hasCached ,cacheInf :${cacheInf} `)
+      BYLog.debug(TAG + `hasCached ,cacheInf :${cacheInf} `)
       if (cacheInf) {
         result = true
       }
@@ -176,7 +176,7 @@ export class BYDiskLruCache {
 
   get(key: string): ArrayBuffer | undefined {
     if (!this.isInited) {
-      BYLog.devDebug(TAG + `还未初始化`)
+      BYLog.debug(TAG + `还未初始化`)
       return
     }
 
@@ -184,7 +184,7 @@ export class BYDiskLruCache {
       // TODO 如何才能修改文件访问时间呢
       return BYFileUtil.getInstance().readFileSync(this.path + key)
     } else {
-      BYLog.devDebug(TAG + `未找到缓存信息`)
+      BYLog.debug(TAG + `未找到缓存信息`)
     }
     return undefined
   }

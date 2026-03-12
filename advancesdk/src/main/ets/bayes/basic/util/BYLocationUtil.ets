@@ -43,34 +43,34 @@ export class BYLocationUtil {
         value(undefined)
       })
     try {
-      BYLog.devDebug(`getLocation start `)
+      BYLog.debug(`getLocation start `)
 
       result = new Promise<geoLocationManager.Location | undefined>((value) => {
         try {
-          BYLog.devDebug(`getLocation start  getLastLocation`)
+          BYLog.debug(`getLocation start  getLastLocation`)
           let loc: geoLocationManager.Location | undefined
           // loc = geoLocationManager.getLastLocation()
           if (!loc) {
-            BYLog.devDebug(`getLocation start getCurrentLocationEasy when 'Location' empty`)
+            BYLog.debug(`getLocation start getCurrentLocationEasy when 'Location' empty`)
             BYLocationUtil.getCurrentLocationEasy((location) => {
-              BYLog.devDebug(`getLocation use getCurrentLocation`)
+              BYLog.debug(`getLocation use getCurrentLocation`)
               value(location)
             })
           } else {
-            BYLog.devDebug(`getLocation use getLastLocation`)
+            BYLog.debug(`getLocation use getLastLocation`)
             value(loc)
           }
         } catch (e) {
           BYLog.printE(e)
           //若获取上一次定位信息失败，尝试实时获取
           try {
-            BYLog.devDebug(`getLocation start getCurrentLocationEasy when getLastLocation err`)
+            BYLog.debug(`getLocation start getCurrentLocationEasy when getLastLocation err`)
             BYLocationUtil.getCurrentLocationEasy((location) => {
-              BYLog.devDebug(`getLocation use getCurrentLocationEasy`)
+              BYLog.debug(`getLocation use getCurrentLocationEasy`)
               value(location)
             })
           } catch (e) {
-            BYLog.devDebug(`getCurrentLocationEasy catch err`)
+            BYLog.debug(`getCurrentLocationEasy catch err`)
             BYLog.printE(e)
             value(undefined)
           }

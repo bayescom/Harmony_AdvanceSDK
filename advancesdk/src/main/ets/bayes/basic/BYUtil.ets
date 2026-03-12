@@ -76,7 +76,7 @@ export class BYUtil {
       //减去0.5以后进行向上取整
       let calNum = oriNum - 0.5
       result = new Decimal(calNum).ceil().toNumber()
-      // BYLog.devDebug(`caseNumberInt ,oriNum = ${oriNum} ,calNum = ${calNum} , result = ${result}`)
+      // BYLog.debug(`caseNumberInt ,oriNum = ${oriNum} ,calNum = ${calNum} , result = ${result}`)
     } catch (e) {
       BYLog.printE(e)
     }
@@ -121,7 +121,7 @@ export class BYUtil {
       let navHVP = BYDisplay.px2VP(navH)
       BYSetting.get().navigationBarHeightVP = navHVP;
 
-      BYLog.devDebug(`initStatusHeight result navHVP = ${navHVP} , barHVP = ${barHVP} `)
+      BYLog.debug(`initStatusHeight result navHVP = ${navHVP} , barHVP = ${barHVP} `)
     } catch (e) {
     }
   }

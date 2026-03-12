@@ -1,6 +1,4 @@
 import hilog from '@ohos.hilog'
-import { BYSetting } from './BYSetting'
-import { BYSingleton } from './BYSingleton'
 
 const LOGGER_DOMAIN: number = 0x0000
 const LOGGER_TAG: string = 'BYLog'
@@ -61,18 +59,6 @@ export class BYLog {
       // hilog.debug(BYLog.domain, BYLog.tag, BYLog.format.repeat(args.length), args)
     }
   }
-
-  static devDebug(...args: string[]): void {
-    if (BYLog.showDevLog()) {
-      BYLog.logInfo("-dev-" + args.toString())
-      // hilog.debug(BYLog.domain, BYLog.tag + "-dev", BYLog.format.repeat(args.length), args)
-    }
-  }
-
-  static showDevLog(): boolean {
-    return BYLog.showLog && BYSetting.get().isDev && BYSingleton.get().debug
-  }
-
 
   /**
    * 打印INFO级别日志

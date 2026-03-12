@@ -20,7 +20,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
   }
 
   adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
-    BYLog.devDebug(TAG + ` adapter_loadAd start`)
+    BYLog.debug(TAG + ` adapter_loadAd start`)
     return new Promise<AdvanceAdnStatusResult>(async (resolve, reject) => {
       let result = new AdvanceAdnStatusResult()
       try {
@@ -164,7 +164,7 @@ export class AdvCsjNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
                 result.status = AdvanceAdLoadState.success
                 resolve(result)
 
-                BYLog.devDebug(TAG + 'after resolve')
+                BYLog.debug(TAG + 'after resolve')
               }
             })
           } else {

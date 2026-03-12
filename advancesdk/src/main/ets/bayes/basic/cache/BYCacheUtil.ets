@@ -39,7 +39,7 @@ export namespace BYCacheUtil {
       let savedObj = cache[key] as BYCacheEle<T>
       if (savedObj) {
         const savedValue = savedObj.eleValue
-        BYLog.devDebug(`已找到缓存 key:${key} , savedValue : ${savedValue}`)
+        BYLog.debug(`已找到缓存 key:${key} , savedValue : ${savedValue}`)
         result.cacheValue = savedValue
 
         //如果配置了过期时间，检查是否需要更新源数据
@@ -47,7 +47,7 @@ export namespace BYCacheUtil {
           let now = systemDateTime.getTime()
           let savedTime = savedObj.cachedTime
           if ((now - savedTime) > expireTime) {
-            BYLog.devDebug(`当前缓存值已过期`)
+            BYLog.debug(`当前缓存值已过期`)
             // 标识需要刷新 , 此时需要重新执行获取操作
             result.needRefresh = true
           }

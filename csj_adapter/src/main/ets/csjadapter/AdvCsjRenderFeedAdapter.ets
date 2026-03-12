@@ -20,7 +20,7 @@ export class AdvCsjRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
   }
 
   adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
-    BYLog.devDebug(TAG + ` adapter_loadAd start`)
+    BYLog.debug(TAG + ` adapter_loadAd start`)
     return new Promise<AdvanceAdnStatusResult>(async (resolve, reject) => {
       let result = new AdvanceAdnStatusResult()
       try {

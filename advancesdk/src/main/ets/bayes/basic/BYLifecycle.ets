@@ -16,7 +16,7 @@ export class BYLifecycle {
       let context = ctx.getApplicationContext()
       //  广告位跳转dp时，需要根据生命周期，进行是否有弹框逻辑判断。点击后仅有丢焦事件，代表丢焦事件为dp系统拦截弹框存在导致，如果直接丢焦事件+进入后台状态，代表离开了当前APP。相关上报逻辑需要基于当前事件监听，实现更准确得事件行为上报
       let lifecycleId = context?.on('abilityLifecycle', new BYAbilityLifecycleCallback())
-      BYLog.devDebug(TAG + `registerLife ,lifecycleId = ${lifecycleId}`)
+      BYLog.debug(TAG + `registerLife ,lifecycleId = ${lifecycleId}`)
 
       // 监听应用程序状态变化
       // 创建一个EntryApplicationStateChangeCallback实例来处理状态变化
@@ -32,7 +32,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
   onAbilityCreate(ability: UIAbility): void {
     // 在这里可以执行Ability创建后的初始化操作
     try { // ...
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onAbilityCreate (应用启动)，ability = ${ability}`)
     } catch (e) {
     }
@@ -48,7 +48,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
       if (windowStage) {
         BYConstant.windowStage = windowStage
       }
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onWindowStageCreate (WindowStage创建) ，ability = ${ability} , windowStage = ${JSON.stringify(windowStage)}`)
     } catch (e) {
     }
@@ -65,7 +65,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
 
       BYEventBus.send(BY_EVENT_KEY_WINDOW_FOCUS_RESUME)
 
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onWindowStageActive (WindowStage获取到焦点) ，ability = ${ability} , windowStage = ${JSON.stringify(windowStage)}`)
     } catch (e) {
     }
@@ -79,7 +79,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
     BYEventBus.send(BY_EVENT_KEY_WINDOW_FOCUS_LOST)
 
     try {
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onWindowStageInactive (WindowStage失焦)，ability = ${ability} , windowStage = ${JSON.stringify(windowStage)}`)
     } catch (e) {
     }
@@ -92,7 +92,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
     // ...
 
     try {
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onWindowStageDestroy (WindowStage销毁)，ability = ${ability} , windowStage = ${JSON.stringify(windowStage)}`)
     } catch (e) {
     }
@@ -105,7 +105,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
     // ...
 
     try {
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onAbilityDestroy (Ability销毁)，ability = ${ability}  `)
     } catch (e) {
     }
@@ -118,7 +118,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
     // ...
 
     try {
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onAbilityForeground (Ability进入前台)，ability = ${ability}  `)
     } catch (e) {
     }
@@ -131,7 +131,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
     // ...
 
     try {
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onAbilityForeground (Ability移入'后台‘)，ability = ${ability}  `)
     } catch (e) {
     }
@@ -144,7 +144,7 @@ class BYAbilityLifecycleCallback extends AbilityLifecycleCallback {
     // ...
 
     try {
-      BYLog.devDebug(TAG +
+      BYLog.debug(TAG +
         `--BYAbilityLifecycleCallback-- onAbilityContinue (Ability从暂停状态恢复)，ability = ${ability}  `)
     } catch (e) {
     }
@@ -161,7 +161,7 @@ class BYApplicationStateChangeCallback extends ApplicationStateChangeCallback {
 
     BYSetting.get().isAppForeground = true
     BYEventBus.send(BY_EVENT_KEY_APP_STATE_CHANGE)
-    BYLog.devDebug(TAG + `--BYApplicationStateChangeCallback-- onApplicationForeground (当应用程序进入前台时触发)  `)
+    BYLog.debug(TAG + `--BYApplicationStateChangeCallback-- onApplicationForeground (当应用程序进入前台时触发)  `)
 
   }
 
@@ -172,7 +172,7 @@ class BYApplicationStateChangeCallback extends ApplicationStateChangeCallback {
     BYSetting.get().isAppForeground = false
     BYEventBus.send(BY_EVENT_KEY_APP_STATE_CHANGE)
 
-    BYLog.devDebug(TAG + `--BYApplicationStateChangeCallback-- onApplicationBackground (应用程序进入’后台‘时触发)  `)
+    BYLog.debug(TAG + `--BYApplicationStateChangeCallback-- onApplicationBackground (应用程序进入’后台‘时触发)  `)
 
   }
 }

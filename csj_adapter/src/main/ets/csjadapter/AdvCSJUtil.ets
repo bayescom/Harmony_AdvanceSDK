@@ -1,6 +1,5 @@
-import { CSJAdSdk, SDKConfig, SDKConfigBuilder, StartResult } from '@csj/openadsdk'
+import { CSJAdSdk, SDKConfig, SDKConfigBuilder } from '@csj/openadsdk'
 import {
-  BYSingleton,
   BYLog,
   AdvanceCommonAdapter,
   AdvanceSetting,
@@ -8,7 +7,8 @@ import {
   AdvanceADNUnitData,
   AdvanceAdType,
   BYConstant,
-  AdvanceAdnInitState
+  AdvanceAdnInitState,
+  BYSetting
 } from 'AdvanceSDK'
 import { AdvCsjNativeExpressAdapter } from './AdvCsjNativeExpressAdapter'
 import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
@@ -79,7 +79,7 @@ export class AdvCSJUtil {
             .appId(appID)
             .appName("appName")
             .allowShowNotify(true)
-            .debug(BYSingleton.get().debug)
+            .debug(BYSetting.get().isDev)
             .build()
 
           CSJAdSdk.init(BYConstant.context, config)

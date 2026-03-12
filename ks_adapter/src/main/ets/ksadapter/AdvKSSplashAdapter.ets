@@ -6,9 +6,11 @@ import {
   ADV_ERR_DATA_NULL,
   AdvanceSplashCommonAdapter,
   AdvanceAdLoadState,
+  BYWindowUtil,
 } from 'AdvanceSDK';
 import { KSAdScene, KSAdSDK, KSSplashAd, KSSplashAdInteractListener, KSAdInteractionType,
   KSAdBuildSplashView } from 'ksadsdk';
+import { KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY } from './AdvKSDisplayPageView';
 import { AdvKSUtil } from './AdvKSUtil';
 
 
@@ -22,7 +24,7 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
   }
 
   adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
-    BYLog.devDebug(TAG + ` adapter_loadAd start`)
+    BYLog.debug(TAG + ` adapter_loadAd start`)
     return new Promise<AdvanceAdnStatusResult>(async (resolve) => {
       let result = new AdvanceAdnStatusResult()
       let initResult = await AdvKSUtil.loadKSSDK(this)
@@ -35,6 +37,7 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
           const scene: KSAdScene = new KSAdScene()
             .setPosId(sup.adspotid)
             .setAdNum(1);
+          const that = this // 参照快手demo内特殊写法。不这样写，show的时候广告对象已被释放
           KSAdSDK.getLoadManager().loadSplashAd(scene, {
             onRequestSuccess(splashAd: KSSplashAd) {
               // 广告请求成功
@@ -50,7 +53,7 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
             onAdLoad(splashAd: KSSplashAd) {
               // 广告成功加载，可以展示
               BYLog.debug(TAG + "开屏回调 - onAdLoaded")
-              this.ks_ad = splashAd
+              that.ks_ad = splashAd
               result.status = AdvanceAdLoadState.success
               resolve(result)
             }
@@ -72,25 +75,30 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
   }
 
   adapter_showAd(windowStage: window.WindowStage) {
-    this.ks_ad?.setInteractListener(this.interactionListener)
-    KSAdBuildSplashView(this.ks_ad)
-  }
-
-  protected interactionListener: KSSplashAdInteractListener = {
-    onAdShowStart() {
-      BYLog.debug(TAG + "开屏回调 - onAdExposure")
-      this.bridge?.splashAdapter_didAdShow()
-    },
-    onAdShowEnd() {},
-    onAdClick(interactionType?: KSAdInteractionType) {
-      BYLog.debug(TAG + "开屏回调 - onAdClick")
-      this.bridge?.splashAdapter_didAdClick()
-    },
-    onAdSkip() {
-      BYLog.debug(TAG + `开屏回调 - onAdClose`)
-      this.bridge?.splashAdapter_didAdClose()
-    },
-    onCloseLandingPage() {}
+    const that = this
+    if (that.ks_ad) {
+      that.ks_ad?.setInteractListener({
+        onAdShowStart() {
+          BYLog.debug(TAG + "开屏回调 - onAdExposure")
+          that.bridge?.splashAdapter_didAdShow()
+        },
+        onAdShowEnd() {
+          BYWindowUtil.destroySubWindow()
+        },
+        onAdClick(interactionType?: KSAdInteractionType) {
+          BYLog.debug(TAG + "开屏回调 - onAdClick")
+          BYWindowUtil.destroySubWindow()
+          that.bridge?.splashAdapter_didAdClick()
+        },
+        onAdSkip() {
+          BYLog.debug(TAG + `开屏回调 - onAdClose`)
+          BYWindowUtil.destroySubWindow()
+          that.bridge?.splashAdapter_didAdClose()
+        },
+        onCloseLandingPage() {}
+      })
+      BYWindowUtil.createWindow(KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY, that.ks_ad)
+    }
   }
 
 }
