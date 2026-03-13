@@ -1,4 +1,5 @@
-import { KSAdBuildSplashView, KSInterstitialAd, KSSplashAd, KSBuildNewInterstitialAdView } from "ksadsdk"
+import { KSAdBuildSplashView, KSSplashAd, KSBuildNewInterstitialAdView,
+  KSNewInterstitialAd } from "ksadsdk"
 
 export const KS_DISPLAY_PAGE_TAG = 'AdvKSDisplayPageView'
 export const STORAGE_AD_KEY = 'AdvKSAdStorageKey'
@@ -28,7 +29,7 @@ export struct AdvKSDisplayPageView {
       if (this.ks_ad) {
         if (this.ks_ad instanceof KSSplashAd) {
           KSAdBuildSplashView(this.ks_ad)
-        } else if (this.ks_ad instanceof KSInterstitialAd) {
+        } else if (this.ks_ad instanceof KSNewInterstitialAd) {
           KSBuildNewInterstitialAdView(this.ks_ad)
         }
       }

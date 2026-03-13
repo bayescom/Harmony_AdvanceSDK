@@ -1,5 +1,5 @@
 import {
-  AdvanceError, AdvanceOption, AdvanceSplash, AdvanceAdInfo
+  AdvanceError, AdvanceOption, AdvanceInterstitial, AdvanceAdInfo
 } from 'AdvanceSDK'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -7,19 +7,19 @@ import { logToast, toast } from '../util/Toast'
 
 @Entry
 @Component
-struct Splash {
-  @State placementId: string = '10014541' // mercury
+struct Interstitial {
+  @State placementId: string = '10014593' // mercury
   private readonly placementIdArr: Array<[string, string]> = [
-    ['10014541', '开屏-倍业'],
-    ['10014521', '开屏-穿山甲'],
-    ['10014522', '开屏-优量汇'],
-    ['10014526', '开屏-快手'],
+    ['10014593', '插屏-倍业'],
+    ['10014592', '插屏-穿山甲'],
+    ['10014591', '插屏-优量汇'],
+    ['10014594', '插屏-快手'],
   ];
-  @State splashAd?: AdvanceSplash = undefined
+  @State interstitialAd?: AdvanceInterstitial = undefined
 
   build() {
     Column({ space: 20 }) {
-      PageTitleView({title: '开屏广告'})
+      PageTitleView({title: '插屏广告'})
       PosIdSelector({
         posId: this.placementId,
         posIdArr: this.placementIdArr,
@@ -28,8 +28,8 @@ struct Splash {
         .width('100%')
         .onClick(() => {
           let opt = new AdvanceOption(this.placementId)
-          this.splashAd = new AdvanceSplash(opt)
-          this.splashAd.setAdListener({
+          this.interstitialAd = new AdvanceInterstitial(opt)
+          this.interstitialAd.setAdListener({
             onAdLoaded: (adInfo: AdvanceAdInfo) => {
               logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
             },
@@ -49,17 +49,17 @@ struct Splash {
               // logToast(`onAdClose`)
             },
           })
-          this.splashAd.loadAd()
+          this.interstitialAd.loadAd()
         })
       Button('展示广告')
         .width('100%')
         .onClick(() => {
-          if (!this.splashAd) {
+          if (!this.interstitialAd) {
             toast(`请先请求广告`)
             return
           }
-          if (this.splashAd.isAdValid()) {
-            this.splashAd.showAd()
+          if (this.interstitialAd.isAdValid()) {
+            this.interstitialAd.showAd()
           }
         })
     }.width('100%')

@@ -1,6 +1,5 @@
 import { AdvanceADNUnitData } from './AdvanceADNUnitData';
 import { NodeController, window } from '@kit.ArkUI';
-import { BYLog } from '../../../basic/BYLog';
 import { AdvanceAdnStatusResult } from '../../model/AdvanceSendModel';
 import { AdvanceRenderOption } from '../../config/AdvanceOption';
 

@@ -26,7 +26,7 @@ export class AdvanceSDK {
   }
 
   //当前版本号
-  getSDKVersion(): string {
+  static getSDKVersion(): string {
     return AdvanceConstant.ADV_SDK_VERSION_NAME
   }
 }

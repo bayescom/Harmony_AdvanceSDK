@@ -10,8 +10,9 @@ import {
   AdvanceAdnInitState
 } from 'AdvanceSDK'
 
-import { AdvGDTSplashAdapter } from './AdvGDTSplashAdapter'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { AdvGDTSplashAdapter } from './AdvGDTSplashAdapter'
+import { AdvGDTInterstitialAdapter } from './AdvGDTInterstitialAdapter'
 
 const TAG = `[AdvGDTUtil] `
 
@@ -20,6 +21,8 @@ export class AdvGDTUtil {
     switch (supData.adType) {
       case AdvanceAdType.splash:
         return new AdvGDTSplashAdapter(supData)
+      case AdvanceAdType.interstitial:
+        return new AdvGDTInterstitialAdapter(supData)
       // case AdvanceAdType.nativeExpress:
       //   return new AdvCsjNativeExpressAdapter(supData)
       // case AdvanceAdType.selfRender:

@@ -4,18 +4,20 @@ import {
   AdvanceAdnStatusResult,
   AdvanceError,
   ADV_ERR_DATA_NULL,
-  AdvanceSplashCommonAdapter,
   AdvanceAdLoadState,
   BYApp,
+  AdvanceInterstitialCommonAdapter,
 } from 'AdvanceSDK';
-import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryRenderOption, MercurySplash } from 'mercuryadhar';
+import { MercuryCloseType, MercuryEntry, MercuryErr,
+  MercuryInterstitial,
+  MercuryRenderOption } from 'mercuryadhar';
 import { AdvMercuryUtil } from './AdvMercuryUtil';
 
 
-const TAG = `[AdvMercurySplashAdapter]`
+const TAG = `[AdvMercuryInterstitialAdapter]`
 
-export class AdvMercurySplashAdapter extends AdvanceSplashCommonAdapter {
-  protected mercury_ad?: MercurySplash
+export class AdvMercuryInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
+  protected mercury_ad?: MercuryInterstitial
 
   adapter_isAdValid(): boolean {
     return true
@@ -33,15 +35,15 @@ export class AdvMercurySplashAdapter extends AdvanceSplashCommonAdapter {
         let sup = this.unitData.supplier
         if (sup) {
           let opt = new MercuryEntry().setCodeId(sup.adspotid)
-          this.mercury_ad = new MercurySplash(opt)
+          this.mercury_ad = new MercuryInterstitial(opt)
           this.mercury_ad.loadAd({
             onAdLoaded: () => {
-              BYLog.debug(TAG + "开屏回调 - onAdLoaded")
+              BYLog.debug(TAG + "插屏回调 - onAdLoaded")
               result.status = AdvanceAdLoadState.success
               resolve(result)
             },
             onAdError: (err: MercuryErr): void => {
-              BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.msg}`)
+              BYLog.debug(TAG + `插屏回调 - onAdLoadFailed code: ${err.code} message: ${err.msg}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = err.code
               result.errMsg = err.msg
@@ -68,24 +70,25 @@ export class AdvMercurySplashAdapter extends AdvanceSplashCommonAdapter {
   adapter_showAd(windowStage: window.WindowStage) {
     this.mercury_ad?.setRenderListener({
       onShow: (): void => {
-        BYLog.debug(TAG + "开屏回调 - onAdExposure")
-        this.bridge?.splashAdapter_didAdShow()
+        BYLog.debug(TAG + "插屏回调 - onAdExposure")
+        this.bridge?.interstitialAdapter_didAdShow()
       },
       onClick: (): void => {
-        BYLog.debug(TAG + "开屏回调 - onAdClick")
-        this.bridge?.splashAdapter_didAdClick()
+        BYLog.debug(TAG + "插屏回调 - onAdClick")
+        this.bridge?.interstitialAdapter_didAdClick()
       },
       onRenderErr: (err: MercuryErr): void => {
-        BYLog.debug(TAG + "开屏回调 - onShowError")
-        this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(err.code, err.msg))
+        BYLog.debug(TAG + "插屏回调 - onShowError")
+        this.bridge?.interstitialAdapter_didAdShowFailed(new AdvanceError(err.code, err.msg))
       },
       onClose: (type: MercuryCloseType): void => {
-        BYLog.debug(TAG + `开屏回调 - onAdClose`)
-        this.bridge?.splashAdapter_didAdClose()
+        BYLog.debug(TAG + `插屏回调 - onAdClose`)
+        this.bridge?.interstitialAdapter_didAdClose()
       }
     })
     let renOp = new MercuryRenderOption()
     renOp.windowStage = BYApp.getWindowStage()
+    renOp.layoutFullScreen = false
     this.mercury_ad?.showAd(renOp)
   }
 

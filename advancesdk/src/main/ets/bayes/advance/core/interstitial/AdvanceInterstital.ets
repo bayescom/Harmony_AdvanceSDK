@@ -1,38 +1,38 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
-import { AdvanceSplashListener } from '../AdvanceAdOpenListener';
+import { AdvanceInterstitialListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
 import { AdvanceOption } from '../../config/AdvanceOption';
-import { AdvanceSplashCommonAdapter } from '../adn/AdvanceSplashCommonAdapter';
+import { AdvanceInterstitialCommonAdapter } from '../adn/AdvanceInterstitialCommonAdapter';
 import { AdvanceError } from '../../../../../../../Index';
 
-export class AdvanceSplash extends AdvanceAdBase {
+export class AdvanceInterstitial extends AdvanceAdBase {
   constructor(option: AdvanceOption) {
     super(option)
-    this.adSlotType = AdvanceAdType.splash
+    this.adSlotType = AdvanceAdType.interstitial
   }
 
-  protected mListener?: AdvanceSplashListener
+  protected mListener?: AdvanceInterstitialListener
 
   protected override adnWin(): void {
-    let adapter = this.getCurrentAdapter() as AdvanceSplashCommonAdapter
-    adapter.setSplashAdapterBridge({
-      splashAdapter_didAdShow: () => {
+    let adapter = this.getCurrentAdapter() as AdvanceInterstitialCommonAdapter
+    adapter.setInterstitialAdapterBridge({
+      interstitialAdapter_didAdShow: () => {
         this.reportBestAdnShowTask()
         this.mListener?.onAdShow()
       },
-      splashAdapter_didAdShowFailed: (error: AdvanceError) => {
+      interstitialAdapter_didAdShowFailed: (error: AdvanceError) => {
         this.reportBestAdnShowFailedTask(error)
         this.mListener?.onAdShowFailed(error)
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
       },
-      splashAdapter_didAdClick: () => {
+      interstitialAdapter_didAdClick: () => {
         this.reportBestAdnClickTask()
         this.mListener?.onAdClick()
       },
-      splashAdapter_didAdClose: () => {
+      interstitialAdapter_didAdClose: () => {
         this.mListener?.onAdClose()
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
@@ -40,7 +40,7 @@ export class AdvanceSplash extends AdvanceAdBase {
     })
   }
 
-  setAdListener(listener: AdvanceSplashListener) {
+  setAdListener(listener: AdvanceInterstitialListener) {
     this.loadListener = listener
     this.mListener = listener
   }

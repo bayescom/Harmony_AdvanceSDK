@@ -28,6 +28,10 @@ export interface AdvanceSplashListener extends AdvanceAdInteractionListener {
   onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
 }
 
+export interface AdvanceInterstitialListener extends AdvanceAdInteractionListener {
+  onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+}
+
 export interface AdvanceNativeExpressListener extends AdvanceAdInteractionListener {
   onDislike: (dislike: AdvanceDislike) => void //广告关闭回调
   onRenderSuccess: () => void // 在调用广告的render方法后，广告渲染成功，会回调该方法，此时表示广告已准备好，待展示

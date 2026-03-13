@@ -1,26 +1,27 @@
-import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener, GDTSplashAd } from '@gdt/gdt-union-sdk';
+import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
+  GDTInterstitialAd} from '@gdt/gdt-union-sdk';
 import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceAdnStatusResult,
   AdvanceError,
   ADV_ERR_DATA_NULL,
-  AdvanceSplashCommonAdapter,
   ADV_ERR_AD_Invalid_Expired,
   AdvanceAdLoadState,
+  AdvanceInterstitialCommonAdapter,
 } from 'AdvanceSDK';
 import { AdvGDTUtil } from './AdvGDTUtil';
 
 
-const TAG = `[AdvGDTSplashAdapter]`
+const TAG = `[AdvGDTInterstitialAdapter]`
 
-export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
-  protected gdt_ad?: GDTSplashAd
+export class AdvGDTInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
+  protected gdt_ad?: GDTInterstitialAd
 
   adapter_isAdValid(): boolean {
     const isAdValid = this.gdt_ad?.isValid() ?? false
     if (!isAdValid) {
-      this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+      this.bridge?.interstitialAdapter_didAdShowFailed(new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
     }
     return isAdValid
   }
@@ -37,18 +38,17 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
         let sup = this.unitData.supplier
         if (sup) {
           const config: GDTAdLoadConfig = {
-            posId: sup.adspotid,
-            timeoutMillis: sup.timeout
+            posId: sup.adspotid
           };
-          GDTAdSDK.getAdLoader().loadSplashAd(config, {
-            onAdLoad: (ad: GDTSplashAd): void => {
-              BYLog.debug(TAG + "开屏回调 - onAdLoaded")
+          GDTAdSDK.getAdLoader().loadInterstitialAd(config, {
+            onAdLoad: (ad: GDTInterstitialAd): void => {
+              BYLog.debug(TAG + " 插屏回调 - onAdLoaded")
               this.gdt_ad = ad
               result.status = AdvanceAdLoadState.success
               resolve(result)
             },
             onError: (err: GDTError): void => {
-              BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+              BYLog.debug(TAG + `插屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = err.code
               result.errMsg = err.message
@@ -78,20 +78,20 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
-      BYLog.debug(TAG + "开屏回调 - onAdExposure")
-      this.bridge?.splashAdapter_didAdShow()
+      BYLog.debug(TAG + "插屏回调 - onAdExposure")
+      this.bridge?.interstitialAdapter_didAdShow()
     },
     onAdClick: (): void => {
-      BYLog.debug(TAG + "开屏回调 - onAdClick")
-      this.bridge?.splashAdapter_didAdClick()
+      BYLog.debug(TAG + "插屏回调 - onAdClick")
+      this.bridge?.interstitialAdapter_didAdClick()
     },
     onAdClose: (): void => {
-      BYLog.debug(TAG + `开屏回调 - onAdClose`)
-      this.bridge?.splashAdapter_didAdClose()
+      BYLog.debug(TAG + `插屏回调 - onAdClose`)
+      this.bridge?.interstitialAdapter_didAdClose()
     },
     onError: (err: GDTError): void => {
-      BYLog.debug(TAG + "开屏回调 - onShowError")
-      this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(err.code, err.message))
+      BYLog.debug(TAG + "插屏回调 - onShowError")
+      this.bridge?.interstitialAdapter_didAdShowFailed(new AdvanceError(err.code, err.message))
     }
   }
 

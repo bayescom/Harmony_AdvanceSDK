@@ -1,4 +1,4 @@
-import { NodeController, window } from '@kit.ArkUI';
+import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceAdnStatusResult,
@@ -126,21 +126,4 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
     },
   }
 
-  // adapter_showAd(advanceRenderOP: AdvanceRenderOption): void {
-  //   if (!this.mSplashAd) {
-  //     this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(ADV_ERR_EXCEPTION_RENDER, '未获取到广告'))
-  //     return
-  //   }
-  //   let windowStage = AdvanceUtil.getWindowStage(advanceRenderOP)
-  //   if (!windowStage) {
-  //     this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(ADV_ERR_EXCEPTION_RENDER, '为获取到窗口信息 '))
-  //     return
-  //   }
-  //   BYLog.debug(TAG + `adapter_showAd ,windowStage = ${windowStage}`)
-  //   this.mSplashAd.showSplashAd(windowStage, advanceRenderOP.customBottomBuilder)
-  // }
-
-  adapter_getAdComponent(): NodeController | undefined {
-    return this.csj_ad?.getAdComponent(false)
-  }
 }

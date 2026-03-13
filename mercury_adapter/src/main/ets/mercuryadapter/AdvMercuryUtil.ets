@@ -10,6 +10,7 @@ import {
   BYApp,
 } from 'AdvanceSDK'
 import { MercuryAD } from 'mercuryadhar'
+import { AdvMercuryInterstitialAdapter } from './AdvMercuryInterstitialAdapter'
 import { AdvMercurySplashAdapter } from './AdvMercurySplashAdapter'
 
 const TAG = `[AdvMercuryUtil] `
@@ -19,6 +20,8 @@ export class AdvMercuryUtil {
     switch (supData.adType) {
       case AdvanceAdType.splash:
         return new AdvMercurySplashAdapter(supData)
+      case AdvanceAdType.interstitial:
+        return new AdvMercuryInterstitialAdapter(supData)
       // case AdvanceAdType.nativeExpress:
       //   return new AdvCsjNativeExpressAdapter(supData)
       // case AdvanceAdType.selfRender:

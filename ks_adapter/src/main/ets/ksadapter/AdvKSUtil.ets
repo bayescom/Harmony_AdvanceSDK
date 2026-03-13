@@ -9,6 +9,7 @@ import {
   BYApp,
 } from 'AdvanceSDK'
 import { KSAdSDK, KSAdSDKInitConfig } from 'ksadsdk'
+import { AdvKSInterstitialAdapter } from './AdvKSInterstitialAdapter'
 import { AdvKSSplashAdapter } from './AdvKSSplashAdapter'
 
 const TAG = `[AdvKSUtil] `
@@ -18,6 +19,8 @@ export class AdvKSUtil {
     switch (supData.adType) {
       case AdvanceAdType.splash:
         return new AdvKSSplashAdapter(supData)
+      case AdvanceAdType.interstitial:
+        return new AdvKSInterstitialAdapter(supData)
       // case AdvanceAdType.nativeExpress:
       //   return new AdvCsjNativeExpressAdapter(supData)
       // case AdvanceAdType.selfRender:

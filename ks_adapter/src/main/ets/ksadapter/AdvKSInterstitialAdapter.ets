@@ -3,19 +3,19 @@ import {
   BYLog,
   AdvanceAdnStatusResult,
   ADV_ERR_DATA_NULL,
-  AdvanceSplashCommonAdapter,
   AdvanceAdLoadState,
   BYWindowUtil,
+  AdvanceInterstitialCommonAdapter,
 } from 'AdvanceSDK';
-import { KSAdScene, KSAdSDK, KSSplashAd, KSAdInteractionType} from 'ksadsdk';
+import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSNewInterstitialAd} from 'ksadsdk';
 import { KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY } from './AdvKSDisplayPageView';
 import { AdvKSUtil } from './AdvKSUtil';
 
 
-const TAG = `[AdvKSSplashAdapter]`
+const TAG = `[AdvKSInterstitialAdapter]`
 
-export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
-  protected ks_ad?: KSSplashAd
+export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
+  protected ks_ad?: KSNewInterstitialAd
 
   adapter_isAdValid(): boolean {
     return true
@@ -34,24 +34,25 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
         if (sup) {
           const scene: KSAdScene = new KSAdScene()
             .setPosId(sup.adspotid)
-            .setAdNum(1);
+            .setAdNum(1)
+            .setScreenOrientation(KSAdScreenDirection.vertical);
           const that = this // 参照快手demo内写法；因为callback内获取的this不是当前adpater对象，而是listener对象
-          KSAdSDK.getLoadManager().loadSplashAd(scene, {
-            onRequestSuccess(splashAd: KSSplashAd) {
+          KSAdSDK.getLoadManager().loadNewInterstitialAd(scene, {
+            onRequestSuccess(ad: KSNewInterstitialAd) {
               // 广告请求成功
             },
             onError(code: number, msg: string) {
               // 广告请求失败
-              BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${code} message: ${msg}`)
+              BYLog.debug(TAG + `插屏回调 - onAdLoadFailed code: ${code} message: ${msg}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = code
               result.errMsg = msg
               resolve(result)
             },
-            onAdLoad(splashAd: KSSplashAd) {
+            onAdLoad(ad: KSNewInterstitialAd) {
               // 广告成功加载，可以展示
-              BYLog.debug(TAG + "开屏回调 - onAdLoaded")
-              that.ks_ad = splashAd
+              BYLog.debug(TAG + "插屏回调 - onAdLoaded")
+              that.ks_ad = ad
               result.status = AdvanceAdLoadState.success
               resolve(result)
             }
@@ -76,24 +77,21 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
     const that = this
     if (that.ks_ad) {
       that.ks_ad?.setInteractListener({
-        onAdShowStart() {
-          BYLog.debug(TAG + "开屏回调 - onAdExposure")
-          that.bridge?.splashAdapter_didAdShow()
+        onAdShow() {
+          BYLog.debug(TAG + "插屏回调 - onAdExposure")
+          that.bridge?.interstitialAdapter_didAdShow()
         },
-        onAdShowEnd() {
+        onAdClick() {
+          BYLog.debug(TAG + "插屏回调 - onAdClick")
+          that.bridge?.interstitialAdapter_didAdClick()
+        },
+        onAdClose() {
+          BYLog.debug(TAG + `插屏回调 - onAdClose`)
           BYWindowUtil.destroySubWindow()
+          that.bridge?.interstitialAdapter_didAdClose()
         },
-        onAdClick(interactionType?: KSAdInteractionType) {
-          BYLog.debug(TAG + "开屏回调 - onAdClick")
-          BYWindowUtil.destroySubWindow()
-          that.bridge?.splashAdapter_didAdClick()
-        },
-        onAdSkip() {
-          BYLog.debug(TAG + `开屏回调 - onAdClose`)
-          BYWindowUtil.destroySubWindow()
-          that.bridge?.splashAdapter_didAdClose()
-        },
-        onCloseLandingPage() {}
+        onVideoPlayStart() {},
+        onVideoPlayEnd() {},
       })
       BYWindowUtil.createWindow(KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY, that.ks_ad)
     }
