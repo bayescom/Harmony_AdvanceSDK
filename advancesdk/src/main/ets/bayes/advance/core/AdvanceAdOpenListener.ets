@@ -22,14 +22,16 @@ export interface AdvanceAdInteractionListener extends AdvanceAdLoadListener {
   onAdShow: () => void // 广告曝光成功
   onAdClick: () => void // 广告点击
   onAdClose: () => void // 广告关闭
+  onAdShowFailed?: (error: AdvanceError) => void // 广告展示失败
 }
 
-export interface AdvanceSplashListener extends AdvanceAdInteractionListener {
-  onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
-}
+export interface AdvanceSplashListener extends AdvanceAdInteractionListener {}
 
-export interface AdvanceInterstitialListener extends AdvanceAdInteractionListener {
-  onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+export interface AdvanceInterstitialListener extends AdvanceAdInteractionListener {}
+
+export interface AdvanceRewardVideoListener extends AdvanceAdInteractionListener {
+  onAdReward: () => void // 奖励发放
+  onAdPlayEnd?: () => void // 广告播放完成
 }
 
 export interface AdvanceNativeExpressListener extends AdvanceAdInteractionListener {

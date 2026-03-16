@@ -4,17 +4,19 @@ import {
   AdvanceAdnStatusResult,
   ADV_ERR_DATA_NULL,
   AdvanceAdLoadState,
-  AdvanceInterstitialCommonAdapter,
+  AdvanceRewardVideoCommonAdapter,
 } from 'AdvanceSDK';
 import {
-  AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJFullAd, FullAdInteractionListener,
+  AdSlotBuilder, CSJAdCreator, CSJAdSdk,
+  CSJRewardAd,
+  RewardAdInteractionListener,
 } from '@csj/openadsdk';
 import { AdvCSJUtil } from './AdvCSJUtil';
 
-const TAG = `[AdvCSJInterstitialAdapter]`
+const TAG = `[AdvCSJRewardVideoAdapter]`
 
-export class AdvCSJInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
-  protected csj_ad?: CSJFullAd
+export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
+  protected csj_ad?: CSJRewardAd
 
   adapter_isAdValid(): boolean {
     return true
@@ -36,21 +38,21 @@ export class AdvCSJInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
           let adSlot = new AdSlotBuilder()
             .setCodeId(sup.adspotid)
             .build()
-          mAdCreator.loadFullAd(adSlot, {
-            onAdLoaded: (fullAd: CSJFullAd) => {
-              BYLog.debug(TAG + "插屏回调 - onAdLoaded")
-              this.csj_ad = fullAd
+          mAdCreator.loadRewardAd(adSlot, {
+            onAdLoaded: (rewardAd: CSJRewardAd) => {
+              BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
+              this.csj_ad = rewardAd
               result.status = AdvanceAdLoadState.success
               resolve(result)
             },
             onError: (code: number, message: string) => {
-              BYLog.debug(TAG + `插屏回调 - onAdLoadFailed code: ${code} message: ${message}`)
+              BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${code} message: ${message}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = code
               result.errMsg = message
               resolve(result)
             },
-            onAdCached: (fullAd: CSJFullAd) => {
+            onAdCached: () => {
             }
           })
 
@@ -72,28 +74,33 @@ export class AdvCSJInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
 
   adapter_showAd(windowStage: window.WindowStage) {
     this.csj_ad?.setInteractionListener(this.interactionListener)
-    this.csj_ad?.showFullAd(windowStage)
+    this.csj_ad?.showRewardAd(windowStage)
   }
 
-  protected interactionListener: FullAdInteractionListener = {
+  protected interactionListener: RewardAdInteractionListener = {
     onShow: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidShow")
+      BYLog.debug(TAG + "激励视频回调 - onDidShow")
       this.bridge?.bridge_didAdShow()
     },
     onClose: () => {
-      BYLog.debug(TAG + `插屏回调 - onDidClose`)
+      BYLog.debug(TAG + `激励视频回调 - onDidClose`)
       this.bridge?.bridge_didAdClose()
     },
     onClick: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidClick")
+      BYLog.debug(TAG + "激励视频回调 - onDidClick")
       this.bridge?.bridge_didAdClick()
     },
     onSkip: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidSkip")
+      BYLog.debug(TAG + "激励视频回调 - onDidSkip")
+    },
+    onRewardArrived: (isVerify, rewardType, extraInfo) => {
+      BYLog.debug(TAG + "激励视频回调 - onDidReward")
+      this.bridge?.bridge_didAdReward()
     },
     onComplete: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidComplete")
-    },
+      BYLog.debug(TAG + "激励视频回调 - onDidComplete")
+      this.bridge?.bridge_didAdPlayEnd()
+    }
   }
 
 }

@@ -13,6 +13,7 @@ import {
 import { AdvCSJInterstitialAdapter } from './AdvCSJInterstitialAdapter'
 import { AdvCsjNativeExpressAdapter } from './AdvCsjNativeExpressAdapter'
 import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
+import { AdvCSJRewardVideoAdapter } from './AdvCSJRewardVideolAdapter'
 import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
 
 const TAG = `[AdvCSJUtil] `
@@ -24,6 +25,8 @@ export class AdvCSJUtil {
         return new AdvCSJSplashAdapter(supData)
       case AdvanceAdType.interstitial:
         return new AdvCSJInterstitialAdapter(supData)
+      case AdvanceAdType.rewardVideo:
+        return new AdvCSJRewardVideoAdapter(supData)
       case AdvanceAdType.nativeExpress:
         return new AdvCsjNativeExpressAdapter(supData)
       case AdvanceAdType.selfRender:

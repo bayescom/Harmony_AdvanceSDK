@@ -79,16 +79,16 @@ export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
       that.ks_ad?.setInteractListener({
         onAdShow() {
           BYLog.debug(TAG + "插屏回调 - onAdExposure")
-          that.bridge?.interstitialAdapter_didAdShow()
+          that.bridge?.bridge_didAdShow()
         },
         onAdClick() {
           BYLog.debug(TAG + "插屏回调 - onAdClick")
-          that.bridge?.interstitialAdapter_didAdClick()
+          that.bridge?.bridge_didAdClick()
         },
         onAdClose() {
           BYLog.debug(TAG + `插屏回调 - onAdClose`)
           BYWindowUtil.destroySubWindow()
-          that.bridge?.interstitialAdapter_didAdClose()
+          that.bridge?.bridge_didAdClose()
         },
         onVideoPlayStart() {},
         onVideoPlayEnd() {},

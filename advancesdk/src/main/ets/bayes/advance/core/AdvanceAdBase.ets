@@ -1,5 +1,5 @@
 import { BYLog } from '../../basic/BYLog'
-import { AdvanceOption, AdvanceRenderOption } from '../config/AdvanceOption'
+import { AdvanceRequestOption, AdvanceRenderOption } from '../config/AdvanceOption'
 import { AdvanceADNUnitData, AdvanceSupplierExt } from './adn/AdvanceADNUnitData'
 import {
   AdvanceError,
@@ -28,7 +28,7 @@ import { AdvanceAdLoadState } from '../../../../../../Index'
 const TAG = `[AdvanceAdBase] `
 
 export abstract class AdvanceAdBase {
-  protected adOption: AdvanceOption
+  protected adOption: AdvanceRequestOption
   protected loadListener ?: AdvanceAdLoadListener
   protected adSlotType: number = 0
   protected paraTimeOut: number = AdvanceConstant.ADV_PARA_GROUP_TIMEOUT //组超时时间，单位毫秒
@@ -45,7 +45,7 @@ export abstract class AdvanceAdBase {
 
   protected abstract adnWin()
 
-  constructor(option: AdvanceOption) {
+  constructor(option: AdvanceRequestOption) {
     this.adOption = option
   }
 

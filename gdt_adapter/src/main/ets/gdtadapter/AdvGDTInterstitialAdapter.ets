@@ -21,7 +21,7 @@ export class AdvGDTInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
   adapter_isAdValid(): boolean {
     const isAdValid = this.gdt_ad?.isValid() ?? false
     if (!isAdValid) {
-      this.bridge?.interstitialAdapter_didAdShowFailed(new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+      this.bridge?.bridge_didAdShowFailed(new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
     }
     return isAdValid
   }
@@ -79,19 +79,19 @@ export class AdvGDTInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
       BYLog.debug(TAG + "插屏回调 - onAdExposure")
-      this.bridge?.interstitialAdapter_didAdShow()
+      this.bridge?.bridge_didAdShow()
     },
     onAdClick: (): void => {
       BYLog.debug(TAG + "插屏回调 - onAdClick")
-      this.bridge?.interstitialAdapter_didAdClick()
+      this.bridge?.bridge_didAdClick()
     },
     onAdClose: (): void => {
       BYLog.debug(TAG + `插屏回调 - onAdClose`)
-      this.bridge?.interstitialAdapter_didAdClose()
+      this.bridge?.bridge_didAdClose()
     },
     onError: (err: GDTError): void => {
       BYLog.debug(TAG + "插屏回调 - onShowError")
-      this.bridge?.interstitialAdapter_didAdShowFailed(new AdvanceError(err.code, err.message))
+      this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.message))
     }
   }
 

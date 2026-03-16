@@ -9,7 +9,7 @@ import { BYUtil } from '../../basic/BYUtil';
 import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import { BYSecurity } from '../../basic/BYSecurity';
 import { BYSetting } from '../../basic/BYSetting';
-import { AdvanceOption } from '../config/AdvanceOption';
+import { AdvanceRequestOption } from '../config/AdvanceOption';
 import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../define/AdvanceError';
 import { AdvanceConstant } from '../define/AdvanceConstant';
@@ -17,7 +17,7 @@ import { BYConstant } from '../../basic/BYConstant';
 import { AdvanceSetting } from '../config/AdvanceSetting';
 
 export class AdvanceRequestManger {
-  static async prepareReqAdData(adConfig: AdvanceOption): Promise<AdvanceReqModel> {
+  static async prepareReqAdData(adConfig: AdvanceRequestOption): Promise<AdvanceReqModel> {
     let req: AdvanceReqModel = new AdvanceReqModel
     try {
       req.version = AdvanceConstant.ADV_API_VERSION_NAME
@@ -126,7 +126,7 @@ export class AdvanceRequestManger {
 
 
   //获取聚合策略信息，无策略或者网络错误将回调失败
-  static async requestStrategy(adConfig: AdvanceOption,
+  static async requestStrategy(adConfig: AdvanceRequestOption,
     callBack?: (err?: AdvanceError, data?: AdvanceStrategyResponse) => void) {
 
     let hasResult = false

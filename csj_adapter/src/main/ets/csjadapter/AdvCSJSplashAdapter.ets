@@ -77,7 +77,7 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
             },
             onRenderFail: (code: number, message: string) => {
               BYLog.debug(TAG + "开屏回调 - onRenderFail")
-              this.bridge?.splashAdapter_didAdShowFailed(new AdvanceError(code, message))
+              this.bridge?.bridge_didAdShowFailed(new AdvanceError(code, message))
             },
 
           }, BYApp.getUIContext(), sup.timeout)
@@ -108,15 +108,15 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
   protected interactionListener: CSJSplashAdInteractionListener = {
     onDidShow: () => {
       BYLog.debug(TAG + "开屏回调 - onDidShow")
-      this.bridge?.splashAdapter_didAdShow()
+      this.bridge?.bridge_didAdShow()
     },
     onDidClose: (closeType: CSJSplashAdCloseType) => {
       BYLog.debug(TAG + `开屏回调 - onDidClose 关闭原因：${closeType}`)
-      this.bridge?.splashAdapter_didAdClose()
+      this.bridge?.bridge_didAdClose()
     },
     onDidClick: () => {
       BYLog.debug(TAG + "开屏回调 - onDidClick")
-      this.bridge?.splashAdapter_didAdClick()
+      this.bridge?.bridge_didAdClick()
     },
     onVideoDidPlayFinish: () => {
       BYLog.debug(TAG + "开屏回调 - onVideoDidPlayFinish")

@@ -2,7 +2,7 @@ import { router } from '@kit.ArkUI';
 import {
   AdvanceDislike,
   AdvanceError,
-  AdvanceOption,
+  AdvanceRequestOption,
   AdvanceAdInfo,
   AdvanceRenderFeedData,
   AdvanceRenderFeed,
@@ -36,7 +36,7 @@ export struct RenderFeed {
 
 
     //请求聚合广告
-    let op = new AdvanceOption(posId)
+    let op = new AdvanceRequestOption(posId)
     op.widthVP = 360
     let advNative = new AdvanceRenderFeed(op)
     let data: AdvanceRenderFeedData | undefined = undefined

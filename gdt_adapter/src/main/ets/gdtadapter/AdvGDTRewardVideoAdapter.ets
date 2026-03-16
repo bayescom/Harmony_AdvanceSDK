@@ -1,21 +1,23 @@
-import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener, GDTSplashAd } from '@gdt/gdt-union-sdk';
+import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
+  GDTRewardAd,
+  GDTVideoStateListener} from '@gdt/gdt-union-sdk';
 import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceAdnStatusResult,
   AdvanceError,
   ADV_ERR_DATA_NULL,
-  AdvanceSplashCommonAdapter,
   ADV_ERR_AD_Invalid_Expired,
   AdvanceAdLoadState,
+  AdvanceRewardVideoCommonAdapter,
 } from 'AdvanceSDK';
 import { AdvGDTUtil } from './AdvGDTUtil';
 
 
-const TAG = `[AdvGDTSplashAdapter]`
+const TAG = `[AdvGDTRewardVideoAdapter]`
 
-export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
-  protected gdt_ad?: GDTSplashAd
+export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
+  protected gdt_ad?: GDTRewardAd
 
   adapter_isAdValid(): boolean {
     const isAdValid = this.gdt_ad?.isValid() ?? false
@@ -37,18 +39,17 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
         let sup = this.unitData.supplier
         if (sup) {
           const config: GDTAdLoadConfig = {
-            posId: sup.adspotid,
-            timeoutMillis: sup.timeout
+            posId: sup.adspotid
           };
-          GDTAdSDK.getAdLoader().loadSplashAd(config, {
-            onAdLoad: (ad: GDTSplashAd): void => {
-              BYLog.debug(TAG + "开屏回调 - onAdLoaded")
+          GDTAdSDK.getAdLoader().loadRewardAd(config, {
+            onAdLoad: (ad: GDTRewardAd): void => {
+              BYLog.debug(TAG + " 激励视频 - onAdLoaded")
               this.gdt_ad = ad
               result.status = AdvanceAdLoadState.success
               resolve(result)
             },
             onError: (err: GDTError): void => {
-              BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+              BYLog.debug(TAG + `激励视频 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = err.code
               result.errMsg = err.message
@@ -73,25 +74,37 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
 
   adapter_showAd(windowStage: window.WindowStage) {
     this.gdt_ad?.setInteractionListener(this.interactionListener)
+    this.gdt_ad?.setVideoStateListener(this.videoStateListener)
     this.gdt_ad?.show(windowStage)
   }
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
-      BYLog.debug(TAG + "开屏回调 - onAdExposure")
+      BYLog.debug(TAG + "激励视频回调 - onAdExposure")
       this.bridge?.bridge_didAdShow()
     },
     onAdClick: (): void => {
-      BYLog.debug(TAG + "开屏回调 - onAdClick")
+      BYLog.debug(TAG + "激励视频回调 - onAdClick")
       this.bridge?.bridge_didAdClick()
     },
     onAdClose: (): void => {
-      BYLog.debug(TAG + `开屏回调 - onAdClose`)
+      BYLog.debug(TAG + `激励视频回调 - onAdClose`)
       this.bridge?.bridge_didAdClose()
     },
     onError: (err: GDTError): void => {
-      BYLog.debug(TAG + "开屏回调 - onShowError")
+      BYLog.debug(TAG + "激励视频回调 - onShowError")
       this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.message))
+    },
+    onReward: (map: Map<string, string>): void => {
+      BYLog.debug(TAG + "激励视频回调 - onReward")
+      this.bridge?.bridge_didAdReward()
+    },
+  }
+
+  videoStateListener: GDTVideoStateListener = {
+    onVideoComplete: (): void => {
+      BYLog.debug(TAG + "激励视频回调 - onVideoComplete")
+      this.bridge?.bridge_didAdPlayEnd()
     }
   }
 

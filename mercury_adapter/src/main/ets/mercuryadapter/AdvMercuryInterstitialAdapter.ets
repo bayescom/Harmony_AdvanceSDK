@@ -71,19 +71,19 @@ export class AdvMercuryInterstitialAdapter extends AdvanceInterstitialCommonAdap
     this.mercury_ad?.setRenderListener({
       onShow: (): void => {
         BYLog.debug(TAG + "插屏回调 - onAdExposure")
-        this.bridge?.interstitialAdapter_didAdShow()
+        this.bridge?.bridge_didAdShow()
       },
       onClick: (): void => {
         BYLog.debug(TAG + "插屏回调 - onAdClick")
-        this.bridge?.interstitialAdapter_didAdClick()
+        this.bridge?.bridge_didAdClick()
       },
       onRenderErr: (err: MercuryErr): void => {
         BYLog.debug(TAG + "插屏回调 - onShowError")
-        this.bridge?.interstitialAdapter_didAdShowFailed(new AdvanceError(err.code, err.msg))
+        this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.msg))
       },
       onClose: (type: MercuryCloseType): void => {
         BYLog.debug(TAG + `插屏回调 - onAdClose`)
-        this.bridge?.interstitialAdapter_didAdClose()
+        this.bridge?.bridge_didAdClose()
       }
     })
     let renOp = new MercuryRenderOption()

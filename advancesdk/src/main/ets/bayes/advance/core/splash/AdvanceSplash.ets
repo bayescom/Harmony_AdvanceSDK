@@ -3,12 +3,12 @@ import { AdvanceSplashListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
-import { AdvanceOption } from '../../config/AdvanceOption';
+import { AdvanceRequestOption } from '../../config/AdvanceOption';
 import { AdvanceSplashCommonAdapter } from '../adn/AdvanceSplashCommonAdapter';
 import { AdvanceError } from '../../../../../../../Index';
 
 export class AdvanceSplash extends AdvanceAdBase {
-  constructor(option: AdvanceOption) {
+  constructor(option: AdvanceRequestOption) {
     super(option)
     this.adSlotType = AdvanceAdType.splash
   }
@@ -18,21 +18,23 @@ export class AdvanceSplash extends AdvanceAdBase {
   protected override adnWin(): void {
     let adapter = this.getCurrentAdapter() as AdvanceSplashCommonAdapter
     adapter.setSplashAdapterBridge({
-      splashAdapter_didAdShow: () => {
+      bridge_didAdShow: () => {
         this.reportBestAdnShowTask()
         this.mListener?.onAdShow()
       },
-      splashAdapter_didAdShowFailed: (error: AdvanceError) => {
+      bridge_didAdShowFailed: (error: AdvanceError) => {
         this.reportBestAdnShowFailedTask(error)
-        this.mListener?.onAdShowFailed(error)
+        if (this.mListener?.onAdShowFailed) {
+          this.mListener?.onAdShowFailed(error)
+        }
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
       },
-      splashAdapter_didAdClick: () => {
+      bridge_didAdClick: () => {
         this.reportBestAdnClickTask()
         this.mListener?.onAdClick()
       },
-      splashAdapter_didAdClose: () => {
+      bridge_didAdClose: () => {
         this.mListener?.onAdClose()
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
@@ -54,7 +56,7 @@ export class AdvanceSplash extends AdvanceAdBase {
   }
 
   loadAd() {
-    super.loadStrategy()
+    this.loadStrategy()
   }
 
   showAd(windowStage?: window.WindowStage) {

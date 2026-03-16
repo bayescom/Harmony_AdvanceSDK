@@ -11,6 +11,7 @@ import {
 } from 'AdvanceSDK'
 import { MercuryAD } from 'mercuryadhar'
 import { AdvMercuryInterstitialAdapter } from './AdvMercuryInterstitialAdapter'
+import { AdvMercuryRewardVideoAdapter } from './AdvMercuryRewardVideoAdapter'
 import { AdvMercurySplashAdapter } from './AdvMercurySplashAdapter'
 
 const TAG = `[AdvMercuryUtil] `
@@ -22,6 +23,8 @@ export class AdvMercuryUtil {
         return new AdvMercurySplashAdapter(supData)
       case AdvanceAdType.interstitial:
         return new AdvMercuryInterstitialAdapter(supData)
+      case AdvanceAdType.rewardVideo:
+        return new AdvMercuryRewardVideoAdapter(supData)
       // case AdvanceAdType.nativeExpress:
       //   return new AdvCsjNativeExpressAdapter(supData)
       // case AdvanceAdType.selfRender:

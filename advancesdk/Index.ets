@@ -1,6 +1,7 @@
 export * from './src/main/ets/bayes/advance/AdvanceSDK'
 export * from './src/main/ets/bayes/advance/core/splash/AdvanceSplash'
 export * from './src/main/ets/bayes/advance/core/interstitial/AdvanceInterstital'
+export * from './src/main/ets/bayes/advance/core/rewardVideo/AdvanceRewardVideo'
 export * from './src/main/ets/bayes/advance/core/nativeExpress/AdvanceNativeExpress'
 export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceRenderFeed'
 export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceNativeCompliance'
@@ -10,12 +11,13 @@ export * from './src/main/ets/bayes/advance/define/AdvanceDefine'
 export * from './src/main/ets/bayes/advance/core/AdvanceDislike';
 export * from './src/main/ets/bayes/advance/define/AdvanceError';
 export * from './src/main/ets/bayes/advance/model/AdvanceAdInfo';
-export { AdvanceOption, AdvanceRenderOption } from './src/main/ets/bayes/advance/config/AdvanceOption';
+export { AdvanceRequestOption, AdvanceRenderOption } from './src/main/ets/bayes/advance/config/AdvanceOption';
 export * from './src/main/ets/bayes/advance/core/AdvanceAdOpenListener';
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceNativeExpressCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceRenderFeedCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceSplashCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceInterstitialCommonAdapter'
+export * from './src/main/ets/bayes/advance/core/adn/AdvanceRewardVideoCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonAdapter'
 export { AdvanceAdnStatusResult, AdvanceAdnInitResult} from './src/main/ets/bayes/advance/model/AdvanceSendModel'
 export { AdvanceConstant } from './src/main/ets/bayes/advance/define/AdvanceConstant'

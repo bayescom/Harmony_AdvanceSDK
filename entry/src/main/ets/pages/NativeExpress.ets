@@ -1,5 +1,5 @@
 import { logToast } from '../util/Toast';
-import { AdvanceDislike, AdvanceError, AdvanceNativeExpress, AdvanceOption, AdvanceAdInfo } from 'AdvanceSDK'
+import { AdvanceDislike, AdvanceError, AdvanceNativeExpress, AdvanceRequestOption, AdvanceAdInfo } from 'AdvanceSDK'
 import { router } from '@kit.ArkUI';
 import { AdInf, DemoUtil } from '../util/DemoUtil';
 
@@ -28,7 +28,7 @@ export struct NativeExpress {
 
 
     //请求聚合广告
-    let op = new AdvanceOption(posId)
+    let op = new AdvanceRequestOption(posId)
     op.widthVP = 390
     op.heightVP = 0
     let advFeed = new AdvanceNativeExpress(op)

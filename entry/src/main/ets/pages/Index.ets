@@ -31,7 +31,7 @@ struct Index {
       Button('激励视频广告')
         .width('100%')
         .onClick(() => {
-          // router.pushUrl({ url: "pages/Splash" })
+          router.pushUrl({ url: "pages/RewardVideo" })
         })
       Button('信息流广告（模版渲染）')
         .width('100%')

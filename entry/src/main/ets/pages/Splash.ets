@@ -1,5 +1,5 @@
 import {
-  AdvanceError, AdvanceOption, AdvanceSplash, AdvanceAdInfo
+  AdvanceError, AdvanceRequestOption, AdvanceSplash, AdvanceAdInfo
 } from 'AdvanceSDK'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -15,7 +15,7 @@ struct Splash {
     ['10014522', '开屏-优量汇'],
     ['10014526', '开屏-快手'],
   ];
-  @State splashAd?: AdvanceSplash = undefined
+  splashAd?: AdvanceSplash = undefined
 
   build() {
     Column({ space: 20 }) {
@@ -27,7 +27,7 @@ struct Splash {
       Button('加载广告')
         .width('100%')
         .onClick(() => {
-          let opt = new AdvanceOption(this.placementId)
+          let opt = new AdvanceRequestOption(this.placementId)
           this.splashAd = new AdvanceSplash(opt)
           this.splashAd.setAdListener({
             onAdLoaded: (adInfo: AdvanceAdInfo) => {

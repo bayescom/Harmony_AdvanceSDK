@@ -1,7 +1,7 @@
 import { window } from '@kit.ArkUI'
 
 
-export class AdvanceOption {
+export class AdvanceRequestOption {
   codeId: string
   widthVP :number = 0
   heightVP :number = 0

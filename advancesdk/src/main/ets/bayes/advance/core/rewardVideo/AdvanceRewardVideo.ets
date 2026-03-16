@@ -1,23 +1,23 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
-import { AdvanceInterstitialListener } from '../AdvanceAdOpenListener';
+import { AdvanceRewardVideoListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
 import { AdvanceRequestOption } from '../../config/AdvanceOption';
-import { AdvanceInterstitialCommonAdapter } from '../adn/AdvanceInterstitialCommonAdapter';
 import { AdvanceError } from '../../../../../../../Index';
+import { AdvanceRewardVideoCommonAdapter } from '../adn/AdvanceRewardVideoCommonAdapter';
 
-export class AdvanceInterstitial extends AdvanceAdBase {
+export class AdvanceRewardVideo extends AdvanceAdBase {
   constructor(option: AdvanceRequestOption) {
     super(option)
-    this.adSlotType = AdvanceAdType.interstitial
+    this.adSlotType = AdvanceAdType.rewardVideo
   }
 
-  protected mListener?: AdvanceInterstitialListener
+  protected mListener?: AdvanceRewardVideoListener
 
   protected override adnWin(): void {
-    let adapter = this.getCurrentAdapter() as AdvanceInterstitialCommonAdapter
-    adapter.setInterstitialAdapterBridge({
+    let adapter = this.getCurrentAdapter() as AdvanceRewardVideoCommonAdapter
+    adapter.setRewardVideoAdapterBridge({
       bridge_didAdShow: () => {
         this.reportBestAdnShowTask()
         this.mListener?.onAdShow()
@@ -38,11 +38,19 @@ export class AdvanceInterstitial extends AdvanceAdBase {
         this.mListener?.onAdClose()
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
+      },
+      bridge_didAdReward: () => {
+        this.mListener?.onAdReward()
+      },
+      bridge_didAdPlayEnd: () => {
+        if (this.mListener?.onAdPlayEnd) {
+          this.mListener?.onAdPlayEnd()
+        }
       }
     })
   }
 
-  setAdListener(listener: AdvanceInterstitialListener) {
+  setAdListener(listener: AdvanceRewardVideoListener) {
     this.loadListener = listener
     this.mListener = listener
   }
