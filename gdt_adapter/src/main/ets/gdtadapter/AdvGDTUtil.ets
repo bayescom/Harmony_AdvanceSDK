@@ -14,6 +14,7 @@ import { BusinessError } from '@kit.BasicServicesKit'
 import { AdvGDTSplashAdapter } from './AdvGDTSplashAdapter'
 import { AdvGDTInterstitialAdapter } from './AdvGDTInterstitialAdapter'
 import { AdvGDTRewardVideoAdapter } from './AdvGDTRewardVideoAdapter'
+import { AdvGDTBannerAdapter } from './AdvGDTBannerAdapter'
 
 const TAG = `[AdvGDTUtil] `
 
@@ -22,6 +23,8 @@ export class AdvGDTUtil {
     switch (supData.adType) {
       case AdvanceAdType.splash:
         return new AdvGDTSplashAdapter(supData)
+      case AdvanceAdType.banner:
+        return new AdvGDTBannerAdapter(supData)
       case AdvanceAdType.interstitial:
         return new AdvGDTInterstitialAdapter(supData)
       case AdvanceAdType.rewardVideo:

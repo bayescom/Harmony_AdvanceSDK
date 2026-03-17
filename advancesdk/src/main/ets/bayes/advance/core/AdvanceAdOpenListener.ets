@@ -20,12 +20,14 @@ export interface AdvanceAdLoadListener {
 // 各广告位通用的交互接口
 export interface AdvanceAdInteractionListener extends AdvanceAdLoadListener {
   onAdShow: () => void // 广告曝光成功
+  onAdShowFailed?: (error: AdvanceError) => void // 广告展示失败
   onAdClick: () => void // 广告点击
   onAdClose: () => void // 广告关闭
-  onAdShowFailed?: (error: AdvanceError) => void // 广告展示失败
 }
 
 export interface AdvanceSplashListener extends AdvanceAdInteractionListener {}
+
+export interface AdvanceBannerListener extends AdvanceAdInteractionListener {}
 
 export interface AdvanceInterstitialListener extends AdvanceAdInteractionListener {}
 

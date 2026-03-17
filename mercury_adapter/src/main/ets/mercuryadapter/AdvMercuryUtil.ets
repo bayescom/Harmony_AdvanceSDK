@@ -10,6 +10,7 @@ import {
   BYApp,
 } from 'AdvanceSDK'
 import { MercuryAD } from 'mercuryadhar'
+import { AdvMercuryBannerAdapter } from './AdvMercuryBannerAdapter'
 import { AdvMercuryInterstitialAdapter } from './AdvMercuryInterstitialAdapter'
 import { AdvMercuryRewardVideoAdapter } from './AdvMercuryRewardVideoAdapter'
 import { AdvMercurySplashAdapter } from './AdvMercurySplashAdapter'
@@ -21,6 +22,8 @@ export class AdvMercuryUtil {
     switch (supData.adType) {
       case AdvanceAdType.splash:
         return new AdvMercurySplashAdapter(supData)
+      case AdvanceAdType.banner:
+        return new AdvMercuryBannerAdapter(supData)
       case AdvanceAdType.interstitial:
         return new AdvMercuryInterstitialAdapter(supData)
       case AdvanceAdType.rewardVideo:

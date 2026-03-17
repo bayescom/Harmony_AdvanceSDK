@@ -1,6 +1,8 @@
 import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
-  GDTInterstitialAd} from '@gdt/gdt-union-sdk';
-import { window } from '@kit.ArkUI';
+  GDTBannerAd,
+  GDTAdSize,
+  GDTRenderListener} from '@gdt/gdt-union-sdk';
+import { NodeController } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceAdnStatusResult,
@@ -8,15 +10,17 @@ import {
   ADV_ERR_DATA_NULL,
   ADV_ERR_AD_Invalid_Expired,
   AdvanceAdLoadState,
-  AdvanceInterstitialCommonAdapter,
+  AdvanceBannerCommonAdapter,
+  BYConstant,
+  BYApp,
 } from 'AdvanceSDK';
 import { AdvGDTUtil } from './AdvGDTUtil';
 
 
-const TAG = `[AdvGDTInterstitialAdapter]`
+const TAG = `[AdvGDTBannerAdapter]`
 
-export class AdvGDTInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
-  protected gdt_ad?: GDTInterstitialAd
+export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
+  protected gdt_ad?: GDTBannerAd
 
   adapter_isAdValid(): boolean {
     const isAdValid = this.gdt_ad?.isValid() ?? false
@@ -36,19 +40,26 @@ export class AdvGDTInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
       if (initResult.success) { // 初始化成功
         //执行广告加载流程
         let sup = this.unitData.supplier
+        let width = this.unitData.ext?.vpWidth ?? 0
+        let height = this.unitData.ext?.vpHeight ?? 0
         if (sup) {
           const config: GDTAdLoadConfig = {
-            posId: sup.adspotid
+            posId: sup.adspotid,
+            adSize: new GDTAdSize(width, height)
           };
-          GDTAdSDK.getAdLoader().loadInterstitialAd(config, {
-            onAdLoad: (ad: GDTInterstitialAd): void => {
-              BYLog.debug(TAG + "插屏回调 - onAdLoaded")
+          GDTAdSDK.getAdLoader().loadBannerAd(config, {
+            onAdLoad: (ad: GDTBannerAd): void => {
+              BYLog.debug(TAG + "横幅回调 - onAdLoaded")
+              ad.setRefresh(0);
+              ad.setInteractionListener(this.interactionListener);
+              ad.setRenderListener(this.renderListener);
+              ad.render(BYConstant.windowStage, BYApp.getUIContext());
               this.gdt_ad = ad
               result.status = AdvanceAdLoadState.success
               resolve(result)
             },
             onError: (err: GDTError): void => {
-              BYLog.debug(TAG + `插屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+              BYLog.debug(TAG + `横幅回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = err.code
               result.errMsg = err.message
@@ -71,26 +82,35 @@ export class AdvGDTInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
     })
   }
 
-  adapter_showAd(windowStage: window.WindowStage) {
-    this.gdt_ad?.setInteractionListener(this.interactionListener)
-    this.gdt_ad?.show(windowStage)
+  adapter_getAdComponent(): NodeController | undefined {
+    return this.gdt_ad?.getAdComponent()
   }
+
+  protected renderListener: GDTRenderListener = {
+    onRenderSuccess: (): void => {
+      BYLog.debug(TAG + "横幅回调 - onAdRenderSuccess")
+    },
+    onRenderFail: (err: GDTError): void => {
+      BYLog.debug(TAG + "横幅回调 - onAdRenderFail")
+      this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.message))
+    }
+  };
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
-      BYLog.debug(TAG + "插屏回调 - onAdExposure")
+      BYLog.debug(TAG + "横幅回调 - onAdExposure")
       this.bridge?.bridge_didAdShow()
     },
     onAdClick: (): void => {
-      BYLog.debug(TAG + "插屏回调 - onAdClick")
+      BYLog.debug(TAG + "横幅回调 - onAdClick")
       this.bridge?.bridge_didAdClick()
     },
     onAdClose: (): void => {
-      BYLog.debug(TAG + `插屏回调 - onAdClose`)
+      BYLog.debug(TAG + `横幅回调 - onAdClose`)
       this.bridge?.bridge_didAdClose()
     },
     onError: (err: GDTError): void => {
-      BYLog.debug(TAG + "插屏回调 - onShowError")
+      BYLog.debug(TAG + "横幅回调 - onShowError")
       this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.message))
     }
   }

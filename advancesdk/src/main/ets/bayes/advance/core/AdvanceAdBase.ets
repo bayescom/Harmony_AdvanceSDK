@@ -113,8 +113,8 @@ export abstract class AdvanceAdBase {
             adnData.supplier = element
             adnData.ext = new AdvanceSupplierExt()
             //宽高属性值设置
-            adnData.ext.vpWidth = this.adOption.widthVP
-            adnData.ext.vpHeight = this.adOption.heightVP
+            adnData.ext.vpWidth = this.adOption.adWidth ?? 0
+            adnData.ext.vpHeight = this.adOption.adHeight ?? 0
             adnData.adType = this.adSlotType
             adnMap[element.priority] = adnData
             //生成用来加载广告adn的适配器，进行后续广告请求及展示操作

@@ -35,18 +35,21 @@ struct Splash {
             },
             onAdLoadFailed: (err: AdvanceError) => {
               logToast(`onAdLoadFailed, err: ${err.toString()}`)
+              this.splashAd = undefined
             },
             onAdShow: () => {
               logToast(`onAdShow`)
             },
             onAdShowFailed: (error: AdvanceError) => {
               logToast(`onAdShowFailed, err: ${error.toString()}`)
+              this.splashAd = undefined
             },
             onAdClick: () => {
               logToast(`onAdClick`)
             },
             onAdClose: () => {
               // logToast(`onAdClose`)
+              this.splashAd = undefined
             },
           })
           this.splashAd.loadAd()

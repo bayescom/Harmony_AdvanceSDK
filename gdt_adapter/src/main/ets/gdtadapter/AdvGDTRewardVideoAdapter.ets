@@ -43,7 +43,7 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
           };
           GDTAdSDK.getAdLoader().loadRewardAd(config, {
             onAdLoad: (ad: GDTRewardAd): void => {
-              BYLog.debug(TAG + " 激励视频 - onAdLoaded")
+              BYLog.debug(TAG + "激励视频 - onAdLoaded")
               this.gdt_ad = ad
               result.status = AdvanceAdLoadState.success
               resolve(result)

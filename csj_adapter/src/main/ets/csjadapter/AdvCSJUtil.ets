@@ -10,6 +10,7 @@ import {
   AdvanceAdnInitState,
   BYSetting
 } from 'AdvanceSDK'
+import { AdvCSJBannerAdapter } from './AdvCSJBannerAdapter'
 import { AdvCSJInterstitialAdapter } from './AdvCSJInterstitialAdapter'
 import { AdvCsjNativeExpressAdapter } from './AdvCsjNativeExpressAdapter'
 import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
@@ -23,6 +24,8 @@ export class AdvCSJUtil {
     switch (supData.adType) {
       case AdvanceAdType.splash:
         return new AdvCSJSplashAdapter(supData)
+      case AdvanceAdType.banner:
+        return new AdvCSJBannerAdapter(supData)
       case AdvanceAdType.interstitial:
         return new AdvCSJInterstitialAdapter(supData)
       case AdvanceAdType.rewardVideo:

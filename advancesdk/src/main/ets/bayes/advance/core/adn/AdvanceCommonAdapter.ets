@@ -19,7 +19,7 @@ export abstract class AdvanceCommonAdapter {
 
   adapter_showAd(windowStage: window.WindowStage) {} // 默认实现
 
-  adapter_getAdComponent(): NodeController | undefined {
+  adapter_getAdComponent(): NodeController | undefined { // for banner
     return undefined
   }
 

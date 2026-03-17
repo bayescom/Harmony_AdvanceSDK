@@ -1,70 +1,63 @@
 import {
-  AdvanceError, AdvanceRequestOption, AdvanceInterstitial, AdvanceAdInfo
+  AdvanceError, AdvanceRequestOption, AdvanceBanner, AdvanceAdInfo
 } from 'AdvanceSDK'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
-import { logToast, toast } from '../util/Toast'
+import { logToast } from '../util/Toast'
 
 @Entry
 @Component
-struct Interstitial {
-  @State placementId: string = '10014593' // mercury
+struct Banner {
+  @State placementId: string = '10014620' // mercury
   private readonly placementIdArr: Array<[string, string]> = [
-    ['10014593', '插屏-倍业'],
-    ['10014592', '插屏-穿山甲'],
-    ['10014591', '插屏-优量汇'],
-    ['10014594', '插屏-快手'],
+    ['10014620', '横幅-倍业'],
+    ['10014622', '横幅-穿山甲'],
+    ['10014618', '横幅-优量汇'],
   ];
-  interstitialAd?: AdvanceInterstitial = undefined
+  @State bannerAd?: AdvanceBanner = undefined
 
   build() {
     Column({ space: 20 }) {
-      PageTitleView({title: '插屏广告'})
+      PageTitleView({title: 'Banner广告'})
       PosIdSelector({
         posId: this.placementId,
         posIdArr: this.placementIdArr,
       })
-      Button('加载广告')
+      Button('加载并展示广告')
         .width('100%')
         .onClick(() => {
-          let opt = new AdvanceRequestOption(this.placementId)
-          this.interstitialAd = new AdvanceInterstitial(opt)
-          this.interstitialAd.setAdListener({
+          let opt = new AdvanceRequestOption(this.placementId, 375, 120)
+          this.bannerAd = new AdvanceBanner(opt)
+          this.bannerAd.setAdListener({
             onAdLoaded: (adInfo: AdvanceAdInfo) => {
               logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
             },
             onAdLoadFailed: (err: AdvanceError) => {
               logToast(`onAdLoadFailed, err: ${err.toString()}`)
-              this.interstitialAd = undefined
+              this.bannerAd = undefined
             },
             onAdShow: () => {
               logToast(`onAdShow`)
             },
             onAdShowFailed: (error: AdvanceError) => {
               logToast(`onAdShowFailed, err: ${error.toString()}`)
-              this.interstitialAd = undefined
+              this.bannerAd = undefined
             },
             onAdClick: () => {
               logToast(`onAdClick`)
             },
             onAdClose: () => {
               // logToast(`onAdClose`)
-              this.interstitialAd = undefined
+              this.bannerAd = undefined
             },
           })
-          this.interstitialAd.loadAd()
+          this.bannerAd.loadAd()
         })
-      Button('展示广告')
-        .width('100%')
-        .onClick(() => {
-          if (!this.interstitialAd) {
-            toast(`请先请求广告`)
-            return
-          }
-          if (this.interstitialAd.isAdValid()) {
-            this.interstitialAd.showAd()
-          }
-        })
+      if (this.bannerAd?.isAdValid()) {
+        NodeContainer(this.bannerAd?.getAdComponent())
+          .width(this.bannerAd?.getAcceptWidth())
+          .height(this.bannerAd?.getAcceptHeight())
+      }
     }.width('100%')
     .padding({
       top: 10,

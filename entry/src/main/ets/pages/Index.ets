@@ -21,7 +21,7 @@ struct Index {
       Button('横幅广告')
         .width('100%')
         .onClick(() => {
-          // router.pushUrl({ url: "pages/Splash" })
+          router.pushUrl({ url: "pages/Banner" })
         })
       Button('插屏广告')
         .width('100%')

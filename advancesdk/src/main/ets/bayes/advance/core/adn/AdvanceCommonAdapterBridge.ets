@@ -9,6 +9,8 @@ export interface AdvanceCommonAdapterBridge {
 }
 export interface AdvanceSplashAdapterBridge extends AdvanceCommonAdapterBridge {}
 
+export interface AdvanceBannerAdapterBridge extends AdvanceCommonAdapterBridge {}
+
 export interface AdvanceInterstitialAdapterBridge extends AdvanceCommonAdapterBridge {}
 
 export interface AdvanceRewardVideoAdapterBridge extends AdvanceCommonAdapterBridge {

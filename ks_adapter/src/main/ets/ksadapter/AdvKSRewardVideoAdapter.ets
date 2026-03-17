@@ -87,7 +87,6 @@ export class AdvKSRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
         },
         onAdClose() {
           BYLog.debug(TAG + `激励视频回调 - onAdClose`)
-          BYWindowUtil.destroySubWindow()
           that.bridge?.bridge_didAdClose()
         },
         onRewardVerify() {

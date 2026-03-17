@@ -3,11 +3,13 @@ import { window } from '@kit.ArkUI'
 
 export class AdvanceRequestOption {
   codeId: string
-  widthVP :number = 0
-  heightVP :number = 0
+  adWidth? :number// 单位：vp
+  adHeight? :number // 单位: vp
 
-  constructor(codeId: string) {
+  constructor(codeId: string, adWidth?: number, adHeight?: number) {
     this.codeId = codeId
+    this.adWidth = adWidth
+    this.adHeight = adHeight
   }
 }
 

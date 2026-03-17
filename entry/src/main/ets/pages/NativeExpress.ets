@@ -29,8 +29,8 @@ export struct NativeExpress {
 
     //请求聚合广告
     let op = new AdvanceRequestOption(posId)
-    op.widthVP = 390
-    op.heightVP = 0
+    op.adWidth = 390
+    op.adHeight = 0
     let advFeed = new AdvanceNativeExpress(op)
     advFeed.setListener({
       onAdShow: (): void => {

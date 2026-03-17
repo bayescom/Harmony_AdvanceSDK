@@ -35,18 +35,21 @@ struct Interstitial {
             },
             onAdLoadFailed: (err: AdvanceError) => {
               logToast(`onAdLoadFailed, err: ${err.toString()}`)
+              this.rewardVideoAd = undefined
             },
             onAdShow: () => {
               logToast(`onAdShow`)
             },
             onAdShowFailed: (error: AdvanceError) => {
               logToast(`onAdShowFailed, err: ${error.toString()}`)
+              this.rewardVideoAd = undefined
             },
             onAdClick: () => {
               logToast(`onAdClick`)
             },
             onAdClose: () => {
               // logToast(`onAdClose`)
+              this.rewardVideoAd = undefined
             },
             onAdReward: () => {
               logToast(`onAdReward`)

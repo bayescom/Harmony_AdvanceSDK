@@ -37,7 +37,7 @@ export struct RenderFeed {
 
     //请求聚合广告
     let op = new AdvanceRequestOption(posId)
-    op.widthVP = 360
+    op.adWidth = 360
     let advNative = new AdvanceRenderFeed(op)
     let data: AdvanceRenderFeedData | undefined = undefined
     advNative.setListener({

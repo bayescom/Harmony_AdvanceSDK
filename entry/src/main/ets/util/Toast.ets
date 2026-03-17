@@ -6,7 +6,8 @@ export function toast(message: string | Resource) {
     const bottom = WindowUtils.windowHeight > 0 ? (WindowUtils.windowHeight / 2 + 'px') : undefined;
     promptAction.showToast({
       message: message,
-      bottom: bottom
+      // bottom: bottom,
+      alignment: Alignment.Center
     })
   }
 }
