@@ -1,5 +1,5 @@
 import {
-  AdvanceError, AdvanceRequestOption, AdvanceBanner, AdvanceAdInfo
+  AdvanceError, AdvanceAdLoadConfig, AdvanceBanner, AdvanceAdInfo
 } from 'AdvanceSDK'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -18,7 +18,7 @@ struct Banner {
 
   build() {
     Column({ space: 20 }) {
-      PageTitleView({title: 'Banner广告'})
+      PageTitleView({title: '横幅广告'})
       PosIdSelector({
         posId: this.placementId,
         posIdArr: this.placementIdArr,
@@ -26,8 +26,12 @@ struct Banner {
       Button('加载并展示广告')
         .width('100%')
         .onClick(() => {
-          let opt = new AdvanceRequestOption(this.placementId, 375, 120)
-          this.bannerAd = new AdvanceBanner(opt)
+          let config: AdvanceAdLoadConfig = {
+            placementId: this.placementId,
+            adWidth: 375,
+            adHeight: 120
+          }
+          this.bannerAd = new AdvanceBanner(config)
           this.bannerAd.setAdListener({
             onAdLoaded: (adInfo: AdvanceAdInfo) => {
               logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)

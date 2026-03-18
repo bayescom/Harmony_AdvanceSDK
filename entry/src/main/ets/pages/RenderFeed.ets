@@ -2,7 +2,7 @@ import { router } from '@kit.ArkUI';
 import {
   AdvanceDislike,
   AdvanceError,
-  AdvanceRequestOption,
+  AdvanceAdLoadConfig,
   AdvanceAdInfo,
   AdvanceRenderFeedData,
   AdvanceRenderFeed,
@@ -36,9 +36,11 @@ export struct RenderFeed {
 
 
     //请求聚合广告
-    let op = new AdvanceRequestOption(posId)
-    op.adWidth = 360
-    let advNative = new AdvanceRenderFeed(op)
+    let config: AdvanceAdLoadConfig = {
+      placementId: posId,
+      adWidth: 390
+    }
+    let advNative = new AdvanceRenderFeed(config)
     let data: AdvanceRenderFeedData | undefined = undefined
     advNative.setListener({
       onAdShow: (): void => {

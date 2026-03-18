@@ -1,7 +1,6 @@
 import { AdvanceADNUnitData } from './AdvanceADNUnitData';
 import { NodeController, window } from '@kit.ArkUI';
 import { AdvanceAdnStatusResult } from '../../model/AdvanceSendModel';
-import { AdvanceRenderOption } from '../../config/AdvanceOption';
 
 export abstract class AdvanceCommonAdapter {
   //渠道参数

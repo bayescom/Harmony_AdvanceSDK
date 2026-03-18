@@ -9,7 +9,7 @@ import { BYUtil } from '../../basic/BYUtil';
 import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import { BYSecurity } from '../../basic/BYSecurity';
 import { BYSetting } from '../../basic/BYSetting';
-import { AdvanceRequestOption } from '../config/AdvanceOption';
+import { AdvanceAdLoadConfig } from '../config/AdvanceAdConfig';
 import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyResponse } from '../model/AdvanceNetModel';
 import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../define/AdvanceError';
 import { AdvanceConstant } from '../define/AdvanceConstant';
@@ -17,7 +17,7 @@ import { BYConstant } from '../../basic/BYConstant';
 import { AdvanceSetting } from '../config/AdvanceSetting';
 
 export class AdvanceRequestManger {
-  static async prepareReqAdData(adConfig: AdvanceRequestOption): Promise<AdvanceReqModel> {
+  static async prepareReqAdData(adConfig: AdvanceAdLoadConfig): Promise<AdvanceReqModel> {
     let req: AdvanceReqModel = new AdvanceReqModel
     try {
       req.version = AdvanceConstant.ADV_API_VERSION_NAME
@@ -26,7 +26,7 @@ export class AdvanceRequestManger {
       req.time = systemDateTime.getTime(false) + ""
       let appid = AdvanceSetting.get().appId
       req.appid = appid
-      req.adspotid = adConfig.codeId
+      req.adspotid = adConfig.placementId
       let bundleInfo =
         await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION)
       req.appver = bundleInfo.versionName;
@@ -126,7 +126,7 @@ export class AdvanceRequestManger {
 
 
   //获取聚合策略信息，无策略或者网络错误将回调失败
-  static async requestStrategy(adConfig: AdvanceRequestOption,
+  static async requestStrategy(adConfig: AdvanceAdLoadConfig,
     callBack?: (err?: AdvanceError, data?: AdvanceStrategyResponse) => void) {
 
     let hasResult = false

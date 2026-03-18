@@ -2,12 +2,12 @@ import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceBannerListener } from '../AdvanceAdOpenListener';
 import { NodeController, window } from '@kit.ArkUI';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
-import { AdvanceRequestOption } from '../../config/AdvanceOption';
+import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceBannerCommonAdapter } from '../adn/AdvanceBannerCommonAdapter';
 import { AdvanceError } from '../../../../../../../Index';
 
 export class AdvanceBanner extends AdvanceAdBase {
-  constructor(option: AdvanceRequestOption) {
+  constructor(option: AdvanceAdLoadConfig) {
     super(option)
     this.adSlotType = AdvanceAdType.banner
   }
@@ -63,11 +63,11 @@ export class AdvanceBanner extends AdvanceAdBase {
   }
 
   getAcceptWidth(): number {
-    return this.adOption.adWidth ?? 0
+    return this.adConfig.adWidth ?? 0
   }
 
   getAcceptHeight(): number {
-    return this.adOption.adHeight ?? 0
+    return this.adConfig.adHeight ?? 0
   }
 
 }

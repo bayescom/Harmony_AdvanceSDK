@@ -1,5 +1,5 @@
 import { BYLog } from '../../basic/BYLog'
-import { AdvanceRequestOption, AdvanceRenderOption } from '../config/AdvanceOption'
+import { AdvanceAdLoadConfig } from '../config/AdvanceAdConfig'
 import { AdvanceADNUnitData, AdvanceSupplierExt } from './adn/AdvanceADNUnitData'
 import {
   AdvanceError,
@@ -17,7 +17,7 @@ import { taskpool } from '@kit.ArkTS'
 import { AdvanceAdnStatusResult } from '../model/AdvanceSendModel'
 import AdvanceNet from '../net/AdvanceRequest'
 import { BYStrUtil } from '../../basic/util/BYStrUtil'
-import { AdvanceADNManger } from './adn/AdvanceADNManger'
+import { AdvanceADNManager } from './adn/AdvanceADNManager'
 import { AdvanceConstant } from '../define/AdvanceConstant'
 import { AdvanceUtil } from './AdvanceUtil'
 import { BYConstant } from '../../basic/BYConstant'
@@ -28,7 +28,7 @@ import { AdvanceAdLoadState } from '../../../../../../Index'
 const TAG = `[AdvanceAdBase] `
 
 export abstract class AdvanceAdBase {
-  protected adOption: AdvanceRequestOption
+  protected adConfig: AdvanceAdLoadConfig
   protected loadListener ?: AdvanceAdLoadListener
   protected adSlotType: number = 0
   protected paraTimeOut: number = AdvanceConstant.ADV_PARA_GROUP_TIMEOUT //组超时时间，单位毫秒
@@ -45,9 +45,10 @@ export abstract class AdvanceAdBase {
 
   protected abstract adnWin()
 
-  constructor(option: AdvanceRequestOption) {
-    this.adOption = option
+  constructor(config: AdvanceAdLoadConfig) {
+    this.adConfig = config
   }
+
 
   protected loadStrategy(): void {
     try {
@@ -59,7 +60,7 @@ export abstract class AdvanceAdBase {
         return
       }
 
-      AdvanceRequestManger.requestStrategy(this.adOption, (err, data) => {
+      AdvanceRequestManger.requestStrategy(this.adConfig, (err, data) => {
         if (err) {
           BYLog.error(TAG + err.msg)
           this.loadListener?.onAdLoadFailed(err)
@@ -113,12 +114,12 @@ export abstract class AdvanceAdBase {
             adnData.supplier = element
             adnData.ext = new AdvanceSupplierExt()
             //宽高属性值设置
-            adnData.ext.vpWidth = this.adOption.adWidth ?? 0
-            adnData.ext.vpHeight = this.adOption.adHeight ?? 0
+            adnData.ext.vpWidth = this.adConfig.adWidth ?? 0
+            adnData.ext.vpHeight = this.adConfig.adHeight ?? 0
             adnData.adType = this.adSlotType
             adnMap[element.priority] = adnData
             //生成用来加载广告adn的适配器，进行后续广告请求及展示操作
-            let adapter = await AdvanceADNManger.generateAdnAdapter(adnData)
+            let adapter = await AdvanceADNManager.generateAdnAdapter(adnData)
             //添加元素
             if (adapter) {
               this.adapterMap?.set(element.priority, adapter)

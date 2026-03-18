@@ -12,7 +12,7 @@ export * from './src/main/ets/bayes/advance/define/AdvanceDefine'
 export * from './src/main/ets/bayes/advance/core/AdvanceDislike';
 export * from './src/main/ets/bayes/advance/define/AdvanceError';
 export * from './src/main/ets/bayes/advance/model/AdvanceAdInfo';
-export { AdvanceRequestOption, AdvanceRenderOption } from './src/main/ets/bayes/advance/config/AdvanceOption';
+export { AdvanceAdLoadConfig } from './src/main/ets/bayes/advance/config/AdvanceAdConfig';
 export * from './src/main/ets/bayes/advance/core/AdvanceAdOpenListener';
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceNativeExpressCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceRenderFeedCommonAdapter'

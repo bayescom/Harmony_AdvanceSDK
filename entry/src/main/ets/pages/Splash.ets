@@ -1,5 +1,5 @@
 import {
-  AdvanceError, AdvanceRequestOption, AdvanceSplash, AdvanceAdInfo
+  AdvanceError, AdvanceSplash, AdvanceAdInfo, AdvanceAdLoadConfig
 } from 'AdvanceSDK'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -27,8 +27,10 @@ struct Splash {
       Button('加载广告')
         .width('100%')
         .onClick(() => {
-          let opt = new AdvanceRequestOption(this.placementId)
-          this.splashAd = new AdvanceSplash(opt)
+          let config: AdvanceAdLoadConfig = {
+            placementId: this.placementId,
+          }
+          this.splashAd = new AdvanceSplash(config)
           this.splashAd.setAdListener({
             onAdLoaded: (adInfo: AdvanceAdInfo) => {
               logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)

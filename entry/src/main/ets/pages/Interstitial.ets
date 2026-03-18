@@ -1,5 +1,5 @@
 import {
-  AdvanceError, AdvanceRequestOption, AdvanceInterstitial, AdvanceAdInfo
+  AdvanceError, AdvanceAdLoadConfig, AdvanceInterstitial, AdvanceAdInfo
 } from 'AdvanceSDK'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -27,8 +27,10 @@ struct Interstitial {
       Button('加载广告')
         .width('100%')
         .onClick(() => {
-          let opt = new AdvanceRequestOption(this.placementId)
-          this.interstitialAd = new AdvanceInterstitial(opt)
+          let config: AdvanceAdLoadConfig = {
+            placementId: this.placementId,
+          }
+          this.interstitialAd = new AdvanceInterstitial(config)
           this.interstitialAd.setAdListener({
             onAdLoaded: (adInfo: AdvanceAdInfo) => {
               logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)

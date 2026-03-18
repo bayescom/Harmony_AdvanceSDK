@@ -3,13 +3,13 @@ import { AdvanceSplashListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
-import { AdvanceRequestOption } from '../../config/AdvanceOption';
+import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceSplashCommonAdapter } from '../adn/AdvanceSplashCommonAdapter';
 import { AdvanceError } from '../../../../../../../Index';
 
 export class AdvanceSplash extends AdvanceAdBase {
-  constructor(option: AdvanceRequestOption) {
-    super(option)
+  constructor(config: AdvanceAdLoadConfig) {
+    super(config)
     this.adSlotType = AdvanceAdType.splash
   }
 

@@ -1,4 +1,4 @@
-import { AdvanceRenderOption, AdvanceNativeExpressCommonAdapter, AdvanceAdnStatusResult, BYLog, BYDisplay,
+import { AdvanceNativeExpressCommonAdapter, AdvanceAdnStatusResult, BYLog, BYDisplay,
   ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD, AdvanceDislike,
   AdvanceAdLoadState } from 'AdvanceSDK';
 import { NodeController, UIContext, window } from '@kit.ArkUI';

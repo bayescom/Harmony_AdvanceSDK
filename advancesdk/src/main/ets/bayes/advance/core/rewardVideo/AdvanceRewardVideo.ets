@@ -3,12 +3,12 @@ import { AdvanceRewardVideoListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
-import { AdvanceRequestOption } from '../../config/AdvanceOption';
+import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceError } from '../../../../../../../Index';
 import { AdvanceRewardVideoCommonAdapter } from '../adn/AdvanceRewardVideoCommonAdapter';
 
 export class AdvanceRewardVideo extends AdvanceAdBase {
-  constructor(option: AdvanceRequestOption) {
+  constructor(option: AdvanceAdLoadConfig) {
     super(option)
     this.adSlotType = AdvanceAdType.rewardVideo
   }
