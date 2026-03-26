@@ -8,10 +8,11 @@ import {
   AdvanceAdnInitState,
   BYConstant,
   BYApp,
-} from 'AdvanceSDK'
+} from 'advancesdk'
 import { MercuryAD } from 'mercuryadhar'
 import { AdvMercuryBannerAdapter } from './AdvMercuryBannerAdapter'
 import { AdvMercuryInterstitialAdapter } from './AdvMercuryInterstitialAdapter'
+import { AdvMercuryNativeExpressAdapter } from './AdvMercuryNativeExpressAdapter'
 import { AdvMercuryRewardVideoAdapter } from './AdvMercuryRewardVideoAdapter'
 import { AdvMercurySplashAdapter } from './AdvMercurySplashAdapter'
 
@@ -28,8 +29,8 @@ export class AdvMercuryUtil {
         return new AdvMercuryInterstitialAdapter(supData)
       case AdvanceAdType.rewardVideo:
         return new AdvMercuryRewardVideoAdapter(supData)
-      // case AdvanceAdType.nativeExpress:
-      //   return new AdvCsjNativeExpressAdapter(supData)
+      case AdvanceAdType.nativeExpress:
+        return new AdvMercuryNativeExpressAdapter(supData)
       // case AdvanceAdType.selfRender:
       //   return new AdvCsjRenderFeedAdapter(supData)
       default:

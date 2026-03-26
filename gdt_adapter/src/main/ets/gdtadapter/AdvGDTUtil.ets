@@ -8,13 +8,14 @@ import {
   AdvanceAdType,
   BYConstant,
   AdvanceAdnInitState
-} from 'AdvanceSDK'
+} from 'advancesdk'
 
 import { BusinessError } from '@kit.BasicServicesKit'
 import { AdvGDTSplashAdapter } from './AdvGDTSplashAdapter'
 import { AdvGDTInterstitialAdapter } from './AdvGDTInterstitialAdapter'
 import { AdvGDTRewardVideoAdapter } from './AdvGDTRewardVideoAdapter'
 import { AdvGDTBannerAdapter } from './AdvGDTBannerAdapter'
+import { AdvGDTNativeExpressAdapter } from './AdvGDTNativeExpressAdapter'
 
 const TAG = `[AdvGDTUtil] `
 
@@ -29,8 +30,8 @@ export class AdvGDTUtil {
         return new AdvGDTInterstitialAdapter(supData)
       case AdvanceAdType.rewardVideo:
         return new AdvGDTRewardVideoAdapter(supData)
-      // case AdvanceAdType.nativeExpress:
-      //   return new AdvCsjNativeExpressAdapter(supData)
+      case AdvanceAdType.nativeExpress:
+        return new AdvGDTNativeExpressAdapter(supData)
       // case AdvanceAdType.selfRender:
       //   return new AdvCsjRenderFeedAdapter(supData)
       default:

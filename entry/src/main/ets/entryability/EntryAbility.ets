@@ -1,7 +1,7 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
-import { AdvanceSDK } from 'AdvanceSDK';
+import { AdvanceSDK } from 'advancesdk';
 import WindowUtils from '../util/WindowUtils';
 
 export default class EntryAbility extends UIAbility {

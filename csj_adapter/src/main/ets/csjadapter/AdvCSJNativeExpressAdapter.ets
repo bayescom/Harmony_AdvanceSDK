@@ -1,29 +1,17 @@
-import {
-  BYLog,
-  AdvanceAdnStatusResult,
-  ADV_ERR_DATA_NULL,
-  AdvanceAdLoadState,
-  AdvanceBannerCommonAdapter,
-  AdvanceError,
-} from 'advancesdk';
-import {
-  AdSlotBuilder, CSJAdCreator, CSJAdSdk,
+import { AdvanceNativeExpressCommonAdapter, AdvanceAdnStatusResult, BYLog, BYDisplay,
+  ADV_ERR_DATA_NULL, AdvanceAdLoadState, AdvanceError} from 'advancesdk';
+import { NodeController, UIContext } from '@kit.ArkUI';
+import { AdvCSJUtil } from './AdvCSJUtil';
+import { AdSlotBuilder, CSJAdCreator, CSJAdSdk,
   CSJDislikeInteractionCallback,
   CSJNativeExpressAd,
-  ExpressAdInteractionListener,
-} from '@csj/openadsdk';
-import { AdvCSJUtil } from './AdvCSJUtil';
+  ExpressAdInteractionListener } from '@csj/openadsdk';
 import { ArrayList } from '@kit.ArkTS';
-import { NodeController } from '@kit.ArkUI';
 
-const TAG = `[AdvCSJBannerAdapter]`
+const TAG = `[AdvCSJNativeExpressAdapter] `
 
-export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
+export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter {
   protected csj_ad?: CSJNativeExpressAd
-
-  adapter_isAdValid(): boolean {
-    return true
-  }
 
   adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
     BYLog.debug(TAG + ` adapter_loadAd start`)
@@ -37,17 +25,25 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
         let sup = this.unitData.supplier
         let width = this.unitData.ext?.vpWidth ?? 0
         let height = this.unitData.ext?.vpHeight ?? 0
+        //未配置的话取屏幕宽
+        if (width <= 0) {
+          width = BYDisplay.px2VP(BYDisplay.getScreenWPX())
+        }
+        //高度0代表自适应
+        if (height <= 0) {
+          height = 0
+        }
         let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
 
         if (sup) {
           let adSlot = new AdSlotBuilder()
             .setCodeId(sup.adspotid)
             .setAcceptSize(width, height)
-            .setAdCount(1)
             .build()
-          mAdCreator.loadBannerAd(adSlot, {
+
+          mAdCreator.loadExpressFeedAd(adSlot, {
             onError: (code: number, message: string) => {
-              BYLog.debug(TAG + `横幅回调 - onAdLoadFailed code: ${code} message: ${message}`)
+              BYLog.debug(TAG + `模板信息流回调 - onAdLoadFailed code: ${code} message: ${message}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = code
               result.errMsg = message
@@ -55,7 +51,7 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
             },
             onNativeExpressAdLoad: (ads: ArrayList<CSJNativeExpressAd>) => {
               if (ads && ads.length > 0) {
-                BYLog.debug(TAG + "横幅回调 - onAdLoaded")
+                BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
                 this.csj_ad = ads[0]
                 result.status = AdvanceAdLoadState.success
                 resolve(result)
@@ -84,7 +80,7 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
     })
   }
 
-  adapter_render(context: UIContext): void {
+  adapter_render(context: UIContext) {
     this.csj_ad?.setExpressInteractionListener(this.interactionListener)
     this.csj_ad?.setDislikeCallback(this.dislikeCallback)
     this.csj_ad?.render(context)
@@ -96,18 +92,19 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
 
   protected interactionListener: ExpressAdInteractionListener = {
     onRenderSuccess: (width: number, height: number) => {
-      BYLog.debug(TAG + "横幅回调 - onAdRenderSuccess")
+      BYLog.debug(TAG + "模板信息流回调 - onAdRenderSuccess")
+      this.bridge?.bridge_didAdRenderSuccess()
     },
     onRenderFail: (code: number, msg: string) => {
-      BYLog.debug(TAG + "横幅回调 - onAdRenderFail")
-      this.bridge?.bridge_didAdShowFailed(new AdvanceError(code, msg))
+      BYLog.debug(TAG + "模板信息流回调 - onAdRenderFail")
+      this.bridge?.bridge_didAdRenderFail(new AdvanceError(code, msg))
     },
     onAdShow: (type: number) => {
-      BYLog.debug(TAG + "横幅回调 - onAdExposure")
+      BYLog.debug(TAG + "模板信息流回调 - onAdExposure")
       this.bridge?.bridge_didAdShow()
     },
     onAdClicked: (type: number) => {
-      BYLog.debug(TAG + "横幅回调 - onAdClick")
+      BYLog.debug(TAG + "模板信息流回调 - onAdClick")
       this.bridge?.bridge_didAdClick()
     }
   }
@@ -121,7 +118,7 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
      * @param enforceRemove 是否强制关闭广告
      */
     onSelected: (position: number, value: string, enforceRemove: boolean) => {
-      BYLog.debug(TAG + `横幅回调 - onAdClose`)
+      BYLog.debug(TAG + `模板信息流回调 - onAdClose`)
       this.bridge?.bridge_didAdClose()
     },
     onCancel: () => {

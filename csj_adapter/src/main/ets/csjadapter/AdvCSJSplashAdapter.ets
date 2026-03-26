@@ -8,7 +8,7 @@ import {
   AdvanceSplashCommonAdapter,
   BYApp,
   AdvanceAdLoadState,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import {
   AdSlotBuilder,
   CSJAdCreator,

@@ -1,5 +1,5 @@
 import { AdvanceRenderFeedCommonAdapter, AdvanceAdnStatusResult, AdvanceRenderFeedData, BYLog, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD, BYDisplay, AdvanceDislike,
-  AdvanceAdLoadState } from 'AdvanceSDK';
+  AdvanceAdLoadState } from 'advancesdk';
 import { NodeController, window } from '@kit.ArkUI';
 import { AdSlot, AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJFeedAd, CSJNativeAd } from '@csj/openadsdk';
 import { AdvCSJUtil } from './AdvCSJUtil';

@@ -1,13 +1,11 @@
-import { AdvanceNativeExpressListener } from '../AdvanceAdOpenListener'
 import { AdvanceCommonAdapter } from './AdvanceCommonAdapter'
+import { AdvanceNativeExpressAdapterBridge } from './AdvanceCommonAdapterBridge'
 
 export abstract class AdvanceNativeExpressCommonAdapter extends AdvanceCommonAdapter {
-  feedListener?: AdvanceNativeExpressListener
+  bridge?: AdvanceNativeExpressAdapterBridge
 
-  setFeedListener(feedListener: AdvanceNativeExpressListener) {
-    this.feedListener = feedListener
-    // this.baseListener = feedListener
+  setNativeExpressAdapterBridge(bridge: AdvanceNativeExpressAdapterBridge) {
+    this.bridge = bridge
   }
 
-  abstract render(context: UIContext)
 }

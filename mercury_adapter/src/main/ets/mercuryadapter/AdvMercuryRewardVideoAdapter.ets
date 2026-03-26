@@ -7,7 +7,7 @@ import {
   AdvanceAdLoadState,
   BYApp,
   AdvanceRewardVideoCommonAdapter,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr,
   MercuryReward,
   MercuryRenderOption } from 'mercuryadhar';

@@ -7,9 +7,10 @@ import {
   AdvanceAdType,
   AdvanceAdnInitState,
   BYApp,
-} from 'AdvanceSDK'
+} from 'advancesdk'
 import { KSAdSDK, KSAdSDKInitConfig } from 'ksadsdk'
 import { AdvKSInterstitialAdapter } from './AdvKSInterstitialAdapter'
+import { AdvKSNativeExpressAdapter } from './AdvKSNativeExpressAdapter'
 import { AdvKSRewardVideoAdapter } from './AdvKSRewardVideoAdapter'
 import { AdvKSSplashAdapter } from './AdvKSSplashAdapter'
 
@@ -24,8 +25,8 @@ export class AdvKSUtil {
         return new AdvKSInterstitialAdapter(supData)
       case AdvanceAdType.rewardVideo:
         return new AdvKSRewardVideoAdapter(supData)
-      // case AdvanceAdType.nativeExpress:
-      //   return new AdvCsjNativeExpressAdapter(supData)
+      case AdvanceAdType.nativeExpress:
+        return new AdvKSNativeExpressAdapter(supData)
       // case AdvanceAdType.selfRender:
       //   return new AdvCsjRenderFeedAdapter(supData)
       default:

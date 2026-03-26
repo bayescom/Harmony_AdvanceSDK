@@ -9,7 +9,7 @@ import {
   ADV_ERR_AD_Invalid_Expired,
   AdvanceAdLoadState,
   AdvanceInterstitialCommonAdapter,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import { AdvGDTUtil } from './AdvGDTUtil';
 
 

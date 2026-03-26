@@ -7,7 +7,7 @@ import {
   AdvanceSplashCommonAdapter,
   AdvanceAdLoadState,
   BYApp,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryRenderOption, MercurySplash } from 'mercuryadhar';
 import { AdvMercuryUtil } from './AdvMercuryUtil';
 

@@ -2,7 +2,7 @@ import { BYConstant } from '../basic/BYConstant'
 import { BYLifecycle } from '../basic/BYLifecycle'
 import { BYLog } from '../basic/BYLog'
 import { AdvanceConstant } from './define/AdvanceConstant'
-import { common, UIAbility } from '@kit.AbilityKit'
+import { common } from '@kit.AbilityKit'
 import { AdvanceSetting } from './config/AdvanceSetting'
 import { BYSetting } from '../../../../../Index'
 

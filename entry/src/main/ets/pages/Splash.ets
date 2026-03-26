@@ -1,6 +1,6 @@
 import {
   AdvanceError, AdvanceSplash, AdvanceAdInfo, AdvanceAdLoadConfig
-} from 'AdvanceSDK'
+} from 'advancesdk'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
 import { logToast, toast } from '../util/Toast'

@@ -24,9 +24,7 @@ export class AdvanceSplash extends AdvanceAdBase {
       },
       bridge_didAdShowFailed: (error: AdvanceError) => {
         this.reportBestAdnShowFailedTask(error)
-        if (this.mListener?.onAdShowFailed) {
-          this.mListener?.onAdShowFailed(error)
-        }
+        this.mListener?.onAdShowFailed(error)
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
       },

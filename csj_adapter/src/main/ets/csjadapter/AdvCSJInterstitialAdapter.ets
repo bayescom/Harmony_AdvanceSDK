@@ -5,7 +5,7 @@ import {
   ADV_ERR_DATA_NULL,
   AdvanceAdLoadState,
   AdvanceInterstitialCommonAdapter,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import {
   AdSlotBuilder, CSJAdCreator, CSJAdSdk, CSJFullAd, FullAdInteractionListener,
 } from '@csj/openadsdk';

@@ -36,7 +36,7 @@ struct Index {
       Button('信息流广告（模版渲染）')
         .width('100%')
         .onClick(() => {
-          router.pushUrl({ url: "pages/FeedChoose" })
+          router.pushUrl({ url: "pages/NativeExpress/NativeExpressEntry" })
         })
       Button('信息流广告（自渲染）')
         .width('100%')

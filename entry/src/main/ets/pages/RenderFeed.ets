@@ -7,7 +7,7 @@ import {
   AdvanceRenderFeedData,
   AdvanceRenderFeed,
   AdvanceNativeInteractionModel
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import { AdInf, DemoUtil } from '../util/DemoUtil';
 import { ArrayList, util } from '@kit.ArkTS';
 

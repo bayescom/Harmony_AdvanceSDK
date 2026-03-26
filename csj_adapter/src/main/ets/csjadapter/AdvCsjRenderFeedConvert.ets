@@ -1,5 +1,5 @@
 import { CSJArrayList, CSJConstant, CSJFeedAd, CSJImage } from '@csj/openadsdk';
-import { AdvanceRenderFeedData, BYStrUtil, AdvanceNativeCompliance, AdvanceNativeInteractionModel, BYLog } from 'AdvanceSDK';
+import { AdvanceRenderFeedData, BYStrUtil, AdvanceNativeCompliance, AdvanceNativeInteractionModel, BYLog } from 'advancesdk';
 import { UIContext } from '@ohos.arkui.UIContext';
 import ArrayList from '@ohos.util.ArrayList';
 import { NodeController } from '@kit.ArkUI';

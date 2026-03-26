@@ -1,5 +1,5 @@
 import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
-  GDTBannerAd,
+  GDTNativeAd,
   GDTAdSize,
   GDTRenderListener} from '@gdt/gdt-union-sdk';
 import { NodeController } from '@kit.ArkUI';
@@ -10,25 +10,17 @@ import {
   ADV_ERR_DATA_NULL,
   ADV_ERR_AD_Invalid_Expired,
   AdvanceAdLoadState,
-  AdvanceBannerCommonAdapter,
+  AdvanceNativeExpressCommonAdapter,
   BYConstant,
-  BYApp,
+  BYDisplay,
 } from 'advancesdk';
 import { AdvGDTUtil } from './AdvGDTUtil';
 
 
-const TAG = `[AdvGDTBannerAdapter]`
+const TAG = `[AdvGDTNativeExpressAdapter]`
 
-export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
-  protected gdt_ad?: GDTBannerAd
-
-  adapter_isAdValid(): boolean {
-    const isAdValid = this.gdt_ad?.isValid() ?? false
-    if (!isAdValid) {
-      this.bridge?.bridge_didAdShowFailed(new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
-    }
-    return isAdValid
-  }
+export class AdvGDTNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter {
+  protected gdt_ad?: GDTNativeAd
 
   adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
     BYLog.debug(TAG + ` adapter_loadAd start`)
@@ -42,21 +34,36 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
         let sup = this.unitData.supplier
         let width = this.unitData.ext?.vpWidth ?? 0
         let height = this.unitData.ext?.vpHeight ?? 0
+        //未配置的话取屏幕宽
+        if (width <= 0) {
+          width = BYDisplay.px2VP(BYDisplay.getScreenWPX())
+        }
+        //高度GDTAdSize.AUTO_HEIGHT代表自适应
+        if (height <= 0) {
+          height = GDTAdSize.AUTO_HEIGHT
+        }
         if (sup) {
           const config: GDTAdLoadConfig = {
             posId: sup.adspotid,
+            count: 1,
             adSize: new GDTAdSize(width, height)
           };
-          GDTAdSDK.getAdLoader().loadBannerAd(config, {
-            onAdLoad: (ad: GDTBannerAd): void => {
-              BYLog.debug(TAG + "横幅回调 - onAdLoaded")
-              ad.setRefresh(0);
-              this.gdt_ad = ad
-              result.status = AdvanceAdLoadState.success
-              resolve(result)
+          GDTAdSDK.getAdLoader().loadNativeAd(config, {
+            onAdLoad: (ads: Array<GDTNativeAd>): void => {
+              if (ads && ads.length > 0) {
+                BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
+                this.gdt_ad = ads[0]
+                result.status = AdvanceAdLoadState.success
+                resolve(result)
+              } else {
+                result.status = AdvanceAdLoadState.failed
+                result.errCode = ADV_ERR_DATA_NULL
+                result.errMsg = '广告返回内容为空'
+                resolve(result)
+              };
             },
             onError: (err: GDTError): void => {
-              BYLog.debug(TAG + `横幅回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+              BYLog.debug(TAG + `模板信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
               result.status = AdvanceAdLoadState.failed
               result.errCode = err.code
               result.errMsg = err.message
@@ -82,7 +89,11 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
   adapter_render(context: UIContext): void {
     this.gdt_ad?.setInteractionListener(this.interactionListener);
     this.gdt_ad?.setRenderListener(this.renderListener);
-    this.gdt_ad?.render(BYConstant.windowStage, context);
+    if (this.gdt_ad?.isValid()) {
+      this.gdt_ad?.render(BYConstant.windowStage, context);
+    } else {
+      this.bridge?.bridge_didAdRenderFail(new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+    }
   }
 
   adapter_getAdComponent(): NodeController | undefined {
@@ -91,30 +102,31 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
 
   protected renderListener: GDTRenderListener = {
     onRenderSuccess: (): void => {
-      BYLog.debug(TAG + "横幅回调 - onAdRenderSuccess")
+      BYLog.debug(TAG + "模板信息流回调 - onAdRenderSuccess")
+      this.bridge?.bridge_didAdRenderSuccess()
     },
     onRenderFail: (err: GDTError): void => {
-      BYLog.debug(TAG + "横幅回调 - onAdRenderFail")
-      this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.message))
+      BYLog.debug(TAG + "模板信息流回调 - onAdRenderFail")
+      this.bridge?.bridge_didAdRenderFail(new AdvanceError(err.code, err.message))
     }
   };
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
-      BYLog.debug(TAG + "横幅回调 - onAdExposure")
+      BYLog.debug(TAG + "模板信息流回调 - onAdExposure")
       this.bridge?.bridge_didAdShow()
     },
     onAdClick: (): void => {
-      BYLog.debug(TAG + "横幅回调 - onAdClick")
+      BYLog.debug(TAG + "模板信息流回调 - onAdClick")
       this.bridge?.bridge_didAdClick()
     },
     onAdClose: (): void => {
-      BYLog.debug(TAG + `横幅回调 - onAdClose`)
+      BYLog.debug(TAG + `模板信息流回调 - onAdClose`)
       this.bridge?.bridge_didAdClose()
     },
     onError: (err: GDTError): void => {
-      BYLog.debug(TAG + "横幅回调 - onShowError")
-      this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.message))
+      BYLog.debug(TAG + "模板信息流回调 - onShowError")
+      this.bridge?.bridge_didAdRenderFail(new AdvanceError(err.code, err.message))
     }
   }
 

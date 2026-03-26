@@ -6,9 +6,9 @@ import {
   AdvanceAdLoadState,
   BYWindowUtil,
   AdvanceRewardVideoCommonAdapter,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSRewardAd} from 'ksadsdk';
-import { KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY } from './AdvKSDisplayPageView';
+import { KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY } from './Component/AdvKSDisplayPageView';
 import { AdvKSUtil } from './AdvKSUtil';
 
 

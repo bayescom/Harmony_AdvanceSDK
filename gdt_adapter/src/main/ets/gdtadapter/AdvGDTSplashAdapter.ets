@@ -8,7 +8,7 @@ import {
   AdvanceSplashCommonAdapter,
   ADV_ERR_AD_Invalid_Expired,
   AdvanceAdLoadState,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import { AdvGDTUtil } from './AdvGDTUtil';
 
 

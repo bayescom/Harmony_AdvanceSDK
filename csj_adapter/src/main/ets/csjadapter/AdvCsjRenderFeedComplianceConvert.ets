@@ -1,5 +1,5 @@
 import { CSJComplianceInfo } from '@csj/openadsdk';
-import { AdvanceNativeCompliance } from 'AdvanceSDK';
+import { AdvanceNativeCompliance } from 'advancesdk';
 
 export class AdvCsjRenderFeedComplianceConvert implements AdvanceNativeCompliance {
   csjAppInf: CSJComplianceInfo

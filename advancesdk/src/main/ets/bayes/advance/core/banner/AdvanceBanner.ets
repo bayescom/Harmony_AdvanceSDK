@@ -4,7 +4,7 @@ import { NodeController, window } from '@kit.ArkUI';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceBannerCommonAdapter } from '../adn/AdvanceBannerCommonAdapter';
-import { AdvanceError } from '../../../../../../../Index';
+import { AdvanceError, BYApp } from '../../../../../../../Index';
 
 export class AdvanceBanner extends AdvanceAdBase {
   constructor(option: AdvanceAdLoadConfig) {
@@ -23,9 +23,7 @@ export class AdvanceBanner extends AdvanceAdBase {
       },
       bridge_didAdShowFailed: (error: AdvanceError) => {
         this.reportBestAdnShowFailedTask(error)
-        if (this.mListener?.onAdShowFailed) {
-          this.mListener?.onAdShowFailed(error)
-        }
+        this.mListener?.onAdShowFailed(error)
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
       },
@@ -39,6 +37,8 @@ export class AdvanceBanner extends AdvanceAdBase {
         this.destroyAdapters()
       }
     })
+    // 竞胜的广告源渲染广告
+    adapter.adapter_render(BYApp.getUIContext())
   }
 
   setAdListener(listener: AdvanceBannerListener) {

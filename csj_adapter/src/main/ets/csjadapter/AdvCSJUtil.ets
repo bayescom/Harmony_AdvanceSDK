@@ -9,10 +9,10 @@ import {
   BYConstant,
   AdvanceAdnInitState,
   BYSetting
-} from 'AdvanceSDK'
+} from 'advancesdk'
 import { AdvCSJBannerAdapter } from './AdvCSJBannerAdapter'
 import { AdvCSJInterstitialAdapter } from './AdvCSJInterstitialAdapter'
-import { AdvCsjNativeExpressAdapter } from './AdvCsjNativeExpressAdapter'
+import { AdvCSJNativeExpressAdapter } from './AdvCSJNativeExpressAdapter'
 import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
 import { AdvCSJRewardVideoAdapter } from './AdvCSJRewardVideolAdapter'
 import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
@@ -31,7 +31,7 @@ export class AdvCSJUtil {
       case AdvanceAdType.rewardVideo:
         return new AdvCSJRewardVideoAdapter(supData)
       case AdvanceAdType.nativeExpress:
-        return new AdvCsjNativeExpressAdapter(supData)
+        return new AdvCSJNativeExpressAdapter(supData)
       case AdvanceAdType.selfRender:
         return new AdvCsjRenderFeedAdapter(supData)
       default:

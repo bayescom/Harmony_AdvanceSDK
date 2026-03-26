@@ -6,7 +6,7 @@ import {
   ADV_ERR_DATA_NULL,
   AdvanceAdLoadState,
   AdvanceBannerCommonAdapter,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr,
   MercuryBanner } from 'mercuryadhar';
 import { AdvMercuryUtil } from './AdvMercuryUtil';
@@ -41,24 +41,6 @@ export class AdvMercuryBannerAdapter extends AdvanceBannerCommonAdapter {
           this.mercury_ad.loadAd({
             onAdLoaded: () => {
               BYLog.debug(TAG + "横幅回调 - onAdLoaded")
-              this.mercury_ad?.setRenderListener({
-                onShow: (): void => {
-                  BYLog.debug(TAG + "横幅回调 - onAdExposure")
-                  this.bridge?.bridge_didAdShow()
-                },
-                onClick: (): void => {
-                  BYLog.debug(TAG + "横幅回调 - onAdClick")
-                  this.bridge?.bridge_didAdClick()
-                },
-                onRenderErr: (err: MercuryErr): void => {
-                  BYLog.debug(TAG + "横幅回调 - onShowError")
-                  this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.msg))
-                },
-                onClose: (type: MercuryCloseType): void => {
-                  BYLog.debug(TAG + `横幅回调 - onAdClose`)
-                  this.bridge?.bridge_didAdClose()
-                }
-              })
               result.status = AdvanceAdLoadState.success
               resolve(result)
             },
@@ -83,6 +65,27 @@ export class AdvMercuryBannerAdapter extends AdvanceBannerCommonAdapter {
         result.errCode = initResult.code
         result.errMsg = initResult.msg
         resolve(result)
+      }
+    })
+  }
+
+  adapter_render(context: UIContext): void {
+    this.mercury_ad?.setRenderListener({
+      onShow: (): void => {
+        BYLog.debug(TAG + "横幅回调 - onAdExposure")
+        this.bridge?.bridge_didAdShow()
+      },
+      onClick: (): void => {
+        BYLog.debug(TAG + "横幅回调 - onAdClick")
+        this.bridge?.bridge_didAdClick()
+      },
+      onRenderErr: (err: MercuryErr): void => {
+        BYLog.debug(TAG + "横幅回调 - onShowError")
+        this.bridge?.bridge_didAdShowFailed(new AdvanceError(err.code, err.msg))
+      },
+      onClose: (type: MercuryCloseType): void => {
+        BYLog.debug(TAG + `横幅回调 - onAdClose`)
+        this.bridge?.bridge_didAdClose()
       }
     })
   }

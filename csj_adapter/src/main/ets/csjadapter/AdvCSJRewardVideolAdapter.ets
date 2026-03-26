@@ -5,7 +5,7 @@ import {
   ADV_ERR_DATA_NULL,
   AdvanceAdLoadState,
   AdvanceRewardVideoCommonAdapter,
-} from 'AdvanceSDK';
+} from 'advancesdk';
 import {
   AdSlotBuilder, CSJAdCreator, CSJAdSdk,
   CSJRewardAd,

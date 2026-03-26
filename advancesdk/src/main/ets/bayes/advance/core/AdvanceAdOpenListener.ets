@@ -20,26 +20,31 @@ export interface AdvanceAdLoadListener {
 // 各广告位通用的交互接口
 export interface AdvanceAdInteractionListener extends AdvanceAdLoadListener {
   onAdShow: () => void // 广告曝光成功
-  onAdShowFailed?: (error: AdvanceError) => void // 广告展示失败
   onAdClick: () => void // 广告点击
   onAdClose: () => void // 广告关闭
 }
 
-export interface AdvanceSplashListener extends AdvanceAdInteractionListener {}
+export interface AdvanceSplashListener extends AdvanceAdInteractionListener {
+  onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+}
 
-export interface AdvanceBannerListener extends AdvanceAdInteractionListener {}
+export interface AdvanceBannerListener extends AdvanceAdInteractionListener {
+  onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+}
 
-export interface AdvanceInterstitialListener extends AdvanceAdInteractionListener {}
+export interface AdvanceInterstitialListener extends AdvanceAdInteractionListener {
+  onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+}
 
 export interface AdvanceRewardVideoListener extends AdvanceAdInteractionListener {
+  onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
   onAdReward: () => void // 奖励发放
   onAdPlayEnd?: () => void // 广告播放完成
 }
 
 export interface AdvanceNativeExpressListener extends AdvanceAdInteractionListener {
-  onDislike: (dislike: AdvanceDislike) => void //广告关闭回调
-  onRenderSuccess: () => void // 在调用广告的render方法后，广告渲染成功，会回调该方法，此时表示广告已准备好，待展示
-  onRenderFail: (error: AdvanceError) => void //广告曝光成功
+  onRenderSuccess: () => void // 广告渲染成功
+  onRenderFail: (error: AdvanceError) => void // 广告渲染失败
 }
 
 export interface AdvanceRenderFeedListener extends AdvanceAdInteractionListener {

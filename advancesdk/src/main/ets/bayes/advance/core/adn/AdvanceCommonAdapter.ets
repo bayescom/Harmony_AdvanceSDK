@@ -10,16 +10,20 @@ export abstract class AdvanceCommonAdapter {
     this.unitData = supData
   }
 
-  abstract adapter_isAdValid(): boolean
-
   abstract adapter_loadAd(): Promise<AdvanceAdnStatusResult>
 
   // abstract adapter_showAd(advanceRenderOP: AdvanceRenderOption)
 
   adapter_showAd(windowStage: window.WindowStage) {} // 默认实现
 
-  adapter_getAdComponent(): NodeController | undefined { // for banner
+  adapter_isAdValid(): boolean {
+    return false
+  }
+
+  adapter_getAdComponent(): NodeController | undefined { // for banner & native express
     return undefined
   }
+
+  adapter_render(context: UIContext) {} // for banner & native express
 
 }
