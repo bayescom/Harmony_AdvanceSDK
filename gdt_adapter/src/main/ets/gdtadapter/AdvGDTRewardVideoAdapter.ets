@@ -104,7 +104,7 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
   videoStateListener: GDTVideoStateListener = {
     onVideoComplete: (): void => {
       BYLog.debug(TAG + "激励视频回调 - onVideoComplete")
-      this.bridge?.bridge_didAdPlayEnd()
+      this.bridge?.bridge_didAdVideoPlayEnd()
     }
   }
 

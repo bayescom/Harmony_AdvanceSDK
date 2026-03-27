@@ -56,8 +56,8 @@ struct Interstitial {
             onAdReward: () => {
               logToast(`onAdReward`)
             },
-            onAdPlayEnd: () => {
-              logToast(`onAdPlayEnd`)
+            onVideoPlayEnd: () => {
+              logToast(`onVideoPlayEnd`)
             }
           })
           this.rewardVideoAd.loadAd()

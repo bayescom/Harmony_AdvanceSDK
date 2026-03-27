@@ -39,12 +39,15 @@ export interface AdvanceInterstitialListener extends AdvanceAdInteractionListene
 export interface AdvanceRewardVideoListener extends AdvanceAdInteractionListener {
   onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
   onAdReward: () => void // 奖励发放
-  onAdPlayEnd?: () => void // 广告播放完成
+  onVideoPlayEnd?: () => void // 视频播放完成
 }
 
 export interface AdvanceNativeExpressListener extends AdvanceAdInteractionListener {
   onRenderSuccess: () => void // 广告渲染成功
   onRenderFail: (error: AdvanceError) => void // 广告渲染失败
+  onVideoPlayStart?: () => void
+  onVideoPlayEnd?: () => void
+  onVideoPlayFailed?: (error: AdvanceError) => void
 }
 
 export interface AdvanceRenderFeedListener extends AdvanceAdInteractionListener {

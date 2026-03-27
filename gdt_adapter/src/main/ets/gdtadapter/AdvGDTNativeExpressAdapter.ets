@@ -1,7 +1,8 @@
 import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
   GDTNativeAd,
   GDTAdSize,
-  GDTRenderListener} from '@gdt/gdt-union-sdk';
+  GDTRenderListener,
+  GDTVideoStateListener} from '@gdt/gdt-union-sdk';
 import { NodeController } from '@kit.ArkUI';
 import {
   BYLog,
@@ -89,6 +90,7 @@ export class AdvGDTNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
   adapter_render(context: UIContext): void {
     this.gdt_ad?.setInteractionListener(this.interactionListener);
     this.gdt_ad?.setRenderListener(this.renderListener);
+    this.gdt_ad?.setVideoStateListener(this.videoStateListener)
     if (this.gdt_ad?.isValid()) {
       this.gdt_ad?.render(BYConstant.windowStage, context);
     } else {
@@ -127,6 +129,21 @@ export class AdvGDTNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
     onError: (err: GDTError): void => {
       BYLog.debug(TAG + "模板信息流回调 - onShowError")
       this.bridge?.bridge_didAdRenderFail(new AdvanceError(err.code, err.message))
+    }
+  }
+
+  protected videoStateListener: GDTVideoStateListener = {
+    onVideoStart: (): void => {
+      BYLog.debug(TAG + "模板信息流回调 - onVideoStart")
+      this.bridge?.bridge_didAdVideoPlayStart()
+    },
+    onVideoComplete: (): void => {
+      BYLog.debug(TAG + "模板信息流回调 - onVideoEnd")
+      this.bridge?.bridge_didAdVideoPlayEnd()
+    },
+    onVideoError: (err: GDTError): void => {
+      BYLog.debug(TAG + `模板信息流回调 - onVideoFailed`)
+      this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(err.code, err.message))
     }
   }
 

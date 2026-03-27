@@ -99,7 +99,7 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     },
     onComplete: () => {
       BYLog.debug(TAG + "激励视频回调 - onDidComplete")
-      this.bridge?.bridge_didAdPlayEnd()
+      this.bridge?.bridge_didAdVideoPlayEnd()
     }
   }
 

@@ -40,9 +40,9 @@ export class AdvanceRewardVideo extends AdvanceAdBase {
       bridge_didAdReward: () => {
         this.mListener?.onAdReward()
       },
-      bridge_didAdPlayEnd: () => {
-        if (this.mListener?.onAdPlayEnd) {
-          this.mListener?.onAdPlayEnd()
+      bridge_didAdVideoPlayEnd: () => {
+        if (this.mListener?.onVideoPlayEnd) {
+          this.mListener?.onVideoPlayEnd()
         }
       }
     })

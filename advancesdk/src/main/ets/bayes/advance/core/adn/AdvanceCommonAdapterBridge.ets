@@ -21,10 +21,13 @@ export interface AdvanceInterstitialAdapterBridge extends AdvanceCommonAdapterBr
 export interface AdvanceRewardVideoAdapterBridge extends AdvanceCommonAdapterBridge {
   bridge_didAdShowFailed: (error: AdvanceError) => void
   bridge_didAdReward: () => void
-  bridge_didAdPlayEnd: () => void
+  bridge_didAdVideoPlayEnd: () => void
 }
 
 export interface AdvanceNativeExpressAdapterBridge extends AdvanceCommonAdapterBridge {
   bridge_didAdRenderSuccess: () => void
   bridge_didAdRenderFail: (error: AdvanceError) => void
+  bridge_didAdVideoPlayStart: () => void
+  bridge_didAdVideoPlayEnd: () => void
+  bridge_didAdVideoPlayFailed: (error: AdvanceError) => void
 }

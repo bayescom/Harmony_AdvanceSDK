@@ -5,8 +5,9 @@ import {
   AdvanceAdLoadState,
   AdvanceNativeExpressCommonAdapter,
   BYDisplay,
+  AdvanceError,
 } from 'advancesdk';
-import { KSAdScene, KSAdSDK, KSBuildFeedAdView, KSFeedAd} from 'ksadsdk';
+import { KSAdScene, KSAdSDK, KSBuildFeedAdView, KSFeedAd, KSVideoPlayError} from 'ksadsdk';
 import { AdvKSUtil } from './AdvKSUtil';
 import { NodeController } from '@kit.ArkUI';
 import { AdvKSNodeController } from './Component/AdvKSNodeController';
@@ -105,6 +106,21 @@ export class AdvKSNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter
         onDislikeClicked() {
           BYLog.debug(TAG + `模板信息流回调 - onAdClose`)
           that.bridge?.bridge_didAdClose()
+        }
+      })
+
+      that.ks_ad.setVideoPlayListener({
+        onVideoPlayStart() {
+          BYLog.debug(TAG + "模板信息流回调 - onVideoStart")
+          this.bridge?.bridge_didAdVideoPlayStart()
+        },
+        onVideoPlayComplete() {
+          BYLog.debug(TAG + "模板信息流回调 - onVideoEnd")
+          this.bridge?.bridge_didAdVideoPlayEnd()
+        },
+        onVideoPlayError(code: KSVideoPlayError, extra: string) {
+          BYLog.debug(TAG + `模板信息流回调 - onVideoFailed`)
+          this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(code, extra))
         }
       })
     }

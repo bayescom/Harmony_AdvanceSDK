@@ -5,7 +5,8 @@ import { AdvCSJUtil } from './AdvCSJUtil';
 import { AdSlotBuilder, CSJAdCreator, CSJAdSdk,
   CSJDislikeInteractionCallback,
   CSJNativeExpressAd,
-  ExpressAdInteractionListener } from '@csj/openadsdk';
+  ExpressAdInteractionListener,
+  ExpressVideoAdListener} from '@csj/openadsdk';
 import { ArrayList } from '@kit.ArkTS';
 
 const TAG = `[AdvCSJNativeExpressAdapter] `
@@ -83,6 +84,7 @@ export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
   adapter_render(context: UIContext) {
     this.csj_ad?.setExpressInteractionListener(this.interactionListener)
     this.csj_ad?.setDislikeCallback(this.dislikeCallback)
+    this.csj_ad?.setVideoAdListener(this.videoStateListener)
     this.csj_ad?.render(context)
   }
 
@@ -107,6 +109,26 @@ export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
       BYLog.debug(TAG + "模板信息流回调 - onAdClick")
       this.bridge?.bridge_didAdClick()
     }
+  }
+
+  protected videoStateListener: ExpressVideoAdListener = {
+    onVideoAdStartPlay: () => {
+      BYLog.debug(TAG + "模板信息流回调 - onVideoStart")
+      this.bridge?.bridge_didAdVideoPlayStart()
+    },
+    onVideoAdComplete: () => {
+      BYLog.debug(TAG + "模板信息流回调 - onVideoEnd")
+      this.bridge?.bridge_didAdVideoPlayEnd()
+    },
+    onVideoError: (errorCode: number, msg: string) =>  {
+      BYLog.debug(TAG + `模板信息流回调 - onVideoFailed`)
+      this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(errorCode, msg))
+    },
+    onVideoLoad: () =>  {},
+    onVideoAdPaused: () =>  {},
+    onVideoAdContinuePlay: () => {},
+    onProgressUpdate: (current: number, duration: number) => {},
+    onClickReplay: () => {}
   }
 
   protected  dislikeCallback: CSJDislikeInteractionCallback = {

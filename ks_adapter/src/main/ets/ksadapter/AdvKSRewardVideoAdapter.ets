@@ -4,11 +4,9 @@ import {
   AdvanceAdnStatusResult,
   ADV_ERR_DATA_NULL,
   AdvanceAdLoadState,
-  BYWindowUtil,
   AdvanceRewardVideoCommonAdapter,
 } from 'advancesdk';
 import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSRewardAd} from 'ksadsdk';
-import { KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY } from './Component/AdvKSDisplayPageView';
 import { AdvKSUtil } from './AdvKSUtil';
 
 
@@ -95,7 +93,7 @@ export class AdvKSRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
         },
         onVideoPlayEnd() {
           BYLog.debug(TAG + `激励视频回调 - onAdPlayEnd`)
-          that.bridge?.bridge_didAdPlayEnd()
+          that.bridge?.bridge_didAdVideoPlayEnd()
         }
       })
       that.ks_ad?.show({videoSoundEnable: false })

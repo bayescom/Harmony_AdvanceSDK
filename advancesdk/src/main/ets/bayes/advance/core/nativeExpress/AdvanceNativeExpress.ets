@@ -37,6 +37,21 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
         this.mListener?.onAdClose()
         // 销毁各渠道Adapter对象
         this.destroyAdapters()
+      },
+      bridge_didAdVideoPlayStart: () => {
+        if (this.mListener?.onVideoPlayStart) {
+            this.mListener?.onVideoPlayStart()
+        }
+      },
+      bridge_didAdVideoPlayEnd: () => {
+        if (this.mListener?.onVideoPlayEnd) {
+          this.mListener?.onVideoPlayEnd()
+        }
+      },
+      bridge_didAdVideoPlayFailed: (error: AdvanceError) => {
+        if (this.mListener?.onVideoPlayFailed) {
+          this.mListener?.onVideoPlayFailed(error)
+        }
       }
     })
     // 竞胜的广告源渲染广告

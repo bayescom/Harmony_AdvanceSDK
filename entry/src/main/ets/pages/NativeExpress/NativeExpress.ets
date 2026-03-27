@@ -56,6 +56,9 @@ export struct NativeExpress {
       onAdClose: () => {
         this.listArray.splice(2, 1); // 从数组中移除数据
         this.nativeExpressAd = undefined
+      },
+      onVideoPlayEnd: () => {
+        logToast(`onAdVideoEnd`)
       }
     })
     this.nativeExpressAd.loadAd()
