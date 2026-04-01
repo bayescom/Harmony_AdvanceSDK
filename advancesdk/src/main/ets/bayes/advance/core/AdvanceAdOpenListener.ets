@@ -1,6 +1,6 @@
 import { AdvanceError } from '../define/AdvanceError'
 import { AdvanceAdInfo } from '../model/AdvanceAdInfo'
-import { AdvanceDislike } from './AdvanceDislike'
+import { AdvanceRenderFeedWrapper } from './renderFeed/AdvanceRenderFeedWrapper'
 
 // 各广告位通用的加载接口
 export interface AdvanceAdLoadListener {
@@ -21,23 +21,26 @@ export interface AdvanceAdLoadListener {
 export interface AdvanceAdInteractionListener extends AdvanceAdLoadListener {
   onAdShow: () => void // 广告曝光成功
   onAdClick: () => void // 广告点击
-  onAdClose: () => void // 广告关闭
 }
 
 export interface AdvanceSplashListener extends AdvanceAdInteractionListener {
   onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+  onAdClose: () => void // 广告关闭
 }
 
 export interface AdvanceBannerListener extends AdvanceAdInteractionListener {
   onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+  onAdClose: () => void // 广告关闭
 }
 
 export interface AdvanceInterstitialListener extends AdvanceAdInteractionListener {
   onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+  onAdClose: () => void // 广告关闭
 }
 
 export interface AdvanceRewardVideoListener extends AdvanceAdInteractionListener {
   onAdShowFailed: (error: AdvanceError) => void // 广告展示失败
+  onAdClose: () => void // 广告关闭
   onAdReward: () => void // 奖励发放
   onVideoPlayEnd?: () => void // 视频播放完成
 }
@@ -45,14 +48,17 @@ export interface AdvanceRewardVideoListener extends AdvanceAdInteractionListener
 export interface AdvanceNativeExpressListener extends AdvanceAdInteractionListener {
   onRenderSuccess: () => void // 广告渲染成功
   onRenderFail: (error: AdvanceError) => void // 广告渲染失败
+  onAdClose: () => void // 广告关闭
   onVideoPlayStart?: () => void
   onVideoPlayEnd?: () => void
   onVideoPlayFailed?: (error: AdvanceError) => void
 }
 
 export interface AdvanceRenderFeedListener extends AdvanceAdInteractionListener {
-  onDislike: (dislike: AdvanceDislike) => void //广告关闭回调
-  onRenderSuccess: () => void // 在调用广告的render方法后，广告渲染成功，会回调该方法，此时表示广告已准备好，待展示
-  onRenderFail: (error: AdvanceError) => void //广告曝光成功
+  onRenderSuccess: (wrapper: AdvanceRenderFeedWrapper) => void // 广告渲染成功
+  onRenderFail: (error: AdvanceError) => void // 广告渲染失败
+  onVideoPlayStart?: () => void
+  onVideoPlayEnd?: () => void
+  onVideoPlayFailed?: (error: AdvanceError) => void
 }
 

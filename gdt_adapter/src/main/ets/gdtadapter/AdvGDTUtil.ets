@@ -16,6 +16,7 @@ import { AdvGDTInterstitialAdapter } from './AdvGDTInterstitialAdapter'
 import { AdvGDTRewardVideoAdapter } from './AdvGDTRewardVideoAdapter'
 import { AdvGDTBannerAdapter } from './AdvGDTBannerAdapter'
 import { AdvGDTNativeExpressAdapter } from './AdvGDTNativeExpressAdapter'
+import { AdvGDTRenderFeedAdapter } from './AdvGDTRenderFeedAdapter/AdvGDTRenderFeedAdapter'
 
 const TAG = `[AdvGDTUtil] `
 
@@ -32,8 +33,8 @@ export class AdvGDTUtil {
         return new AdvGDTRewardVideoAdapter(supData)
       case AdvanceAdType.nativeExpress:
         return new AdvGDTNativeExpressAdapter(supData)
-      // case AdvanceAdType.selfRender:
-      //   return new AdvCsjRenderFeedAdapter(supData)
+      case AdvanceAdType.renderFeed:
+        return new AdvGDTRenderFeedAdapter(supData)
       default:
         return undefined
     }

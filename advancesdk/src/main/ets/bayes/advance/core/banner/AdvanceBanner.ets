@@ -1,6 +1,6 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceBannerListener } from '../AdvanceAdOpenListener';
-import { NodeController, window } from '@kit.ArkUI';
+import { NodeController } from '@kit.ArkUI';
 import { AdvanceAdType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceBannerCommonAdapter } from '../adn/AdvanceBannerCommonAdapter';

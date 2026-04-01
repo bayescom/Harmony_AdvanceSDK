@@ -12,18 +12,16 @@ export abstract class AdvanceCommonAdapter {
 
   abstract adapter_loadAd(): Promise<AdvanceAdnStatusResult>
 
-  // abstract adapter_showAd(advanceRenderOP: AdvanceRenderOption)
-
   adapter_showAd(windowStage: window.WindowStage) {} // 默认实现
 
   adapter_isAdValid(): boolean {
-    return false
+    return true
   }
 
   adapter_getAdComponent(): NodeController | undefined { // for banner & native express
     return undefined
   }
 
-  adapter_render(context: UIContext) {} // for banner & native express
+  adapter_render(context: UIContext) {} // for banner & native express & render feed
 
 }

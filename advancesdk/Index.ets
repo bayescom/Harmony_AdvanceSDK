@@ -5,11 +5,8 @@ export * from './src/main/ets/bayes/advance/core/interstitial/AdvanceInterstital
 export * from './src/main/ets/bayes/advance/core/rewardVideo/AdvanceRewardVideo'
 export * from './src/main/ets/bayes/advance/core/nativeExpress/AdvanceNativeExpress'
 export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceRenderFeed'
-export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceNativeCompliance'
-export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceRenderFeedData'
-export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceNativeInteractionModel'
+export * from './src/main/ets/bayes/advance/core/renderFeed/AdvanceRenderFeedWrapper'
 export * from './src/main/ets/bayes/advance/define/AdvanceDefine'
-export * from './src/main/ets/bayes/advance/core/AdvanceDislike';
 export * from './src/main/ets/bayes/advance/define/AdvanceError';
 export * from './src/main/ets/bayes/advance/model/AdvanceAdInfo';
 export { AdvanceAdLoadConfig } from './src/main/ets/bayes/advance/config/AdvanceAdConfig';
@@ -24,7 +21,6 @@ export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonAdapter'
 export { AdvanceAdnStatusResult, AdvanceAdnInitResult} from './src/main/ets/bayes/advance/model/AdvanceSendModel'
 export { AdvanceConstant } from './src/main/ets/bayes/advance/define/AdvanceConstant'
 export * from './src/main/ets/bayes/advance/define/AdvanceError'
-export * from './src/main/ets/bayes/advance/core/AdvanceDislike'
 export * from './src/main/ets/bayes/advance/core/AdvanceUtil'
 export * from './src/main/ets/bayes/advance/config/AdvanceSetting'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceADNUnitData'
@@ -37,3 +33,4 @@ export * from './src/main/ets/bayes/basic/BYLocation'
 export * from './src/main/ets/bayes/basic/BYDisplay'
 export * from './src/main/ets/bayes/basic/util/BYStrUtil'
 export * from './src/main/ets/bayes/basic/util/BYWindowUtil'
+export * from './src/main/ets/bayes/basic/component/BYCustomNodeController'

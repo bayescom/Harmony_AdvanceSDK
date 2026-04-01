@@ -1,6 +1,6 @@
 import { BuilderNode, FrameNode, NodeController } from '@kit.ArkUI';
 
-export class AdvKSNodeController <T extends Object> extends NodeController {
+export class BYCustomNodeController <T extends Object> extends NodeController {
   private builderNode?: BuilderNode<[T]>;
   private wrapBuilder: WrappedBuilder<[T]>;
   private param?: T;

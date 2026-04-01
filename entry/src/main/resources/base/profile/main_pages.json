@@ -5,10 +5,9 @@
     "pages/Banner",
     "pages/Interstitial",
     "pages/RewardVideo",
-    "pages/FeedChoose",
-    "pages/RenderFeed",
+    "pages/NativeExpress/NativeExpressEntry",
     "pages/NativeExpress/NativeExpress",
-    "pages/NativeExpress/NativeExpressEntry"
-
+    "pages/RenderFeed/RenderFeedEntry",
+    "pages/RenderFeed/RenderFeed"
   ]
 }

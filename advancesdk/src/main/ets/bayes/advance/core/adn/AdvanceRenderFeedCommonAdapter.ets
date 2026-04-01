@@ -1,14 +1,11 @@
-import { AdvanceRenderFeedListener } from '../AdvanceAdOpenListener'
-import { AdvanceRenderFeedData } from '../renderFeed/AdvanceRenderFeedData'
 import { AdvanceCommonAdapter } from './AdvanceCommonAdapter'
+import { AdvanceRenderFeedAdapterBridge } from './AdvanceCommonAdapterBridge'
 
 export abstract class AdvanceRenderFeedCommonAdapter extends AdvanceCommonAdapter {
-  nativeListener?: AdvanceRenderFeedListener
+  bridge?: AdvanceRenderFeedAdapterBridge
 
-  setNativeListener(nativeListener: AdvanceRenderFeedListener) {
-    this.nativeListener = nativeListener
-    // this.baseListener = nativeListener
+  setRenderFeedAdapterBridge(bridge: AdvanceRenderFeedAdapterBridge) {
+    this.bridge = bridge
   }
 
-  abstract getNativeData(): AdvanceRenderFeedData | undefined
 }

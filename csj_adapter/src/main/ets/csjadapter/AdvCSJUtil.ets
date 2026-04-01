@@ -13,7 +13,7 @@ import {
 import { AdvCSJBannerAdapter } from './AdvCSJBannerAdapter'
 import { AdvCSJInterstitialAdapter } from './AdvCSJInterstitialAdapter'
 import { AdvCSJNativeExpressAdapter } from './AdvCSJNativeExpressAdapter'
-import { AdvCsjRenderFeedAdapter } from './AdvCsjRenderFeedAdapter'
+import { AdvCSJRenderFeedAdapter } from './AdvCSJRenderFeedAdapter/AdvCSJRenderFeedAdapter'
 import { AdvCSJRewardVideoAdapter } from './AdvCSJRewardVideolAdapter'
 import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
 
@@ -32,8 +32,8 @@ export class AdvCSJUtil {
         return new AdvCSJRewardVideoAdapter(supData)
       case AdvanceAdType.nativeExpress:
         return new AdvCSJNativeExpressAdapter(supData)
-      case AdvanceAdType.selfRender:
-        return new AdvCsjRenderFeedAdapter(supData)
+      case AdvanceAdType.renderFeed:
+        return new AdvCSJRenderFeedAdapter(supData)
       default:
         return undefined
     }

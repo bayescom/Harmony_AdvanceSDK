@@ -41,7 +41,7 @@ struct Index {
       Button('信息流广告（自渲染）')
         .width('100%')
         .onClick(() => {
-          router.pushUrl({ url: "pages/FeedChoose" })
+          router.pushUrl({ url: "pages/RenderFeed/RenderFeedEntry" })
         })
     }
     .height('100%')

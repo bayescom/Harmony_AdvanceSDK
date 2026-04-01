@@ -9,6 +9,7 @@ import {
   BYApp,
 } from 'advancesdk'
 import { KSAdSDK, KSAdSDKInitConfig } from 'ksadsdk'
+import { AdvKSRenderFeedAdapter } from './AdvGDTRenderFeedAdapter/AdvKSRenderFeedAdapter'
 import { AdvKSInterstitialAdapter } from './AdvKSInterstitialAdapter'
 import { AdvKSNativeExpressAdapter } from './AdvKSNativeExpressAdapter'
 import { AdvKSRewardVideoAdapter } from './AdvKSRewardVideoAdapter'
@@ -27,8 +28,8 @@ export class AdvKSUtil {
         return new AdvKSRewardVideoAdapter(supData)
       case AdvanceAdType.nativeExpress:
         return new AdvKSNativeExpressAdapter(supData)
-      // case AdvanceAdType.selfRender:
-      //   return new AdvCsjRenderFeedAdapter(supData)
+      case AdvanceAdType.renderFeed:
+        return new AdvKSRenderFeedAdapter(supData)
       default:
         return undefined
     }
