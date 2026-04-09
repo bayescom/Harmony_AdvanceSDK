@@ -25,8 +25,9 @@ export enum AdvanceAdnLoadAdState {
 
 export enum AdvanceAdnReportTKEventType {
   loaded, // 渠道SDK启动
+  loadend, // 渠道SDK初始化成功
   succeed, // SDK广告获取成功
-  failed, // SDK广告 获取/渲染/超时 失败
+  failed, // SDK广告 获取/渲染/超时/初始化 失败
   exposed, // SDK广告 曝光成功
   clicked, // SDK广告 产生点击
   bidWin, // 结束bidding 某个渠道广告竞胜

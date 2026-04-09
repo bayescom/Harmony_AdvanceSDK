@@ -9,6 +9,7 @@ import {
   BYConstant,
   BYApp,
 } from 'advancesdk'
+import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 import { MercuryAD } from 'mercuryadhar'
 import { AdvMercuryBannerAdapter } from './AdvMercuryBannerAdapter'
 import { AdvMercuryInterstitialAdapter } from './AdvMercuryInterstitialAdapter'
@@ -20,20 +21,20 @@ import { AdvMercurySplashAdapter } from './AdvMercurySplashAdapter'
 const TAG = `[AdvMercuryUtil] `
 
 export class AdvMercuryUtil {
-  static getMercuryAdAdapter(supData: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (supData.adType) {
+  static getMercuryAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
+    switch (data.adType) {
       case AdvanceAdType.splash:
-        return new AdvMercurySplashAdapter(supData)
+        return new AdvMercurySplashAdapter(data)
       case AdvanceAdType.banner:
-        return new AdvMercuryBannerAdapter(supData)
+        return new AdvMercuryBannerAdapter(data)
       case AdvanceAdType.interstitial:
-        return new AdvMercuryInterstitialAdapter(supData)
+        return new AdvMercuryInterstitialAdapter(data)
       case AdvanceAdType.rewardVideo:
-        return new AdvMercuryRewardVideoAdapter(supData)
+        return new AdvMercuryRewardVideoAdapter(data)
       case AdvanceAdType.nativeExpress:
-        return new AdvMercuryNativeExpressAdapter(supData)
+        return new AdvMercuryNativeExpressAdapter(data)
       case AdvanceAdType.renderFeed:
-        return new AdvMercuryRenderFeedAdapter(supData)
+        return new AdvMercuryRenderFeedAdapter(data)
       default:
         return undefined
     }
@@ -44,7 +45,7 @@ export class AdvMercuryUtil {
     return version
   }
 
-  static async loadMercurySDK(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
+  static async loadMercurySDK(supplier: AdvanceSupplierModel): Promise<AdvanceAdnInitResult> {
     return new Promise<AdvanceAdnInitResult>((resolve) => {
       let result = new AdvanceAdnInitResult()
       let mercuryState = AdvanceSetting.get().mercury_initState
@@ -55,20 +56,17 @@ export class AdvMercuryUtil {
         resolve(result)
       } else {
         BYLog.debug(TAG + '开始执行初始化')
-        let adData = adapter.unitData
-        if (adData && adData.supplier) {
-          let appID = adData.supplier.mediaid
-          let appKey = adData.supplier.mediakey
-          let v = AdvMercuryUtil.getMercurySDKVersion()
-          BYLog.debug(TAG + `mercury版本号：${v}`)
-          MercuryAD.initWindow(BYApp.getWindowStage())
-          MercuryAD.init(BYConstant.context, appID, appKey)
-          result.success = true
-          result.code = 0
-          result.msg = '初始化成功'
-          AdvanceSetting.get().mercury_initState = AdvanceAdnInitState.success
-          resolve(result)
-        }
+        let appID = supplier.mediaid
+        let appKey = supplier.mediakey
+        let v = AdvMercuryUtil.getMercurySDKVersion()
+        BYLog.debug(TAG + `mercury版本号：${v}`)
+        MercuryAD.initWindow(BYApp.getWindowStage())
+        MercuryAD.init(BYConstant.context, appID, appKey)
+        result.success = true
+        result.code = 0
+        result.msg = '初始化成功'
+        AdvanceSetting.get().mercury_initState = AdvanceAdnInitState.success
+        resolve(result)
       }
     });
   }

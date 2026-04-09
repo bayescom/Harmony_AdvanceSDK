@@ -6,7 +6,6 @@ import {
   AdvanceSplashCommonAdapter,
   ADV_ERR_AD_Invalid_Expired,
 } from 'advancesdk';
-import { AdvGDTUtil } from './AdvGDTUtil';
 
 
 const TAG = `[AdvGDTSplashAdapter]`
@@ -22,32 +21,24 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
     return isAdValid
   }
 
-  async adapter_loadAd() {
-    let initResult = await AdvGDTUtil.loadGDTSDK(this)
-    BYLog.debug(TAG + `gdt初始化执行结果：${JSON.stringify(initResult)}`)
-
-    if (initResult.success) { // 初始化成功
-      //执行广告加载流程
-      let spotId = this.unitData.supplier.adspotid
-      const config: GDTAdLoadConfig = {
-        posId: spotId,
-        timeoutMillis: this.unitData.supplier.timeout
-      };
-      GDTAdSDK.getAdLoader().loadSplashAd(config, {
-        onAdLoad: (ad: GDTSplashAd): void => {
-          BYLog.debug(TAG + "开屏回调 - onAdLoaded")
-          this.gdt_ad = ad
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
-        },
-        onError: (err: GDTError): void => {
-          BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
-        }
-      })
-
-    } else { // 初始化失败
-      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(initResult.code, initResult.msg))
-    }
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    const config: GDTAdLoadConfig = {
+      posId: spotId,
+      timeoutMillis: this.unitData.supplier.timeout
+    };
+    GDTAdSDK.getAdLoader().loadSplashAd(config, {
+      onAdLoad: (ad: GDTSplashAd): void => {
+        BYLog.debug(TAG + "开屏回调 - onAdLoaded")
+        this.gdt_ad = ad
+        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
+      },
+      onError: (err: GDTError): void => {
+        BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      }
+    })
   }
 
   adapter_showAd(windowStage: window.WindowStage) {

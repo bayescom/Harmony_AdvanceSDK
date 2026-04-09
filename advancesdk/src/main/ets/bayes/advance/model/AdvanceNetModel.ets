@@ -103,6 +103,7 @@ export class AdvanceSupplierModel {
   sdktag: string = ""
   sdk_id: string = '' // 渠道SDK广告源唯一id
   loadedtk: string[] = []
+  loadendtk: string[] = []
   succeedtk: string[] = []
   failedtk: string[] = []
   wintk: string[] = []

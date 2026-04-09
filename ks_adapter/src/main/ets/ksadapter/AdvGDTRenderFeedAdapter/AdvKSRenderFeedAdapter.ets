@@ -6,7 +6,6 @@ import {
   AdvanceRenderFeedWrapper,
 } from 'advancesdk';
 import { KSAdScene, KSAdSDK, KSNativeAd, KSVideoPlayError} from 'ksadsdk';
-import { AdvKSUtil } from '../AdvKSUtil';
 import { AdvKSRenderFeedAdWrapper } from './AdvKSRenderFeedAdWrapper';
 
 
@@ -16,42 +15,34 @@ export class AdvKSRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
   protected ks_ad?: KSNativeAd
   protected wrapper?: AdvanceRenderFeedWrapper | undefined
 
-  async adapter_loadAd() {
-    let initResult = await AdvKSUtil.loadKSSDK(this)
-    BYLog.debug(TAG + `ks初始化执行结果：${JSON.stringify(initResult)}`)
-
-    if (initResult.success) { // 初始化成功
-      //执行广告加载流程
-      let spotId = this.unitData.supplier.adspotid
-      const scene: KSAdScene = new KSAdScene()
-        .setPosId(spotId)
-        .setAdNum(1)
-      const that = this // 参照快手demo内写法；因为callback内获取的this不是当前adpater对象，而是listener对象
-      KSAdSDK.getLoadManager().loadNativeAd(scene, {
-        onRequestSuccess(ads: Array<KSNativeAd>) {
-          // 广告请求成功
-        },
-        onError(code: number, msg: string) {
-          // 广告请求失败
-          BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${code} message: ${msg}`)
-          that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(code, msg))
-        },
-        onAdLoad(ads: KSNativeAd[]) {
-          // 广告成功加载，可以展示
-          if (ads && ads.length > 0) {
-            BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
-            that.ks_ad = ads[0]
-            that.wrapper = new AdvKSRenderFeedAdWrapper(that.ks_ad)
-            that.bridge?.bridge_didAdLoaded(that.unitData.supplier, that.ks_ad.getEcpm())
-          } else {
-            that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
-          };
-        }
-      })
-
-    } else { // 初始化失败
-      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(initResult.code, initResult.msg))
-    }
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    const scene: KSAdScene = new KSAdScene()
+      .setPosId(spotId)
+      .setAdNum(1)
+    const that = this // 参照快手demo内写法；因为callback内获取的this不是当前adpater对象，而是listener对象
+    KSAdSDK.getLoadManager().loadNativeAd(scene, {
+      onRequestSuccess(ads: Array<KSNativeAd>) {
+        // 广告请求成功
+      },
+      onError(code: number, msg: string) {
+        // 广告请求失败
+        BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${code} message: ${msg}`)
+        that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(code, msg))
+      },
+      onAdLoad(ads: KSNativeAd[]) {
+        // 广告成功加载，可以展示
+        if (ads && ads.length > 0) {
+          BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
+          that.ks_ad = ads[0]
+          that.wrapper = new AdvKSRenderFeedAdWrapper(that.ks_ad)
+          that.bridge?.bridge_didAdLoaded(that.unitData.supplier, that.ks_ad.getEcpm())
+        } else {
+          that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+        };
+      }
+    })
   }
   
   adapter_render(context: UIContext): void {

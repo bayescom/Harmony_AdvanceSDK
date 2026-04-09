@@ -13,7 +13,6 @@ import {
   BYConstant,
   BYDisplay,
 } from 'advancesdk';
-import { AdvGDTUtil } from './AdvGDTUtil';
 
 
 const TAG = `[AdvGDTNativeExpressAdapter]`
@@ -21,47 +20,39 @@ const TAG = `[AdvGDTNativeExpressAdapter]`
 export class AdvGDTNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter {
   protected gdt_ad?: GDTNativeAd
 
-  async adapter_loadAd() {
-    let initResult = await AdvGDTUtil.loadGDTSDK(this)
-    BYLog.debug(TAG + `gdt初始化执行结果：${JSON.stringify(initResult)}`)
-
-    if (initResult.success) { // 初始化成功
-      //执行广告加载流程
-      let spotId = this.unitData.supplier.adspotid
-      let width = this.unitData.ext?.vpWidth ?? 0
-      let height = this.unitData.ext?.vpHeight ?? 0
-      //未配置的话取屏幕宽
-      if (width <= 0) {
-        width = BYDisplay.px2VP(BYDisplay.getScreenWPX())
-      }
-      //高度GDTAdSize.AUTO_HEIGHT代表自适应
-      if (height <= 0) {
-        height = GDTAdSize.AUTO_HEIGHT
-      }
-      const config: GDTAdLoadConfig = {
-        posId: spotId,
-        count: 1,
-        adSize: new GDTAdSize(width, height)
-      };
-      GDTAdSDK.getAdLoader().loadNativeAd(config, {
-        onAdLoad: (ads: Array<GDTNativeAd>): void => {
-          if (ads && ads.length > 0) {
-            BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
-            this.gdt_ad = ads[0]
-            this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
-          } else {
-            this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
-          };
-        },
-        onError: (err: GDTError): void => {
-          BYLog.debug(TAG + `模板信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
-        }
-      })
-
-    } else { // 初始化失败
-      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(initResult.code, initResult.msg))
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    let width = this.unitData.ext?.vpWidth ?? 0
+    let height = this.unitData.ext?.vpHeight ?? 0
+    //未配置的话取屏幕宽
+    if (width <= 0) {
+      width = BYDisplay.px2VP(BYDisplay.getScreenWPX())
     }
+    //高度GDTAdSize.AUTO_HEIGHT代表自适应
+    if (height <= 0) {
+      height = GDTAdSize.AUTO_HEIGHT
+    }
+    const config: GDTAdLoadConfig = {
+      posId: spotId,
+      count: 1,
+      adSize: new GDTAdSize(width, height)
+    };
+    GDTAdSDK.getAdLoader().loadNativeAd(config, {
+      onAdLoad: (ads: Array<GDTNativeAd>): void => {
+        if (ads && ads.length > 0) {
+          BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
+          this.gdt_ad = ads[0]
+          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
+        } else {
+          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+        };
+      },
+      onError: (err: GDTError): void => {
+        BYLog.debug(TAG + `模板信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      }
+    })
   }
 
   adapter_render(context: UIContext): void {

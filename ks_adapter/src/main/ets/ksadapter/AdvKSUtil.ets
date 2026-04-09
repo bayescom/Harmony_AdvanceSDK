@@ -8,6 +8,7 @@ import {
   AdvanceAdnInitState,
   BYApp,
 } from 'advancesdk'
+import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 import { KSAdSDK, KSAdSDKInitConfig } from 'ksadsdk'
 import { AdvKSRenderFeedAdapter } from './AdvGDTRenderFeedAdapter/AdvKSRenderFeedAdapter'
 import { AdvKSInterstitialAdapter } from './AdvKSInterstitialAdapter'
@@ -18,18 +19,18 @@ import { AdvKSSplashAdapter } from './AdvKSSplashAdapter'
 const TAG = `[AdvKSUtil] `
 
 export class AdvKSUtil {
-  static getKSAdAdapter(supData: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (supData.adType) {
+  static getKSAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
+    switch (data.adType) {
       case AdvanceAdType.splash:
-        return new AdvKSSplashAdapter(supData)
+        return new AdvKSSplashAdapter(data)
       case AdvanceAdType.interstitial:
-        return new AdvKSInterstitialAdapter(supData)
+        return new AdvKSInterstitialAdapter(data)
       case AdvanceAdType.rewardVideo:
-        return new AdvKSRewardVideoAdapter(supData)
+        return new AdvKSRewardVideoAdapter(data)
       case AdvanceAdType.nativeExpress:
-        return new AdvKSNativeExpressAdapter(supData)
+        return new AdvKSNativeExpressAdapter(data)
       case AdvanceAdType.renderFeed:
-        return new AdvKSRenderFeedAdapter(supData)
+        return new AdvKSRenderFeedAdapter(data)
       default:
         return undefined
     }
@@ -40,7 +41,7 @@ export class AdvKSUtil {
     return version
   }
 
-  static async loadKSSDK(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
+  static async loadKSSDK(supplier: AdvanceSupplierModel): Promise<AdvanceAdnInitResult> {
     return new Promise<AdvanceAdnInitResult>((resolve) => {
       let result = new AdvanceAdnInitResult()
       let ksState = AdvanceSetting.get().ks_initState
@@ -75,29 +76,26 @@ export class AdvKSUtil {
         }, perMs);
       } else {
         BYLog.debug(TAG + '开始执行初始化')
-        let adData = adapter.unitData
-        if (adData && adData.supplier) {
-          let appID = adData.supplier.mediaid
-          const initConfig: KSAdSDKInitConfig = {
-            appId: appID,
-          }
-          KSAdSDK.init(
-            initConfig,
-            BYApp.getApplicationContext(),
-            BYApp.getWindowStage()
-          )
-          let v = AdvKSUtil.getKSSDKVersion()
-          BYLog.debug(TAG + `ks版本号：${v}`)
-          KSAdSDK.start().then((success) => {
-            result.success = success
-            result.code = success ? 0 : -1
-            result.msg = '初始化' + success ? "成功" : "失败"
-            AdvanceSetting.get().ks_initState = success ? AdvanceAdnInitState.success : AdvanceAdnInitState.failed
-            resolve(result)
-          });
-          // 初始化进行中
-          AdvanceSetting.get().ks_initState = AdvanceAdnInitState.loading
+        let appID = supplier.mediaid
+        const initConfig: KSAdSDKInitConfig = {
+          appId: appID,
         }
+        KSAdSDK.init(
+          initConfig,
+          BYApp.getApplicationContext(),
+          BYApp.getWindowStage()
+        )
+        let v = AdvKSUtil.getKSSDKVersion()
+        BYLog.debug(TAG + `ks版本号：${v}`)
+        KSAdSDK.start().then((success) => {
+          result.success = success
+          result.code = success ? 0 : -1
+          result.msg = '初始化' + success ? "成功" : "失败"
+          AdvanceSetting.get().ks_initState = success ? AdvanceAdnInitState.success : AdvanceAdnInitState.failed
+          resolve(result)
+        });
+        // 初始化进行中
+        AdvanceSetting.get().ks_initState = AdvanceAdnInitState.loading
       }
     });
   }

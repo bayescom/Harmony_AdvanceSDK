@@ -10,6 +10,7 @@ import {
   AdvanceAdnInitState,
   BYSetting
 } from 'advancesdk'
+import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 import { AdvCSJBannerAdapter } from './AdvCSJBannerAdapter'
 import { AdvCSJInterstitialAdapter } from './AdvCSJInterstitialAdapter'
 import { AdvCSJNativeExpressAdapter } from './AdvCSJNativeExpressAdapter'
@@ -44,7 +45,7 @@ export class AdvCSJUtil {
     return version
   }
 
-  static async loadCSJSDK(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
+  static async loadCSJSDK(supplier: AdvanceSupplierModel): Promise<AdvanceAdnInitResult> {
     return new Promise<AdvanceAdnInitResult>((resolve) => {
       let result = new AdvanceAdnInitResult()
       let csjState = AdvanceSetting.get().csj_initState
@@ -79,36 +80,33 @@ export class AdvCSJUtil {
         }, perMs);
       } else {
         BYLog.debug(TAG + '开始执行初始化')
-        let adData = adapter.unitData
-        if (adData && adData.supplier) {
-          let adConfigBuilder = new SDKConfigBuilder()
-          let appID = adData.supplier.mediaid
-          BYLog.debug(TAG + `穿山甲 appID = ${appID} `)
-          let config: SDKConfig = adConfigBuilder
-            .appId(appID)
-            .appName("appName")
-            .allowShowNotify(true)
-            .debug(BYSetting.get().isDev)
-            .build()
+        let adConfigBuilder = new SDKConfigBuilder()
+        let appID = supplier.mediaid
+        BYLog.debug(TAG + `穿山甲 appID = ${appID} `)
+        let config: SDKConfig = adConfigBuilder
+          .appId(appID)
+          .appName("appName")
+          .allowShowNotify(true)
+          .debug(BYSetting.get().isDev)
+          .build()
 
-          CSJAdSdk.init(BYConstant.context, config)
-          let v = AdvCSJUtil.getCSJSDKVersion()
-          BYLog.debug(TAG + `csj版本号：${v}`)
-          CSJAdSdk.start().then((res) => {
-            result.code = res.code
-            result.msg = res.msg
-            if (res.code == 0 || res.code == 4200) {
-              result.success = true
-              AdvanceSetting.get().csj_initState = AdvanceAdnInitState.success
-            } else {
-              result.success = false
-              AdvanceSetting.get().csj_initState = AdvanceAdnInitState.failed
-            }
-             resolve(result)
-          })
-          // 初始化进行中
-          AdvanceSetting.get().csj_initState = AdvanceAdnInitState.loading
-        }
+        CSJAdSdk.init(BYConstant.context, config)
+        let v = AdvCSJUtil.getCSJSDKVersion()
+        BYLog.debug(TAG + `csj版本号：${v}`)
+        CSJAdSdk.start().then((res) => {
+          result.code = res.code
+          result.msg = res.msg
+          if (res.code == 0 || res.code == 4200) {
+            result.success = true
+            AdvanceSetting.get().csj_initState = AdvanceAdnInitState.success
+          } else {
+            result.success = false
+            AdvanceSetting.get().csj_initState = AdvanceAdnInitState.failed
+          }
+          resolve(result)
+        })
+        // 初始化进行中
+        AdvanceSetting.get().csj_initState = AdvanceAdnInitState.loading
       }
     });
   }

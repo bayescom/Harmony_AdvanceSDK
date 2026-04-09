@@ -6,7 +6,8 @@ import {
   ADV_ERR_SDK_INIT_MISS,
   ADV_ERR_ALL_ADN_FAILED,
   ADV_ERR_DATA_NULL,
-  ADV_ERR_ADN_TIMEOUT
+  ADV_ERR_ADN_TIMEOUT,
+  ADV_ERR_ADN_INIT_FAILED
 } from '../define/AdvanceError'
 import { AdvanceStrategyModel, AdvanceSupplierModel } from '../model/AdvanceNetModel'
 import { AdvanceRequestManger } from '../net/AdvanceRequestManger'
@@ -122,7 +123,7 @@ export abstract class AdvanceAdBase {
     }
     // this.startBidding(templeSuppliers)
     // 并发执行混合策略下队列中的广告请求
-    templeSuppliers.forEach(async (supplier: AdvanceSupplierModel, index: number) => {
+    templeSuppliers.forEach(async (supplier: AdvanceSupplierModel) => {
       this.reportAdnTask(AdvanceAdnReportTKEventType.loaded, supplier)
 
       let adnData = new AdvanceADNUnitData()
@@ -132,6 +133,16 @@ export abstract class AdvanceAdBase {
       //宽高属性值设置
       adnData.ext.vpWidth = this.adConfig.adWidth ?? 0
       adnData.ext.vpHeight = this.adConfig.adHeight ?? 0
+      // 初始化SDK
+      let initResult = await AdvanceADNManager.loadADN(supplier)
+      if (!initResult.success) {
+        BYLog.debug(`${supplier.name}渠道SDK执行初始化失败`)
+        this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, new AdvanceError(ADV_ERR_ADN_INIT_FAILED, `${supplier.name}初始化失败：code: ${initResult.code}, msg: ${initResult.msg}`))
+        return // 在 forEach 中相当于 continue
+      }
+      BYLog.debug(`${supplier.name}渠道SDK执行初始化成功`)
+      this.reportAdnTask(AdvanceAdnReportTKEventType.loadend, supplier)
+
       // 生成用来加载广告adn的适配器，进行后续广告请求及展示操作
       let adapter = await AdvanceADNManager.generateAdnAdapter(adnData)
       // 添加元素
@@ -176,7 +187,7 @@ export abstract class AdvanceAdBase {
 
   /**
    * 检测是否命中用于展示的渠道
-   * 由每个渠道SDK Callback返回结果时调用 或者 超时后调用
+   * 由每个渠道SDK Callback返回结果时调用 或 超时后调用 或 SDK初始化失败时调用
    * @param supplier: loadAd后返回结果的某个渠道
    * @param state: loadAd后返回结果状态
    * @param error: 错误信息
@@ -200,7 +211,7 @@ export abstract class AdvanceAdBase {
         } else {
           this.biddingSuppliers.splice(this.biddingSuppliers.indexOf(supplier), 1)
         }
-        // 上报渠道广告获取失败/超时
+        // 上报渠道广告获取失败/超时/初始化失败
         this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
         break
       default:
@@ -332,6 +343,9 @@ export abstract class AdvanceAdBase {
       case AdvanceAdnReportTKEventType.loaded:
         reportUrls = supplier.loadedtk
         break
+      case AdvanceAdnReportTKEventType.loadend:
+        reportUrls = supplier.loadendtk
+        break
       case AdvanceAdnReportTKEventType.succeed:
         reportUrls = supplier.succeedtk
         break
@@ -360,9 +374,9 @@ export abstract class AdvanceAdBase {
 
   // 收集渠道广告加载错误的信息
   private collectAdnError(supplier: AdvanceSupplierModel, error?: AdvanceError) {
-    // key: 渠道名-渠道id
+    // key: 渠道名-渠道id-sdk_id
     if (error) {
-      const key = `${supplier.name}-${supplier.id}`
+      const key = `${supplier.name}-${supplier.id}-${supplier.sdk_id}`
       this.errorInfo.set(key, error)
     }
   }

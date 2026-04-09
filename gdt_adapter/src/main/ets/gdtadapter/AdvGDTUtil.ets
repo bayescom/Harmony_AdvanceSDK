@@ -17,24 +17,25 @@ import { AdvGDTRewardVideoAdapter } from './AdvGDTRewardVideoAdapter'
 import { AdvGDTBannerAdapter } from './AdvGDTBannerAdapter'
 import { AdvGDTNativeExpressAdapter } from './AdvGDTNativeExpressAdapter'
 import { AdvGDTRenderFeedAdapter } from './AdvGDTRenderFeedAdapter/AdvGDTRenderFeedAdapter'
+import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 
 const TAG = `[AdvGDTUtil] `
 
 export class AdvGDTUtil {
-  static getGDTAdAdapter(supData: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (supData.adType) {
+  static getGDTAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
+    switch (data.adType) {
       case AdvanceAdType.splash:
-        return new AdvGDTSplashAdapter(supData)
+        return new AdvGDTSplashAdapter(data)
       case AdvanceAdType.banner:
-        return new AdvGDTBannerAdapter(supData)
+        return new AdvGDTBannerAdapter(data)
       case AdvanceAdType.interstitial:
-        return new AdvGDTInterstitialAdapter(supData)
+        return new AdvGDTInterstitialAdapter(data)
       case AdvanceAdType.rewardVideo:
-        return new AdvGDTRewardVideoAdapter(supData)
+        return new AdvGDTRewardVideoAdapter(data)
       case AdvanceAdType.nativeExpress:
-        return new AdvGDTNativeExpressAdapter(supData)
+        return new AdvGDTNativeExpressAdapter(data)
       case AdvanceAdType.renderFeed:
-        return new AdvGDTRenderFeedAdapter(supData)
+        return new AdvGDTRenderFeedAdapter(data)
       default:
         return undefined
     }
@@ -45,7 +46,7 @@ export class AdvGDTUtil {
     return version
   }
 
-  static async loadGDTSDK(adapter: AdvanceCommonAdapter): Promise<AdvanceAdnInitResult> {
+  static async loadGDTSDK(supplier: AdvanceSupplierModel): Promise<AdvanceAdnInitResult> {
     return new Promise<AdvanceAdnInitResult>((resolve) => {
       let result = new AdvanceAdnInitResult()
       let gdtState = AdvanceSetting.get().gdt_initState
@@ -80,30 +81,27 @@ export class AdvGDTUtil {
         }, perMs);
       } else {
         BYLog.debug(TAG + '开始执行初始化')
-        let adData = adapter.unitData
-        if (adData && adData.supplier) {
-          let appID = adData.supplier.mediaid
-          GDTAdSDK.init(BYConstant.context, {
-            appId: appID
-          })
-          let v = AdvGDTUtil.getGDTSDKVersion()
-          BYLog.debug(TAG + `gdt版本号：${v}`)
-          GDTAdSDK.start().then((res) => {
-            result.success = true
-            result.code = res.code
-            result.msg = res.msg
-            AdvanceSetting.get().gdt_initState = AdvanceAdnInitState.success
-            resolve(result)
-          }).catch((err: BusinessError) => {
-            result.success = false
-            result.code = err.code
-            result.msg = err.message
-            AdvanceSetting.get().gdt_initState = AdvanceAdnInitState.failed
-            resolve(result)
-          });
-          // 初始化进行中
-          AdvanceSetting.get().gdt_initState = AdvanceAdnInitState.loading
-        }
+        let appID = supplier.mediaid
+        GDTAdSDK.init(BYConstant.context, {
+          appId: appID
+        })
+        let v = AdvGDTUtil.getGDTSDKVersion()
+        BYLog.debug(TAG + `gdt版本号：${v}`)
+        GDTAdSDK.start().then((res) => {
+          result.success = true
+          result.code = res.code
+          result.msg = res.msg
+          AdvanceSetting.get().gdt_initState = AdvanceAdnInitState.success
+          resolve(result)
+        }).catch((err: BusinessError) => {
+          result.success = false
+          result.code = err.code
+          result.msg = err.message
+          AdvanceSetting.get().gdt_initState = AdvanceAdnInitState.failed
+          resolve(result)
+        });
+        // 初始化进行中
+        AdvanceSetting.get().gdt_initState = AdvanceAdnInitState.loading
       }
     });
   }

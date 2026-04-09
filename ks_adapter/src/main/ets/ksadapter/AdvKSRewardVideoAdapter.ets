@@ -5,7 +5,6 @@ import {
   AdvanceRewardVideoCommonAdapter,
 } from 'advancesdk';
 import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSRewardAd} from 'ksadsdk';
-import { AdvKSUtil } from './AdvKSUtil';
 
 
 const TAG = `[AdvKSRewardVideoAdapter]`
@@ -17,38 +16,30 @@ export class AdvKSRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     return true
   }
 
-  async adapter_loadAd() {
-    let initResult = await AdvKSUtil.loadKSSDK(this)
-    BYLog.debug(TAG + `ks初始化执行结果：${JSON.stringify(initResult)}`)
-
-    if (initResult.success) { // 初始化成功
-      let spotId = this.unitData.supplier.adspotid
-      //执行广告加载流程
-      const scene: KSAdScene = new KSAdScene()
-        .setPosId(spotId)
-        .setAdNum(1)
-        .setScreenOrientation(KSAdScreenDirection.vertical);
-      const that = this // 参照快手demo内写法；因为callback内获取的this不是当前adpater对象，而是listener对象
-      KSAdSDK.getLoadManager().loadRewardAd(scene, {
-        onRequestSuccess(ad: KSRewardAd) {
-          // 广告请求成功
-        },
-        onError(code: number, msg: string) {
-          // 广告请求失败
-          BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${code} message: ${msg}`)
-          that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(code, msg))
-        },
-        onAdLoad(ad: KSRewardAd) {
-          // 广告成功加载，可以展示
-          BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
-          that.ks_ad = ad
-          that.bridge?.bridge_didAdLoaded(that.unitData.supplier, ad.getEcpm())
-        }
-      })
-
-    } else { // 初始化失败
-      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(initResult.code, initResult.msg))
-    }
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    const scene: KSAdScene = new KSAdScene()
+      .setPosId(spotId)
+      .setAdNum(1)
+      .setScreenOrientation(KSAdScreenDirection.vertical);
+    const that = this // 参照快手demo内写法；因为callback内获取的this不是当前adpater对象，而是listener对象
+    KSAdSDK.getLoadManager().loadRewardAd(scene, {
+      onRequestSuccess(ad: KSRewardAd) {
+        // 广告请求成功
+      },
+      onError(code: number, msg: string) {
+        // 广告请求失败
+        BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${code} message: ${msg}`)
+        that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(code, msg))
+      },
+      onAdLoad(ad: KSRewardAd) {
+        // 广告成功加载，可以展示
+        BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
+        that.ks_ad = ad
+        that.bridge?.bridge_didAdLoaded(that.unitData.supplier, ad.getEcpm())
+      }
+    })
   }
 
   adapter_showAd(windowStage: window.WindowStage) {

@@ -32,6 +32,7 @@ export class AdvanceUtil {
     let costTime = currentTimeStamp - loadTimeStamp
     switch (eventType) {
       case AdvanceAdnReportTKEventType.loaded:
+      case AdvanceAdnReportTKEventType.loadend:
         // 拼接SDK启动耗时
         url += `&t_msg=l_${costTime}`
         break

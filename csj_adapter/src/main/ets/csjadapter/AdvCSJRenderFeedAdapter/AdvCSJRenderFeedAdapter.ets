@@ -7,7 +7,6 @@ import { AdSlot, AdSlotBuilder, CSJAdCreator,
   CSJFeedAd, CSJNativeAd,
   CSJVideoAdListener,
   ExpressRenderListener} from '@csj/openadsdk';
-import { AdvCSJUtil } from '../AdvCSJUtil';
 import { ArrayList } from '@kit.ArkTS';
 import { AdvCSJRenderFeedAdWrapper } from './AdvCSJRenderFeedAdWrapper';
 
@@ -17,43 +16,34 @@ export class AdvCSJRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
   protected csj_ad?: CSJFeedAd
   protected wrapper?: AdvanceRenderFeedWrapper | undefined
 
-  async adapter_loadAd() {
-    let initResult = await AdvCSJUtil.loadCSJSDK(this)
-    BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
 
-    if (initResult.success == true) { // 初始化成功
-      //执行广告加载流程
-      let spotId = this.unitData.supplier.adspotid
-      let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
+    let adSlot: AdSlot = new AdSlotBuilder()
+      .setCodeId(spotId)
+      .setAdCount(1)
+      .setSupportRenderControl(true)
+      .build();
 
-      let adSlot: AdSlot = new AdSlotBuilder()
-        .setCodeId(spotId)
-        .setAdCount(1)
-        .setSupportRenderControl(true)
-        .build();
-
-      mAdCreator.loadFeedAd(adSlot, {
-        onFeedAdLoad: (ads: ArrayList<CSJFeedAd>) => {
-          if (ads && ads.length > 0) {
-            BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
-            this.csj_ad = ads[0]
-            this.wrapper = new AdvCSJRenderFeedAdWrapper(this.csj_ad)
-            // 穿山甲变现SDK不提供ecpm获取
-            this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
-          } else {
-            this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
-          };
-        },
-        onError: (code: number, message: string) => {
-          BYLog.debug(TAG + `自渲染息流回调 - onAdLoadFailed code: ${code} message: ${message}`)
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
-        }
-      })
-
-    } else { // 初始化失败
-      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier!, new AdvanceError(initResult.code, initResult.msg))
-    }
-
+    mAdCreator.loadFeedAd(adSlot, {
+      onFeedAdLoad: (ads: ArrayList<CSJFeedAd>) => {
+        if (ads && ads.length > 0) {
+          BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
+          this.csj_ad = ads[0]
+          this.wrapper = new AdvCSJRenderFeedAdWrapper(this.csj_ad)
+          // 穿山甲变现SDK不提供ecpm获取
+          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
+        } else {
+          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+        };
+      },
+      onError: (code: number, message: string) => {
+        BYLog.debug(TAG + `自渲染息流回调 - onAdLoadFailed code: ${code} message: ${message}`)
+        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
+      }
+    })
   }
 
   adapter_render(context: UIContext) {

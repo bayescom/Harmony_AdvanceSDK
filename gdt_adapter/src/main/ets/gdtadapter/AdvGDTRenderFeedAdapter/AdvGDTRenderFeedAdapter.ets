@@ -21,37 +21,29 @@ export class AdvGDTRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
   protected gdt_ad?: GDTManualAd
   protected wrapper?: AdvanceRenderFeedWrapper | undefined
 
-  async adapter_loadAd() {
-    let initResult = await AdvGDTUtil.loadGDTSDK(this)
-    BYLog.debug(TAG + `gdt初始化执行结果：${JSON.stringify(initResult)}`)
-
-    if (initResult.success) { // 初始化成功
-      //执行广告加载流程
-      let spotId = this.unitData.supplier.adspotid
-      const config: GDTAdLoadConfig = {
-        posId: spotId,
-        count: 1,
-      };
-      GDTAdSDK.getAdLoader().loadManualAd(config, {
-        onAdLoad: (ads: Array<GDTManualAd>): void => {
-          if (ads && ads.length > 0) {
-            BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
-            this.gdt_ad = ads[0]
-            this.wrapper = new AdvGDTRenderFeedAdWrapper(this.gdt_ad)
-            this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
-          } else {
-            this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
-          };
-        },
-        onError: (err: GDTError): void => {
-          BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
-        }
-      })
-
-    } else { // 初始化失败
-      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(initResult.code, initResult.msg))
-    }
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    const config: GDTAdLoadConfig = {
+      posId: spotId,
+      count: 1,
+    };
+    GDTAdSDK.getAdLoader().loadManualAd(config, {
+      onAdLoad: (ads: Array<GDTManualAd>): void => {
+        if (ads && ads.length > 0) {
+          BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
+          this.gdt_ad = ads[0]
+          this.wrapper = new AdvGDTRenderFeedAdWrapper(this.gdt_ad)
+          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
+        } else {
+          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+        };
+      },
+      onError: (err: GDTError): void => {
+        BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      }
+    })
   }
 
   adapter_render(context: UIContext): void {

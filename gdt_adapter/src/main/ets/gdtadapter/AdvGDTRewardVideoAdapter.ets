@@ -8,7 +8,6 @@ import {
   ADV_ERR_AD_Invalid_Expired,
   AdvanceRewardVideoCommonAdapter,
 } from 'advancesdk';
-import { AdvGDTUtil } from './AdvGDTUtil';
 
 
 const TAG = `[AdvGDTRewardVideoAdapter]`
@@ -24,31 +23,23 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     return isAdValid
   }
 
-  async adapter_loadAd() {
-    let initResult = await AdvGDTUtil.loadGDTSDK(this)
-    BYLog.debug(TAG + `gdt初始化执行结果：${JSON.stringify(initResult)}`)
-
-    if (initResult.success) { // 初始化成功
-      //执行广告加载流程
-      let spotId = this.unitData.supplier.adspotid
-      const config: GDTAdLoadConfig = {
-        posId: spotId
-      };
-      GDTAdSDK.getAdLoader().loadRewardAd(config, {
-        onAdLoad: (ad: GDTRewardAd): void => {
-          BYLog.debug(TAG + "激励视频 - onAdLoaded")
-          this.gdt_ad = ad
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
-        },
-        onError: (err: GDTError): void => {
-          BYLog.debug(TAG + `激励视频 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
-        }
-      })
-
-    } else { // 初始化失败
-      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(initResult.code, initResult.msg))
-    }
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    const config: GDTAdLoadConfig = {
+      posId: spotId
+    };
+    GDTAdSDK.getAdLoader().loadRewardAd(config, {
+      onAdLoad: (ad: GDTRewardAd): void => {
+        BYLog.debug(TAG + "激励视频 - onAdLoaded")
+        this.gdt_ad = ad
+        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
+      },
+      onError: (err: GDTError): void => {
+        BYLog.debug(TAG + `激励视频 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      }
+    })
   }
 
   adapter_showAd(windowStage: window.WindowStage) {
