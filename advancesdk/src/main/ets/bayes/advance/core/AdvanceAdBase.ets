@@ -3,618 +3,396 @@ import { AdvanceAdLoadConfig } from '../config/AdvanceAdConfig'
 import { AdvanceADNUnitData, AdvanceSupplierExt } from './adn/AdvanceADNUnitData'
 import {
   AdvanceError,
-  ADV_ERR_ADN_INIT_MISS,
-  ADV_ERR_ALL_FAILED,
+  ADV_ERR_SDK_INIT_MISS,
+  ADV_ERR_ALL_ADN_FAILED,
   ADV_ERR_DATA_NULL,
-  ADV_ERR_NO_ADAPTER
+  ADV_ERR_ADN_TIMEOUT
 } from '../define/AdvanceError'
-import { AdvanceParaGroup } from '../model/AdvanceGroup'
-import { AdvanceStrategyResponse } from '../model/AdvanceNetModel'
+import { AdvanceStrategyModel, AdvanceSupplierModel } from '../model/AdvanceNetModel'
 import { AdvanceRequestManger } from '../net/AdvanceRequestManger'
 import { AdvanceCommonAdapter } from './adn/AdvanceCommonAdapter'
-import { AdvanceAdLoadListener } from './AdvanceAdOpenListener'
 import { taskpool } from '@kit.ArkTS'
-import { AdvanceAdnStatusResult } from '../model/AdvanceSendModel'
 import AdvanceNet from '../net/AdvanceRequest'
-import { BYStrUtil } from '../../basic/util/BYStrUtil'
-import { AdvanceADNManager } from './adn/AdvanceADNManager'
-import { AdvanceConstant } from '../define/AdvanceConstant'
 import { AdvanceUtil } from './AdvanceUtil'
 import { BYConstant } from '../../basic/BYConstant'
-import { window } from '@kit.ArkUI'
-import { AdvanceAdLoadState } from '../../../../../../Index'
+import { AdvanceAdnLoadAdState,
+  AdvanceAdnReportTKEventType,
+   } from '../define/AdvanceDefine'
+import { AdvanceAdInfo } from '../model/AdvanceAdInfo'
+import { AdvanceADNManager } from './adn/AdvanceADNManager'
+import { systemDateTime } from '@kit.BasicServicesKit'
 
 
 const TAG = `[AdvanceAdBase] `
 
 export abstract class AdvanceAdBase {
   protected adConfig: AdvanceAdLoadConfig
-  protected loadListener ?: AdvanceAdLoadListener
   protected adSlotType: number = 0
-  protected paraTimeOut: number = AdvanceConstant.ADV_PARA_GROUP_TIMEOUT //组超时时间，单位毫秒
-  //并行策略组
-  protected supplierGroups: AdvanceParaGroup[] = []
-  //当前执行的SDK组
-  protected runningGroup ?: AdvanceParaGroup
-  // currentAD ?: AdvanceADNUnitData
-  protected adapterMap: Map<number, AdvanceCommonAdapter> | undefined = new Map()
-  //最优adn
-  protected tempBestAdn: AdvanceADNUnitData | undefined
-  //当前组可用数量，用来判断是否组内全部失败
-  protected currentGroupAbleSize: number = 0;
+  protected winAdapter?: AdvanceCommonAdapter
+  private adapterMap: Map<string, AdvanceCommonAdapter> | undefined = new Map()
+  private strategyModel = new AdvanceStrategyModel()
+  private errorInfo = new Map<string, object>()
+  private loadTimestamp: number = 0 // 发起请求时间戳
+  private timeoutId: number = 0
+  // 已根据优先级排序的第一组parallel渠道
+  private parallelSuppliers: AdvanceSupplierModel[] = []
+  // head_bidding组渠道
+  private biddingSuppliers: AdvanceSupplierModel[] = []
+  // 混合策略组渠道
+  private mixedSuppliers: AdvanceSupplierModel[] = []
+  // bidding组中最高价渠道
+  private bidTargetSupplier?: AdvanceSupplierModel
 
-  protected abstract adnWin()
+  // abstract functions
+  // abstract loadStrategySuccess(model: AdvanceStrategyModel)
+  protected abstract loadStrategyFailed(err: AdvanceError)
 
-  constructor(config: AdvanceAdLoadConfig) {
+  // abstract startBidding(suppliers: AdvanceSupplierModel[])
+  protected abstract loadAnyAdnAdapter(adapter: AdvanceCommonAdapter)
+
+  protected abstract allAdnBiddingFail(err: AdvanceError)
+
+  protected abstract adnBidWin(adInfo: AdvanceAdInfo)
+
+  protected constructor(config: AdvanceAdLoadConfig) {
     this.adConfig = config
   }
 
-
   protected loadStrategy(): void {
-    try {
-      if (!BYConstant.context) {
-        let advErr = new AdvanceError()
-        advErr.code = ADV_ERR_ADN_INIT_MISS
-        advErr.msg = '未找到上下文，请先确保正确完成AdvanceSDK初始化'
-        BYLog.error(TAG + advErr.msg)
+    if (!BYConstant.context) {
+      let advErr = new AdvanceError()
+      advErr.code = ADV_ERR_SDK_INIT_MISS
+      advErr.msg = '未找到上下文，请先确保完成AdvanceSDK初始化'
+      BYLog.error(TAG + advErr.msg)
+      this.loadStrategyFailed(advErr)
+      return
+    }
+
+    this.loadTimestamp = systemDateTime.getTime()
+    AdvanceRequestManger.requestStrategy(this.adConfig, (err, data) => {
+      if (err) {
+        BYLog.error(TAG + err.msg)
+        this.loadStrategyFailed(err)
         return
       }
-
-      AdvanceRequestManger.requestStrategy(this.adConfig, (err, data) => {
-        if (err) {
-          BYLog.error(TAG + err.msg)
-          this.loadListener?.onAdLoadFailed(err)
-          return
-        }
-        if (!data) {
-          let advErr = new AdvanceError()
-          advErr.code = ADV_ERR_DATA_NULL
-          advErr.msg = '获取到得策略信息为空'
-          BYLog.error(TAG + advErr.msg)
-          this.loadListener?.onAdLoadFailed(advErr)
-          return
-        }
-        //将返回策略，解析成必要数据信息
-        this.covertData(data)
-
-      })
-    } catch (e) {
-      BYLog.printE(e)
-    }
-  }
-
-  // //获取当前胜出的渠道信息
-  // getWinSupplier(): AdvanceAdInfo | undefined {
-  //   try {
-  //     let bestSup = this.runningGroup?.bestADN?.supplier
-  //     if (bestSup) {
-  //       return AdvanceUtil.caseSupplier(bestSup)
-  //     }
-  //   } catch (e) {
-  //     BYLog.printE(e)
-  //   }
-  //   return
-  // }
-
-
-  //首先映射对应adnAdapter到map。再对策略进行分组，获得并发组data
-  protected async covertData(data: AdvanceStrategyResponse) {
-    try {
-      if (data.setting) {
-        this.paraTimeOut = data.setting.parallel_timeout
-        let paraGroup = data.setting.parallel_group
-        let supList = data.suppliers
-
-        let adnMap: Map<number, AdvanceADNUnitData> = new Map()
-
-        if (supList && supList.length > 0) {
-          for (let index = 0; index < supList.length; index++) {
-            const element = supList[index];
-            let adnData = new AdvanceADNUnitData()
-            adnData.supplier = element
-            adnData.ext = new AdvanceSupplierExt()
-            //宽高属性值设置
-            adnData.ext.vpWidth = this.adConfig.adWidth ?? 0
-            adnData.ext.vpHeight = this.adConfig.adHeight ?? 0
-            adnData.adType = this.adSlotType
-            adnMap[element.priority] = adnData
-            //生成用来加载广告adn的适配器，进行后续广告请求及展示操作
-            let adapter = await AdvanceADNManager.generateAdnAdapter(adnData)
-            //添加元素
-            if (adapter) {
-              this.adapterMap?.set(element.priority, adapter)
-            }
-          }
-        } else {
-          BYLog.warn(TAG + " suppliers empty")
-        }
-
-        let adapterSize = this.adapterMap?.size ?? 0
-        BYLog.debug(TAG + ` update this.adapterMap , size = ${adapterSize}`)
-
-        //说明无适配adapter
-        if (adapterSize <= 0) {
-          let advErr = new AdvanceError()
-          advErr.code = ADV_ERR_NO_ADAPTER
-          advErr.msg = '未找到可用广告adapter，请检查策略配置SDK与Advance已支持SDK是否一致'
-          BYLog.error(TAG + advErr.msg)
-          this.loadListener?.onAdLoadFailed(advErr)
-          return
-        }
-
-
-        if (paraGroup.length > 0) {
-          for (let index = 0; index < paraGroup.length; index++) {
-            //单组并发
-            const groupEle: number[] = paraGroup[index];
-            //并发组
-            let group: AdvanceParaGroup = new AdvanceParaGroup()
-            //定义组id
-            group.groupID = index
-            for (let index = 0; index < groupEle.length; index++) {
-              const priority: number = groupEle[index];
-              let adnData: AdvanceADNUnitData = adnMap[priority]
-              if (adnData) {
-                group.adnDataGroup.push(adnData)
-              } else {
-                BYLog.debug(TAG + `not found adnData, priority = ${priority}`)
-              }
-            }
-
-            //存在adn数据时，才加入组内
-            if (group.adnDataGroup.length > 0) {
-              this.supplierGroups.push(group)
-            }
-
-
-          }
-        }
-
-        //无并行组
-        if (this.supplierGroups.length <= 0) {
-          let advErr = new AdvanceError()
-          advErr.code = ADV_ERR_DATA_NULL
-          advErr.msg = '无可执行策略组信息'
-          BYLog.error(TAG + advErr.msg)
-          this.loadListener?.onAdLoadFailed(advErr)
-          return
-        }
-
-        //开始加载SDK
-        this.loadAdn()
-
-        // todo  解析bidding组
-
-      } else {
-
+      if (!data) {
         let advErr = new AdvanceError()
         advErr.code = ADV_ERR_DATA_NULL
-        advErr.msg = '策略组setting信息为空'
+        advErr.msg = '获取到得策略信息为空'
         BYLog.error(TAG + advErr.msg)
-        this.loadListener?.onAdLoadFailed(advErr)
-      }
-    } catch (e) {
-      BYLog.printE(e)
-    }
-  }
-
-  protected async loadAdn() {
-
-    try {
-      if (!BYConstant.context) {
-        let advErr = new AdvanceError()
-        advErr.code = ADV_ERR_ADN_INIT_MISS
-        advErr.msg = '未找到上下文，请先确保正确完成AdvanceSDK初始化'
-        BYLog.error(TAG + advErr.msg)
+        this.loadStrategyFailed(advErr)
         return
       }
-      //取第一组运行
-      this.runningGroup = this.supplierGroups[0]
+      this.strategyModel = data
+      // success back
+      // this.loadStrategySuccess(data)
+      // 执行SDK策略
+      this.loadSuppliersConcurrently()
+    })
+  }
 
-      let adnList = this.runningGroup.adnDataGroup
-      //赋值可用adn数量
-      this.currentGroupAbleSize = adnList.length
-      for (let index = 0; index < adnList.length; index++) {
-        const adnData = adnList[index];
-        let supplier = adnData.supplier
+  // 并发加载各个渠道SDK
+  private loadSuppliersConcurrently() {
+    if (this.strategyModel.setting.head_bidding_group.length == 0 && !this.bidTargetSupplier) { // 瀑布流模式，无head_bidding渠道
+      // 策略组无数据说明所有的组加载广告全部没有成功（因为第一层执行完总会被remove掉）
+      if (this.strategyModel.setting.parallel_group.length == 0) {
+        this.allAdnBiddingFail(new AdvanceError(ADV_ERR_ALL_ADN_FAILED, `所有平台都未返回广告（失败或超时）\n详情：${JSON.stringify(Array.from(this.errorInfo))}`))
+        return
+      }
+    }
+    // 取BiddingGroup组
+    this.biddingSuppliers = this.strategyModel.setting.head_bidding_group.map((priority: number) => {
+      return this.strategyModel.suppliers.filter((supplier: AdvanceSupplierModel) => {
+        return supplier.priority === priority
+      })[0]
+    })
+    // 取parallelGroup当前第一层策略组
+    this.parallelSuppliers = this.strategyModel.setting.parallel_group[0].map((priority: number) => {
+      return this.strategyModel.suppliers.filter((supplier: AdvanceSupplierModel) => {
+        return supplier.priority === priority
+      })[0]
+    })
+    // 合并2个组，开始执行竞价策略的回调
+    let templeSuppliers = new Array<AdvanceSupplierModel>()
+    if (this.biddingSuppliers.length) {
+      templeSuppliers.push(...this.biddingSuppliers)
+    }
+    if (this.parallelSuppliers.length) {
+      templeSuppliers.push(...this.parallelSuppliers)
+    }
+    // this.startBidding(templeSuppliers)
+    // 并发执行混合策略下队列中的广告请求
+    templeSuppliers.forEach(async (supplier: AdvanceSupplierModel, index: number) => {
+      this.reportAdnTask(AdvanceAdnReportTKEventType.loaded, supplier)
 
-        if (adnData && supplier) {
-          let adInf = `adspotid：${supplier.adspotid} (${supplier.priority})`
-          BYLog.debug(TAG + `开始执行  ` + adInf)
+      let adnData = new AdvanceADNUnitData()
+      adnData.supplier = supplier
+      adnData.adType = this.adSlotType
+      adnData.ext = new AdvanceSupplierExt()
+      //宽高属性值设置
+      adnData.ext.vpWidth = this.adConfig.adWidth ?? 0
+      adnData.ext.vpHeight = this.adConfig.adHeight ?? 0
+      // 生成用来加载广告adn的适配器，进行后续广告请求及展示操作
+      let adapter = await AdvanceADNManager.generateAdnAdapter(adnData)
+      // 添加元素
+      if (adapter) {
+        this.adapterMap?.set(supplier.sdk_id, adapter)
+        this.loadAnyAdnAdapter(adapter)
+      }
+    })
 
-          let adnAdapter = this.adapterMap?.get(supplier.priority)
-          if (adnAdapter) {
-            adnAdapter.adapter_loadAd().then((it) => {
-              BYLog.debug(TAG + `${adInf} loadAdnAdapter 执行结果：${JSON.stringify(it)}`)
+    // 执行完后移除parallel组渠道，确保再次调用此函数时能获取到下一组渠道
+    if (this.strategyModel.setting.parallel_group.length) {
+      this.strategyModel.setting.parallel_group.shift();
+    }
+    // 执行完后移除bidding组渠道，确保再次调用此函数时该组不再参与竞价
+    if (this.strategyModel.setting.head_bidding_group.length) {
+      [this.strategyModel.setting.head_bidding_group.splice(0)]
+    }
+    this.timeoutId = setTimeout(() => {
+      this.observeLoadAdTimeout()
+    }, this.strategyModel.setting.parallel_timeout)
 
-              this.updateResultPickBest(adnData, it as AdvanceAdnStatusResult)
-            })
-          }
+  }
 
-          //上报SDK启动事件
-          taskpool.execute(reportAdnLoaded, supplier.loadedtk)
+  // 超时监测
+  private observeLoadAdTimeout() {
+    let timeoutParallelSuppliers = this.parallelSuppliers.filter((supplier: AdvanceSupplierModel) => {
+      return supplier.loadAdState === AdvanceAdnLoadAdState.ready || supplier.loadAdState === undefined
+    })
+    // check方法中对parallelSuppliers进行了移除操作，所以创建超时数组避免边遍历边移除带来问题
+    timeoutParallelSuppliers.forEach((supplier: AdvanceSupplierModel, index: number) => {
+      this.checkTarget(supplier, AdvanceAdnLoadAdState.timeout,
+        new AdvanceError(ADV_ERR_ADN_TIMEOUT, '渠道广告加载超时'))
+    })
+    let timeoutBiddingSuppliers = this.biddingSuppliers.filter((supplier: AdvanceSupplierModel) => {
+      return supplier.loadAdState === AdvanceAdnLoadAdState.ready || supplier.loadAdState === undefined
+    })
+    timeoutBiddingSuppliers.forEach((supplier: AdvanceSupplierModel, index: number) => {
+      this.checkTarget(supplier, AdvanceAdnLoadAdState.timeout,
+        new AdvanceError(ADV_ERR_ADN_TIMEOUT, '渠道广告加载超时'))
+    })
+  }
+
+  /**
+   * 检测是否命中用于展示的渠道
+   * 由每个渠道SDK Callback返回结果时调用 或者 超时后调用
+   * @param supplier: loadAd后返回结果的某个渠道
+   * @param state: loadAd后返回结果状态
+   * @param error: 错误信息
+   */
+  protected checkTarget(supplier: AdvanceSupplierModel, state: AdvanceAdnLoadAdState, error?: AdvanceError) {
+    // 监测超时的回调中已经执行了本方法，所以超时后渠道再返回的数据直接丢弃
+    if (supplier.loadAdState == AdvanceAdnLoadAdState.timeout) {
+      return;
+    }
+    supplier.loadAdState = state
+    switch (state) {
+      case AdvanceAdnLoadAdState.success:
+        // 上报渠道广告获取成功
+        this.reportAdnTask(AdvanceAdnReportTKEventType.succeed, supplier)
+        break
+      case AdvanceAdnLoadAdState.failed:
+      case AdvanceAdnLoadAdState.timeout:
+        // 移除失败和超时的渠道
+        if (!supplier.is_head_bidding) {
+          this.parallelSuppliers.splice(this.parallelSuppliers.indexOf(supplier), 1)
         } else {
-          BYLog.warn(TAG + `未找到可执行sup`)
+          this.biddingSuppliers.splice(this.biddingSuppliers.indexOf(supplier), 1)
         }
-
-
-      }
-
-
-      let tim = setTimeout(() => {
-        try {
-          if (this.runningGroup) {
-            if (this.runningGroup.isGroupAllResult || this.runningGroup.isTimeOut) {
-              BYLog.debug(TAG + `组内已全部返回记过，不再校验超时`)
-              clearTimeout(tim)
-              return
-            }
-            this.runningGroup.isTimeOut = true
-          }
-          BYLog.warn(TAG + 'loadAdn timeout，loadNextGroup')
-          //本组超时，尝试加载下一组
-          this.loadNextGroup()
-          clearTimeout(tim)
-        } catch (e) {
-          BYLog.printE(e)
-        }
-      }, this.paraTimeOut)
-
-    } catch (e) {
+        // 上报渠道广告获取失败/超时
+        this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
+        break
+      default:
+        break
     }
 
-  }
+    // biddingSuppliers元素为空 有2种可能
+    // 1：本身无headbidding渠道，即瀑布流策略
+    // 2：本身有headbidding渠道，但是组内渠道都执行失败了，此时也走瀑布流策略
+    if (this.biddingSuppliers.length === 0 && !this.bidTargetSupplier) {
+      // 进入瀑布流竞价执行、选中流程
+      this.enterWaterfallFlow();
 
+    } else { // 混合竞价模式（瀑布流 + 头部竞价）
 
-  // 更新结果并检查是否存在最优adn胜出，胜出后将（回调广告成功）  todo biddng返回需要重排序
-  protected updateResultPickBest(adnData: AdvanceADNUnitData, adnResult?: AdvanceAdnStatusResult) {
-    try {
-      if (!adnResult) {
-        BYLog.debug(TAG + `--updateResultCheckNext-- 请求返回为空`)
-        return
+      // 检测bidding组是否全部返回了结果，失败或超时渠道此前已被删除
+      if (this.biddingSuppliers.filter((supplier: AdvanceSupplierModel) => {
+        return supplier.loadAdState === AdvanceAdnLoadAdState.ready || supplier.loadAdState === undefined
+      }).length) {
+        return;
       }
 
-      if (!this.runningGroup) {
-        BYLog.debug(TAG + `--updateResultCheckNext-- 当前执行组不存在`)
-        return
-      }
-      let currentGroupId = this.runningGroup.groupID
-      if (currentGroupId && currentGroupId > 0 && currentGroupId != adnData.groupID) {
-        BYLog.debug(TAG + `--updateResultCheckNext-- 非当前执行组`)
-        return
+      // 此时bidding组全部返回了结果，且组内都是竞价成功的渠道
+      if (!this.bidTargetSupplier && this.biddingSuppliers.length) {
+        // 对biddingSuppliers进行排序
+        this.sortedForPriceWithSuppliers(this.biddingSuppliers)
+        // 取出最高价渠道
+        this.bidTargetSupplier = this.biddingSuppliers[0]
       }
 
-      //更新状态信息
-      adnData.resultStatus = adnResult.status
-
-      let currentSup = adnData.supplier
-      if (currentSup) {
-        // BYLog.debug(TAG + `--updateResultCheckNext-- 渠道信息为空`)
-        //更新bid价格 todo 竞价系数
-        if (adnResult.bidPrice > 0 && currentSup) {
-          BYLog.debug(TAG + `更新价格 ， adnResult.bidPrice = ${adnResult.bidPrice}`)
-          currentSup.sdk_price = adnResult.bidPrice
-        }
-
-        let currentAdnInf = JSON.stringify(AdvanceUtil.getAdvanceAdInfo(currentSup))
-        //上报广告成功、失败
-        if (adnData.resultStatus == AdvanceAdLoadState.success) {
-          BYLog.debug(TAG + `adn广告获取成功：${currentAdnInf}`)
-          taskpool.execute(reportAdnSuccess, currentSup.succeedtk)
-        } else if (adnData.resultStatus == AdvanceAdLoadState.failed) {
-          BYLog.warn(TAG +
-            `adn广告获取失败：${currentAdnInf}， code: ${adnResult.errCode}， msg: ${adnResult.errMsg}`)
-          taskpool.execute(reportAdnFailed, currentSup.failedtk, new AdvanceError(adnResult.errCode, adnResult.errMsg))
-        }
-      }
-
-
-      //****************** 以下为最优选择逻辑
-
-      let groupAdn = this.runningGroup.adnDataGroup
-      if (groupAdn.length > 0) {
-        let groupSize = groupAdn.length
-        this.currentGroupAbleSize = groupSize
-        let allHasResult = true
-
-
-        for (let index = 0; index < groupSize; index++) {
-          const element = groupAdn[index];
-          const eleSup = element.supplier
-
-          //校验失败逻辑
-          if (element.resultStatus == AdvanceAdLoadState.failed) {
-            this.currentGroupAbleSize--
-            if (eleSup && this.tempBestAdn) {
-              let isBest = false
-              let bestSup = this.tempBestAdn.supplier
-              if (bestSup) {
-                //如果优先级相同，代表了当前失败的为最优渠道
-                isBest = eleSup.priority == bestSup.priority
-              }
-              //最优渠道失败了，则最优adn值置为空
-              if (isBest) {
-                BYLog.debug(TAG + `【临时最优】请求失败，重置临时最优`)
-                this.tempBestAdn = undefined
-              }
-              BYLog.debug(TAG + ` adn广告已失败， sup_priority = ${eleSup?.priority} `)
-            }
-            continue
-          }
-          //存在且成功返回
-          if (eleSup && element.resultStatus == AdvanceAdLoadState.success) {
-            if (!this.tempBestAdn) {
-              this.tempBestAdn = element
-              BYLog.debug(TAG + ` 临时最优Adn赋值， sup_priority = ${eleSup?.priority}`)
-              continue
-            } else {
-              let tempBestSup = this.tempBestAdn.supplier
-              if (tempBestSup) {
-                //寻找优先级 && 价格 高于tempBestAdn得
-                // if (eleSup.priority == tempBestSup.priority) {
-                //   BYLog.debug(TAG + `--最优检查-- 当前adn，跳过`)
-                //   break
-                // }
-                //优先价格
-                if (eleSup.sdk_price > 0 && eleSup.sdk_price > tempBestSup.sdk_price) {
-                  BYLog.debug(TAG + `--临时最优检查-- 替换价格更优Adn ， eleSup = ${eleSup}`)
-                  this.tempBestAdn = element
-                } else if (eleSup.sdk_price == tempBestSup.sdk_price) {
-                  //价格相同（0=0也算），看优先级
-                  if (eleSup.priority > 0 && eleSup.priority < tempBestSup.priority) {
-                    BYLog.debug(TAG + `--临时最优检查-- 替换排序更优Adn ， eleSup = ${eleSup}`)
-                    this.tempBestAdn = element
-                  }
-                }
-              } else {
-                BYLog.debug(TAG + `--临时最优检查-- tempBestSup null`)
-              }
-            }
-          }
-
-          //全部都>0 代表有返回结果
-          allHasResult = allHasResult && element.resultStatus >= 0
-        }
-        //循环遍历后 groupSize 为0代表全部失败了，需要进行下一组
-        this.runningGroup.isGroupAllResult = allHasResult
-
-        let best = this.runningGroup.bestADN
-        if (best && best.chooseBest) {
-          BYLog.debug(TAG + `【当前最优】已被选中`)
-          return
-        }
-
-
-        let tempBestAdn = this.tempBestAdn
-        // todo biding需要全部返回且重排序后队首
-        if (tempBestAdn && tempBestAdn.supplier && tempBestAdn.resultStatus == AdvanceAdLoadState.success) {
-          tempBestAdn.chooseBest = true
-          this.runningGroup.bestADN = tempBestAdn
-          let advanceBestSupplier = AdvanceUtil.getAdvanceAdInfo(tempBestAdn.supplier)
-          BYLog.debug(TAG + `bestADN:${JSON.stringify(tempBestAdn)}`)
-          BYLog.debug(TAG + `【当前最优】命中 ：${JSON.stringify(advanceBestSupplier)}`)
-
-          //先设置adn中的listener
-          this.adnWin()
-          //执行回调给开发者
-          this.loadListener?.onAdLoaded(advanceBestSupplier)
-          //上报胜出
-          taskpool.execute(reportAdnBidWin, tempBestAdn.supplier.wintk)
-        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceAdLoadState.loading) {
-          BYLog.debug(TAG + `【临时最优】仍在请求中……`)
-        } else if (tempBestAdn && tempBestAdn.resultStatus == AdvanceAdLoadState.failed) {
-          BYLog.debug(TAG + `【临时最优】请求失败……`)
-        } else {
-          BYLog.debug(TAG + `未找到最优ADN……`)
-        }
-
-
-        if (this.currentGroupAbleSize <= 0) {
-          BYLog.debug(TAG + `本组广告全部失败， 尝试加载下一组`)
-          this.loadNextGroup()
-        }
-      }
-    } catch (e) {
-      BYLog.printE(e)
-    }
-
-  }
-
-  protected loadNextGroup() {
-    try { //移除第一组
-      this.supplierGroups.splice(0)
-
-      //无更多组 todo bidding组可能仍存在，如不存在此处需回调错误结果
-      if (this.supplierGroups.length <= 0) {
-        let msg = `全部渠道执行失败，请求结束`
-        //全部渠道执行失败
-        BYLog.error(TAG + msg)
-
-        let err = new AdvanceError()
-        err.code = ADV_ERR_ALL_FAILED
-        err.msg = msg
-        //回调广告失败
-        this.loadListener?.onAdLoadFailed(err)
-        // 销毁各渠道Adapter对象
-        this.destroyAdapters()
-        return
-      }
-      //继续执行
-      this.loadAdn()
-    } catch (e) {
-      BYLog.printE(e)
+      // 进入混合竞价（瀑布流 + 头部竞价）执行、选中流程
+      this.enterWaterfallMixedHeadbiddingFlow()
     }
   }
 
-  //根据currentAD 找到对应adapter
-  protected getCurrentAdapter(): AdvanceCommonAdapter | undefined {
-    try {
-      //从当前执行组的最佳广告
-      let key = this.runningGroup?.bestADN?.supplier?.priority
-      if (key) {
-        return this.adapterMap?.get(key)
-      }
-    } catch (e) {
-      BYLog.printE(e)
+  // 进入瀑布流竞价执行、选中流程
+  private enterWaterfallFlow() {
+    // 该parallel组渠道广告均返回失败，执行下一组渠道并发
+    if (this.parallelSuppliers.length == 0) {
+      clearTimeout(this.timeoutId)
+      this.loadSuppliersConcurrently()
+      return;
     }
-    return
+    /// 命中用于展示的渠道并回调
+    this.hitTheTargetWithSuppliers(this.parallelSuppliers)
+  }
+
+  // 进入混合竞价（瀑布流 + 头部竞价）执行、选中流程
+  private enterWaterfallMixedHeadbiddingFlow() {
+    // 如果当前的parallelSuppliers都返回失败，并且bidTarget 比下一组的最高价低 则需要开启下一组parallelGroup
+    if (this.parallelSuppliers.length === 0 && this.strategyModel.setting.parallel_group.length) {
+      let nextGroupPriorities = this.strategyModel.setting.parallel_group[0]
+      let nextGroupSuppliers = nextGroupPriorities.map((priority: number) => {
+        return this.strategyModel.suppliers.filter((supplier: AdvanceSupplierModel) => {
+          return supplier.priority === priority
+        })[0]
+      })
+      this.sortedForPriceWithSuppliers(nextGroupSuppliers)
+      if (nextGroupSuppliers.length && this.bidTargetSupplier &&
+        this.bidTargetSupplier.sdk_price < nextGroupSuppliers[0].sdk_price) {
+        clearTimeout(this.timeoutId)
+        this.loadSuppliersConcurrently()
+        return;
+      }
+    }
+
+    // 无需开启下一组parallelGroup时，直接产生最新的执行队列
+    this.mixedSuppliers = new Array<AdvanceSupplierModel>()
+    if (this.bidTargetSupplier) {
+      this.mixedSuppliers.push(this.bidTargetSupplier)
+    }
+    if (this.parallelSuppliers.length) {
+      this.mixedSuppliers.push(...this.parallelSuppliers)
+    }
+    // 对最新产生的执行队列按价格进行排序
+    this.sortedForPriceWithSuppliers(this.mixedSuppliers)
+    // 命中用于展示的渠道并回调
+    this.hitTheTargetWithSuppliers(this.mixedSuppliers)
+
+  }
+
+  // 命中用于展示的渠道并回调
+  private hitTheTargetWithSuppliers(suppliers: AdvanceSupplierModel[]) {
+    let target = suppliers[0]
+    if (target.loadAdState === AdvanceAdnLoadAdState.success && !target.isHit) {
+      clearTimeout(this.timeoutId)
+      target.isHit = true
+      this.winAdapter = this.adapterMap?.get(target.sdk_id)
+      this.adnBidWin(AdvanceUtil.getAdvanceAdInfo(target))
+      // 竞胜上报
+      this.reportAdnTask(AdvanceAdnReportTKEventType.bidWin, target)
+    }
+  }
+
+  // 混合策略排序规则：1. 按价格排序 2. 价格一样按优先级排序
+  private sortedForPriceWithSuppliers(suppliers: AdvanceSupplierModel[]) {
+    suppliers.sort((a: AdvanceSupplierModel, b: AdvanceSupplierModel) => {
+      if (a.sdk_price == b.sdk_price) {
+        return a.priority - b.priority
+      }
+      return b.sdk_price - a.sdk_price
+    })
+  }
+
+  // 设置渠道返回的竞价
+  protected setECPMIfNeeded(supplier: AdvanceSupplierModel, ecpm: number) {
+    if (supplier.is_head_bidding && ecpm > 0) {
+      supplier.sdk_price = ecpm
+    }
   }
 
   // 销毁各渠道Adapter对象
-  destroyAdapters(): void {
-    this.loadListener = undefined
+  public destroyAdapters(): void {
     this.adapterMap = undefined
   }
 
-  protected reportBestAdnShowTask() {
-    let urls = this.tempBestAdn?.supplier?.imptk
-    if (urls) {
-      taskpool.execute(reportAdnShow, urls)
+  /**
+   * TK监测数据上报
+   * @param eventType 事件类型
+   * @param supplier 渠道对象
+   * @param error 错误信息
+   */
+  protected reportAdnTask(eventType: AdvanceAdnReportTKEventType, supplier: AdvanceSupplierModel, error?: AdvanceError) {
+    if (error) {
+      this.collectAdnError(supplier, error)
+    }
+     let reportUrls = new Array<string>()
+    switch (eventType) {
+      case AdvanceAdnReportTKEventType.loaded:
+        reportUrls = supplier.loadedtk
+        break
+      case AdvanceAdnReportTKEventType.succeed:
+        reportUrls = supplier.succeedtk
+        break
+      case AdvanceAdnReportTKEventType.failed:
+        reportUrls = supplier.failedtk
+        break
+      case AdvanceAdnReportTKEventType.exposed:
+        reportUrls = supplier.imptk
+        break
+      case AdvanceAdnReportTKEventType.clicked:
+        reportUrls = supplier.clicktk
+        break
+      case AdvanceAdnReportTKEventType.bidWin: // 后台不下发时，reportUrls 为 undefined
+        reportUrls = supplier.wintk
+        break
+      default:
+        break
+    }
+    if (reportUrls && reportUrls.length) {
+      // taskpool.execute(global_requestAdnEventTasks, reportUrls, eventType, supplier.sdk_price, this.loadTimestamp, undefined,
+      //   error)
+      this.requestAdnEventTasks(reportUrls, eventType, supplier.sdk_price, this.loadTimestamp, undefined,
+        error)
     }
   }
 
-  protected reportBestAdnShowFailedTask(error: AdvanceError) {
-    let urls = this.tempBestAdn?.supplier?.failedtk
-    if (urls) {
-      taskpool.execute(reportAdnFailed, urls, error)
+  // 收集渠道广告加载错误的信息
+  private collectAdnError(supplier: AdvanceSupplierModel, error?: AdvanceError) {
+    // key: 渠道名-渠道id
+    if (error) {
+      const key = `${supplier.name}-${supplier.id}`
+      this.errorInfo.set(key, error)
     }
   }
 
-  protected reportBestAdnClickTask() {
-    let urls = this.tempBestAdn?.supplier?.clicktk
-    if (urls) {
-      taskpool.execute(reportAdnClick, urls)
-    }
-  }
-
-}
-
-
-@Concurrent
-function reportAdnLoaded(urlList: string[]) {
-  try {
-    if (!urlList) {
-      BYLog.debug('reportAdnLoaded null')
-      return
-    }
-
-    BYLog.debug(`广告启动上报发起`)
-
-    for (let index = 0; index < urlList.length; index++) {
-      const element = urlList[index];
-      if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportAdnLoaded')
-        // todo 宏替换
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
+  // 应用每次发送http请求时，底层系统会从线程池中获取一个线程来执行。线程的执行过程由底层系统管理
+  private requestAdnEventTasks(urls: string[], eventType: AdvanceAdnReportTKEventType, price: number,
+    loadTimeStamp: number, cacheReqId?: string, error?: AdvanceError) {
+    urls.forEach(async (url: string) => {
+      let reportUrl = AdvanceUtil.joinUrlParameters(url, eventType, price, loadTimeStamp, cacheReqId, error)
+      let model = await AdvanceNet.get().reportUrl(reportUrl) as AdvanceStrategyModel
+      if (model.code === 200) {
+        BYLog.debug(`AdvanceTK上报成功：${reportUrl}`)
+      } else {
+        BYLog.debug(`AdvanceTK上报失败：${reportUrl}`)
       }
-    }
-  } catch (e) {
-    BYLog.printE(e)
+    })
   }
 }
 
-
-@Concurrent
-function reportAdnSuccess(urlList: string[]) {
-  try {
-    if (!urlList) {
-      BYLog.debug('reportAdnSuccess null')
-      return
-    }
-    BYLog.debug(`广告成功上报发起`)
-    for (let index = 0; index < urlList.length; index++) {
-      const element = urlList[index];
-      if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportAdnSuccess')
-        // todo 宏替换
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
-      }
-    }
-  } catch (e) {
-    BYLog.printE(e)
-  }
-}
-
-@Concurrent
-function reportAdnFailed(urlList: string[], err: AdvanceError) {
-  try {
-    if (!urlList) {
-      BYLog.debug('reportAdnFailed null')
-      return
-    }
-    BYLog.debug(`广告失败上报发起`)
-    for (let index = 0; index < urlList.length; index++) {
-      const element = urlList[index];
-      if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportAdnFailed')
-        // todo 宏替换
-
-        let url = AdvanceUtil.appendFailedReason(element, err)
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(url))
-      }
-    }
-  } catch (e) {
-    BYLog.printE(e)
-  }
-}
-
-@Concurrent
-function reportAdnBidWin(urlList: string[]) {
-  try {
-    if (!urlList) {
-      BYLog.debug('reportAdnBidWin null')
-      return
-    }
-    BYLog.debug(`广告竞胜上报发起`)
-    for (let index = 0; index < urlList.length; index++) {
-      const element = urlList[index];
-      if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportAdnBidWin')
-        // todo 宏替换
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
-      }
-    }
-  } catch (e) {
-    BYLog.printE(e)
-  }
-}
-
-@Concurrent
-function reportAdnShow(urlList: string[]) {
-  try {
-    if (!urlList) {
-      BYLog.debug('reportAdnShow null')
-      return
-    }
-    BYLog.debug(`广告曝光成功上报发起`)
-    for (let index = 0; index < urlList.length; index++) {
-      const element = urlList[index];
-      if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportAdnShow')
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
-      }
-    }
-  } catch (e) {
-    BYLog.printE(e)
-  }
-}
-
-@Concurrent
-function reportAdnClick(urlList: string[]) {
-  try {
-    if (!urlList) {
-      BYLog.debug('reportAdnClick null')
-      return
-    }
-    BYLog.debug(`广告点击成功上报发起`)
-    for (let index = 0; index < urlList.length; index++) {
-      const element = urlList[index];
-      if (BYStrUtil.isNotEmpty(element)) {
-        BYLog.debug('start reportAdnClick')
-        AdvanceNet.get().reportUrl(AdvanceUtil.getTimeReplacedTk(element))
-      }
-    }
-  } catch (e) {
-    BYLog.printE(e)
-  }
-}
+// 子线程中获取不到打印日志？？？
+// @Concurrent
+// function global_requestAdnEventTasks(urls: string[], eventType: AdvanceAdnReportTKEventType, price: number,
+//   loadTimeStamp: number, cacheReqId?: string, error?: AdvanceError) {
+//   urls.forEach(async (url: string) => {
+//     let reportUrl = AdvanceUtil.joinUrlParameters(url, eventType, price, loadTimeStamp, cacheReqId, error)
+//     let model = await AdvanceNet.get().reportUrl(reportUrl) as AdvanceStrategyModel
+//     if (model.code === 200) {
+//       BYLog.debug(`AdvanceTK上报成功：${reportUrl}`)
+//     } else {
+//       BYLog.debug(`AdvanceTK上报失败：${reportUrl}`)
+//     }
+//   })
+// }

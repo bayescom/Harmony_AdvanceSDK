@@ -8,13 +8,15 @@ import { logToast } from '../util/Toast'
 @Entry
 @Component
 struct Banner {
-  @State placementId: string = '10014620' // mercury
+  @State placementId: string = '10014782' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10014782', '横幅-Bidding'],
     ['10014620', '横幅-倍业'],
     ['10014622', '横幅-穿山甲'],
     ['10014618', '横幅-优量汇'],
   ];
-  @State bannerAd?: AdvanceBanner = undefined
+  @State isShowAd: boolean = false
+  bannerAd?: AdvanceBanner = undefined
 
   build() {
     Column({ space: 20 }) {
@@ -31,10 +33,12 @@ struct Banner {
             adWidth: 375,
             adHeight: 120
           }
+          this.isShowAd = false
           this.bannerAd = new AdvanceBanner(config)
           this.bannerAd.setAdListener({
             onAdLoaded: (adInfo: AdvanceAdInfo) => {
               logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
+              this.isShowAd = true
             },
             onAdLoadFailed: (err: AdvanceError) => {
               logToast(`onAdLoadFailed, err: ${err.toString()}`)
@@ -46,6 +50,7 @@ struct Banner {
             onAdShowFailed: (error: AdvanceError) => {
               logToast(`onAdShowFailed, err: ${error.toString()}`)
               this.bannerAd = undefined
+              this.isShowAd = false
             },
             onAdClick: () => {
               logToast(`onAdClick`)
@@ -53,11 +58,12 @@ struct Banner {
             onAdClose: () => {
               // logToast(`onAdClose`)
               this.bannerAd = undefined
+              this.isShowAd = false
             },
           })
           this.bannerAd.loadAd()
         })
-      if (this.bannerAd?.isAdValid()) {
+      if (this.isShowAd && this.bannerAd?.isAdValid()) {
         NodeContainer(this.bannerAd?.getAdComponent())
           .width(this.bannerAd?.getAcceptWidth())
           .height(this.bannerAd?.getAcceptHeight())

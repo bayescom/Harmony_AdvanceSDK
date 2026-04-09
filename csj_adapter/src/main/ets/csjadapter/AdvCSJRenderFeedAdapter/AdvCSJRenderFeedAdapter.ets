@@ -1,5 +1,4 @@
-import { AdvanceRenderFeedCommonAdapter, AdvanceAdnStatusResult, AdvanceRenderFeedWrapper, BYLog, ADV_ERR_DATA_NULL,
-  AdvanceAdLoadState,
+import { AdvanceRenderFeedCommonAdapter, AdvanceRenderFeedWrapper, BYLog, ADV_ERR_DATA_NULL,
   AdvanceError} from 'advancesdk';
 import { AdSlot, AdSlotBuilder, CSJAdCreator,
   CSJAdInteractionListener,
@@ -18,62 +17,43 @@ export class AdvCSJRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
   protected csj_ad?: CSJFeedAd
   protected wrapper?: AdvanceRenderFeedWrapper | undefined
 
-  adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
-    BYLog.debug(TAG + ` adapter_loadAd start`)
-    return new Promise<AdvanceAdnStatusResult>(async (resolve) => {
-      let result = new AdvanceAdnStatusResult()
-      let initResult = await AdvCSJUtil.loadCSJSDK(this)
-      BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
-      if (initResult.success == true) { // 初始化成功
-        //执行广告加载流程
-        let sup = this.unitData.supplier
-        let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
+  async adapter_loadAd() {
+    let initResult = await AdvCSJUtil.loadCSJSDK(this)
+    BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
 
-        if (sup) {
-          let adSlot: AdSlot = new AdSlotBuilder()
-            .setCodeId(sup.adspotid)
-            .setAdCount(1)
-            .setSupportRenderControl(true)
-            .build();
+    if (initResult.success == true) { // 初始化成功
+      //执行广告加载流程
+      let spotId = this.unitData.supplier.adspotid
+      let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
 
-          mAdCreator.loadFeedAd(adSlot, {
-            onError: (code: number, message: string) => {
-              BYLog.debug(TAG + `自渲染息流回调 - onAdLoadFailed code: ${code} message: ${message}`)
-              result.status = AdvanceAdLoadState.failed
-              result.errCode = code
-              result.errMsg = message
-              resolve(result)
-            },
-            onFeedAdLoad: (ads: ArrayList<CSJFeedAd>) => {
-              if (ads && ads.length > 0) {
-                BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
-                this.csj_ad = ads[0]
-                this.wrapper = new AdvCSJRenderFeedAdWrapper(this.csj_ad)
-                result.status = AdvanceAdLoadState.success
-                resolve(result)
-              } else {
-                result.status = AdvanceAdLoadState.failed
-                result.errCode = ADV_ERR_DATA_NULL
-                result.errMsg = '广告返回内容为空'
-                resolve(result)
-              };
-            }
-          })
+      let adSlot: AdSlot = new AdSlotBuilder()
+        .setCodeId(spotId)
+        .setAdCount(1)
+        .setSupportRenderControl(true)
+        .build();
 
-        } else {
-          result.status = AdvanceAdLoadState.failed
-          result.errCode = ADV_ERR_DATA_NULL
-          result.errMsg = '未找到该adn策略信息'
-          resolve(result)
+      mAdCreator.loadFeedAd(adSlot, {
+        onFeedAdLoad: (ads: ArrayList<CSJFeedAd>) => {
+          if (ads && ads.length > 0) {
+            BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
+            this.csj_ad = ads[0]
+            this.wrapper = new AdvCSJRenderFeedAdWrapper(this.csj_ad)
+            // 穿山甲变现SDK不提供ecpm获取
+            this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
+          } else {
+            this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          };
+        },
+        onError: (code: number, message: string) => {
+          BYLog.debug(TAG + `自渲染息流回调 - onAdLoadFailed code: ${code} message: ${message}`)
+          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
         }
+      })
 
-      } else { // 初始化失败
-        result.status = AdvanceAdLoadState.failed
-        result.errCode = initResult.code
-        result.errMsg = initResult.msg
-        resolve(result)
-      }
-    })
+    } else { // 初始化失败
+      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier!, new AdvanceError(initResult.code, initResult.msg))
+    }
+
   }
 
   adapter_render(context: UIContext) {
@@ -87,22 +67,22 @@ export class AdvCSJRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
   protected renderListener: ExpressRenderListener = {
     onRenderSuccess: (width: number, height: number, isExpress: boolean) => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderSuccess")
-      this.bridge?.bridge_didAdRenderSuccess(this.wrapper!)
+      this.bridge?.bridge_didAdRenderSuccess(this.unitData.supplier, this.wrapper!)
     }
   }
 
   protected interactionListener: CSJAdInteractionListener = {
     onAdShow: (ad: CSJNativeAd) => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow()
+      this.bridge?.bridge_didAdShow(this.unitData.supplier)
     },
     onAdClicked: (ad: CSJNativeAd) => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdClick")
-      this.bridge?.bridge_didAdClick()
+      this.bridge?.bridge_didAdClick(this.unitData.supplier)
     },
     onAdCreativeClick: (ad: CSJNativeAd) => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdClick")
-      this.bridge?.bridge_didAdClick()
+      this.bridge?.bridge_didAdClick(this.unitData.supplier)
     }
   }
 

@@ -2,6 +2,12 @@ import { AdvanceADNUnitData } from './AdvanceADNUnitData'
 import { AdvanceConstant } from '../../define/AdvanceConstant'
 import { AdvanceCommonAdapter } from './AdvanceCommonAdapter'
 
+export class AdvanceAdnInitResult{
+  success: boolean = false
+  code: string | number  = ''
+  msg: string = ''
+}
+
 export class AdvanceADNManager {
   //生成对应adapter实现类
   static async generateAdnAdapter(adnData: AdvanceADNUnitData): Promise<AdvanceCommonAdapter | undefined> {

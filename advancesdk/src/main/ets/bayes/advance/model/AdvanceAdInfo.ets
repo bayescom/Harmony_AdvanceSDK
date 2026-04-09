@@ -4,6 +4,6 @@ export class AdvanceAdInfo {
   adnName: string = ""
   appID: string = ""
   adSlotID: string = ""
-  biddingType: number = 0 // 0代表非bidding， 1 客户端bidding，2 服务端bidding（预留）
+  biddingType: number = 0 // 0 非bidding， 1 客户端bidding
   price: number = 0
 }

@@ -5,8 +5,9 @@ import { router } from '@kit.ArkUI';
 @Entry
 @Component
 struct NativeExpressEntry {
-  @State placementId: string = '10014651' // mercury
+  @State placementId: string = '10014807' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10014807', '模板信息流-Bidding'],
     ['10014651', '模板信息流-倍业'],
     ['10014649', '模板信息流-穿山甲'],
     ['10014650', '模板信息流-优量汇'],

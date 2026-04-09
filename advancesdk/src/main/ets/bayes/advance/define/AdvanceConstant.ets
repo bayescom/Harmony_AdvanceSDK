@@ -9,7 +9,4 @@ export class AdvanceConstant {
   public static readonly ADV_SDK_ID_KS: string = '5'
   public static readonly ADV_SDK_ID_TANX: string = '7'
 
-  //默认并发组超时时间
-  public static readonly ADV_PARA_GROUP_TIMEOUT: number = 5000
-
 }

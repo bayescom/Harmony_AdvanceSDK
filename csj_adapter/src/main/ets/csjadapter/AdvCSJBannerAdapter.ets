@@ -1,13 +1,10 @@
 import {
-  BYLog,
-  AdvanceAdnStatusResult,
-  ADV_ERR_DATA_NULL,
-  AdvanceAdLoadState,
-  AdvanceBannerCommonAdapter,
-  AdvanceError,
+  BYLog, ADV_ERR_DATA_NULL, AdvanceBannerCommonAdapter, AdvanceError,
 } from 'advancesdk';
 import {
-  AdSlotBuilder, CSJAdCreator, CSJAdSdk,
+  AdSlotBuilder,
+  CSJAdCreator,
+  CSJAdSdk,
   CSJDislikeInteractionCallback,
   CSJNativeExpressAd,
   ExpressAdInteractionListener,
@@ -25,63 +22,44 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
     return true
   }
 
-  adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
-    BYLog.debug(TAG + ` adapter_loadAd start`)
-    return new Promise<AdvanceAdnStatusResult>(async (resolve) => {
-      let result = new AdvanceAdnStatusResult()
-      let initResult = await AdvCSJUtil.loadCSJSDK(this)
-      BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
+  async adapter_loadAd() {
+    let initResult = await AdvCSJUtil.loadCSJSDK(this)
+    BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
 
-      if (initResult.success) { // 初始化成功
-        //执行广告加载流程
-        let sup = this.unitData.supplier
-        let width = this.unitData.ext?.vpWidth ?? 0
-        let height = this.unitData.ext?.vpHeight ?? 0
-        let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
-
-        if (sup) {
-          let adSlot = new AdSlotBuilder()
-            .setCodeId(sup.adspotid)
-            .setAcceptSize(width, height)
-            .setAdCount(1)
-            .build()
-          mAdCreator.loadBannerAd(adSlot, {
-            onError: (code: number, message: string) => {
-              BYLog.debug(TAG + `横幅回调 - onAdLoadFailed code: ${code} message: ${message}`)
-              result.status = AdvanceAdLoadState.failed
-              result.errCode = code
-              result.errMsg = message
-              resolve(result)
-            },
-            onNativeExpressAdLoad: (ads: ArrayList<CSJNativeExpressAd>) => {
-              if (ads && ads.length > 0) {
-                BYLog.debug(TAG + "横幅回调 - onAdLoaded")
-                this.csj_ad = ads[0]
-                result.status = AdvanceAdLoadState.success
-                resolve(result)
-              } else {
-                result.status = AdvanceAdLoadState.failed
-                result.errCode = ADV_ERR_DATA_NULL
-                result.errMsg = '广告返回内容为空'
-                resolve(result)
-              };
-            }
-          })
-
-        } else {
-          result.status = AdvanceAdLoadState.failed
-          result.errCode = ADV_ERR_DATA_NULL
-          result.errMsg = '未找到该adn策略信息'
-          resolve(result)
+    if (initResult.success) { // 初始化成功
+      //执行广告加载流程
+      let spotId = this.unitData.supplier.adspotid
+      let width = this.unitData.ext?.vpWidth ?? 0
+      let height = this.unitData.ext?.vpHeight ?? 0
+      let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
+      let adSlot = new AdSlotBuilder()
+        .setCodeId(spotId)
+        .setAcceptSize(width, height)
+        .setAdCount(1)
+        .build()
+      mAdCreator.loadBannerAd(adSlot, {
+        onNativeExpressAdLoad: (ads: ArrayList<CSJNativeExpressAd>) => {
+          if (ads && ads.length > 0) {
+            BYLog.debug(TAG + "横幅回调 - onAdLoaded")
+            this.csj_ad = ads[0]
+            // 穿山甲变现SDK不提供ecpm获取
+            this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
+          } else {
+            this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier,
+              new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          }
+          ;
+        },
+        onError: (code: number, message: string) => {
+          BYLog.debug(TAG + `横幅回调 - onAdLoadFailed code: ${code} message: ${message}`)
+          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
         }
+      })
 
-      } else { // 初始化失败
-        result.status = AdvanceAdLoadState.failed
-        result.errCode = initResult.code
-        result.errMsg = initResult.msg
-        resolve(result)
-      }
-    })
+    } else { // 初始化失败
+      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier!, new AdvanceError(initResult.code, initResult.msg))
+    }
+
   }
 
   adapter_render(context: UIContext): void {
@@ -100,19 +78,18 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
     },
     onRenderFail: (code: number, msg: string) => {
       BYLog.debug(TAG + "横幅回调 - onAdRenderFail")
-      this.bridge?.bridge_didAdShowFailed(new AdvanceError(code, msg))
+      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(code, msg))
     },
     onAdShow: (type: number) => {
       BYLog.debug(TAG + "横幅回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow()
+      this.bridge?.bridge_didAdShow(this.unitData.supplier)
     },
     onAdClicked: (type: number) => {
       BYLog.debug(TAG + "横幅回调 - onAdClick")
-      this.bridge?.bridge_didAdClick()
+      this.bridge?.bridge_didAdClick(this.unitData.supplier)
     }
   }
-
-  protected  dislikeCallback: CSJDislikeInteractionCallback = {
+  protected dislikeCallback: CSJDislikeInteractionCallback = {
     onShow: () => {
     },
     /**
@@ -128,5 +105,4 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
 
     }
   }
-
 }

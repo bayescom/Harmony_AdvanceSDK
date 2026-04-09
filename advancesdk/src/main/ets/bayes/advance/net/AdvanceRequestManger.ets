@@ -10,8 +10,10 @@ import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import { BYSecurity } from '../../basic/BYSecurity';
 import { BYSetting } from '../../basic/BYSetting';
 import { AdvanceAdLoadConfig } from '../config/AdvanceAdConfig';
-import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyResponse } from '../model/AdvanceNetModel';
-import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_EXCEPTION_LOAD } from '../define/AdvanceError';
+import { AdvanceDeviceModel, AdvanceReqModel, AdvanceStrategyModel } from '../model/AdvanceNetModel';
+import { AdvanceError,
+  ADV_ERR_DATA_NO_SUPPLIER,
+  ADV_ERR_DATA_NULL, ADV_ERR_NET_EXCEPTION } from '../define/AdvanceError';
 import { AdvanceConstant } from '../define/AdvanceConstant';
 import { BYConstant } from '../../basic/BYConstant';
 import { AdvanceSetting } from '../config/AdvanceSetting';
@@ -127,13 +129,13 @@ export class AdvanceRequestManger {
 
   //获取聚合策略信息，无策略或者网络错误将回调失败
   static async requestStrategy(adConfig: AdvanceAdLoadConfig,
-    callBack?: (err?: AdvanceError, data?: AdvanceStrategyResponse) => void) {
+    callBack?: (err?: AdvanceError, data?: AdvanceStrategyModel) => void) {
 
     let hasResult = false
     try { //首先生成请求参数信息
       let reqObj = await AdvanceRequestManger.prepareReqAdData(adConfig)
       //获取广告返回信息
-      let netResult: AdvanceStrategyResponse = await AdvanceNet.get().getStrategy(reqObj)
+      let netResult: AdvanceStrategyModel = await AdvanceNet.get().getStrategy(reqObj)
       if (!netResult) {
         if (callBack != undefined) {
           let advErr = new AdvanceError()
@@ -149,7 +151,7 @@ export class AdvanceRequestManger {
         if (callBack != undefined) {
           let err = new AdvanceError()
           err.code = ADV_ERR_DATA_NULL
-          err.msg = `接口请求状态码非200，server code：${netResult.code}  ，detail：${netResult.msg}`
+          err.msg = `接口请求状态码非200，【server code：${netResult.code}，msg：${netResult.msg}】`
           callBack(err, undefined);
         }
         return
@@ -158,8 +160,8 @@ export class AdvanceRequestManger {
       if (netResult.suppliers == undefined || (netResult.suppliers.length > 0 && netResult.suppliers[0] == undefined)) {
         if (callBack != undefined) {
           let err = new AdvanceError()
-          err.code = ADV_ERR_DATA_NULL
-          err.msg = `策略信息为空`
+          err.code = ADV_ERR_DATA_NO_SUPPLIER
+          err.msg = `策略中未配置渠道，请联系相关运营人员配置`
           callBack(err, undefined);
         }
         return
@@ -174,7 +176,7 @@ export class AdvanceRequestManger {
       if (!hasResult) {
         if (callBack != undefined) {
           let err = new AdvanceError()
-          err.code = ADV_ERR_EXCEPTION_LOAD
+          err.code = ADV_ERR_NET_EXCEPTION
           err.msg = '获取广告遇到异常'
           callBack(err, undefined);
         }

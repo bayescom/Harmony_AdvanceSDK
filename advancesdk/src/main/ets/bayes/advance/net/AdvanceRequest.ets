@@ -9,19 +9,44 @@ import {
   ADV_ERR_NET_EXCEPTION,
   ADV_ERR_NET_TIME_OUT
 } from '../define/AdvanceError';
-import { AdvanceStrategyResponse } from '../model/AdvanceNetModel';
+import { AdvanceStrategyModel } from '../model/AdvanceNetModel';
 
 
 const TAG = "【AdvanceRequest】";
 const baseUrl = "http://cruiser.bayescom.cn/"
 const baseUrlHttps = "https://cruiser.bayescom.cn/"
 
+export default class AdvanceNet {
+  private static instance: AdvanceNet;
+
+  private constructor() {
+  }
+
+  static get(): AdvanceNet {
+    if (AdvanceNet.instance === undefined) {
+      AdvanceNet.instance = new AdvanceNet();
+    }
+    return AdvanceNet.instance;
+  }
+
+  // 普通的上报请求，get方式
+  async reportUrl(oriUrl: string): Promise<AdvanceStrategyModel | object> {
+    return requestSync(oriUrl, http.RequestMethod.GET)
+  }
+
+  //获取策略信息
+  async getStrategy(body?: string | Object | ArrayBuffer): Promise<AdvanceStrategyModel> {
+    let reqUrl = `${getBaseUrl()}cruiser`
+    return requestSync(reqUrl, http.RequestMethod.POST, http.HttpDataType.OBJECT, body, true)
+  }
+}
+
 
 async function requestSync(url: string, method: http.RequestMethod,
   expectDataType: http.HttpDataType = http.HttpDataType.STRING,
-  extraData?: string | Object | ArrayBuffer, forceTimeout: boolean = false): Promise<AdvanceStrategyResponse> {
-  return new Promise<AdvanceStrategyResponse>((resolve) => {
-    const res = new AdvanceStrategyResponse()
+  extraData?: string | Object | ArrayBuffer, forceTimeout: boolean = false): Promise<AdvanceStrategyModel> {
+  return new Promise<AdvanceStrategyModel>((resolve) => {
+    let res = new AdvanceStrategyModel()
     let hasResult = false
     try {
 
@@ -92,17 +117,19 @@ async function requestSync(url: string, method: http.RequestMethod,
             }
 
             if (data.resultType === http.HttpDataType.STRING) {
-              let obj: AdvanceStrategyResponse = JSON.parse(JSON.stringify(data.result))
-
-              res.suppliers = obj.suppliers
-              res.code = obj.code
-              res.msg = obj.msg
-              res.abtag = obj.abtag
-              res.reqid = obj.reqid
-              res.setting = obj.setting
+              // let obj: AdvanceStrategyModel = JSON.parse(JSON.stringify(data.result))
+              //
+              // res.suppliers = obj.suppliers
+              // res.code = obj.code
+              // res.msg = obj.msg
+              // res.abtag = obj.abtag
+              // res.reqid = obj.reqid
+              // res.setting = obj.setting
+              res.code = data.responseCode
+              res.msg = data.result as string
 
             } else if (data.resultType === http.HttpDataType.OBJECT) {
-              const obj = data.result as AdvanceStrategyResponse;
+              const obj = data.result as AdvanceStrategyModel;
               res.suppliers = obj.suppliers
               res.code = obj.code
               res.msg = obj.msg
@@ -127,7 +154,7 @@ async function requestSync(url: string, method: http.RequestMethod,
             let error = e as Error;
             let name = error.name;
             let msg = error.message;
-            let inf = `请求中发生 exception ,err name:` + name + " , msg = " + msg
+            let inf = `请求发起阶段发生 exception ,err name:` + name + " , msg = " + msg
             res.msg = inf
           } catch (e) {
           }
@@ -171,30 +198,4 @@ function getBaseUrl(): string {
     BYLog.printE(e)
   }
   return bUrl
-}
-
-
-export default class AdvanceNet {
-  private static instance: AdvanceNet;
-
-  private constructor() {
-  }
-
-  static get(): AdvanceNet {
-    if (AdvanceNet.instance === undefined) {
-      AdvanceNet.instance = new AdvanceNet();
-    }
-    return AdvanceNet.instance;
-  }
-
-  // 普通的上报请求，get方式
-  async reportUrl(oriUrl: string): Promise<AdvanceStrategyResponse | object> {
-    return requestSync(oriUrl, http.RequestMethod.GET)
-  }
-
-  //获取策略信息
-  async getStrategy(body?: string | Object | ArrayBuffer): Promise<AdvanceStrategyResponse> {
-    let reqUrl = `${getBaseUrl()}cruiser`
-    return requestSync(reqUrl, http.RequestMethod.POST, http.HttpDataType.OBJECT, body, true)
-  }
 }

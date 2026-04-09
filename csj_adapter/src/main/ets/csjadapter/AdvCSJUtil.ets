@@ -20,20 +20,20 @@ import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
 const TAG = `[AdvCSJUtil] `
 
 export class AdvCSJUtil {
-  static getCSJAdAdapter(supData: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (supData.adType) {
+  static getCSJAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
+    switch (data.adType) {
       case AdvanceAdType.splash:
-        return new AdvCSJSplashAdapter(supData)
+        return new AdvCSJSplashAdapter(data)
       case AdvanceAdType.banner:
-        return new AdvCSJBannerAdapter(supData)
+        return new AdvCSJBannerAdapter(data)
       case AdvanceAdType.interstitial:
-        return new AdvCSJInterstitialAdapter(supData)
+        return new AdvCSJInterstitialAdapter(data)
       case AdvanceAdType.rewardVideo:
-        return new AdvCSJRewardVideoAdapter(supData)
+        return new AdvCSJRewardVideoAdapter(data)
       case AdvanceAdType.nativeExpress:
-        return new AdvCSJNativeExpressAdapter(supData)
+        return new AdvCSJNativeExpressAdapter(data)
       case AdvanceAdType.renderFeed:
-        return new AdvCSJRenderFeedAdapter(supData)
+        return new AdvCSJRenderFeedAdapter(data)
       default:
         return undefined
     }

@@ -1,18 +1,14 @@
-import { AdvanceAdLoadState, AdvanceAdType } from '../../define/AdvanceDefine'
+import { AdvanceAdType } from '../../define/AdvanceDefine'
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
 
-//聚合adn侧使用的
+// 传递给adapter内的参数信息
 export class AdvanceADNUnitData {
-  groupID: number = 0 //广告位所属组
-  adType: AdvanceAdType = AdvanceAdType.unknown // 广告位类型
-  //adn渠道策略信息
-  supplier?: AdvanceSupplierModel
-  //补充内容
+  //adn渠道对象
+  supplier = new AdvanceSupplierModel()
+  // 广告位类型
+  adType: AdvanceAdType = AdvanceAdType.unknown
+  // 扩展信息
   ext?: AdvanceSupplierExt
-  resultStatus: AdvanceAdLoadState = AdvanceAdLoadState.loading
-
-  //被选中为最优
-  chooseBest: boolean = false
 }
 
 

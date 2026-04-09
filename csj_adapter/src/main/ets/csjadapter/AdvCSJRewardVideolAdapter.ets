@@ -1,9 +1,7 @@
 import { window } from '@kit.ArkUI';
 import {
   BYLog,
-  AdvanceAdnStatusResult,
-  ADV_ERR_DATA_NULL,
-  AdvanceAdLoadState,
+  AdvanceError,
   AdvanceRewardVideoCommonAdapter,
 } from 'advancesdk';
 import {
@@ -22,54 +20,35 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     return true
   }
 
-  adapter_loadAd(): Promise<AdvanceAdnStatusResult> {
-    BYLog.debug(TAG + ` adapter_loadAd start`)
-    return new Promise<AdvanceAdnStatusResult>(async (resolve) => {
-      let result = new AdvanceAdnStatusResult()
-      let initResult = await AdvCSJUtil.loadCSJSDK(this)
-      BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
+  async adapter_loadAd() {
+    let initResult = await AdvCSJUtil.loadCSJSDK(this)
+    BYLog.debug(TAG + ` csj初始化执行结果：${JSON.stringify(initResult)}`)
 
-      if (initResult.success) { // 初始化成功
-        //执行广告加载流程
-        let sup = this.unitData.supplier
-        let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
-
-        if (sup) {
-          let adSlot = new AdSlotBuilder()
-            .setCodeId(sup.adspotid)
-            .build()
-          mAdCreator.loadRewardAd(adSlot, {
-            onAdLoaded: (rewardAd: CSJRewardAd) => {
-              BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
-              this.csj_ad = rewardAd
-              result.status = AdvanceAdLoadState.success
-              resolve(result)
-            },
-            onError: (code: number, message: string) => {
-              BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${code} message: ${message}`)
-              result.status = AdvanceAdLoadState.failed
-              result.errCode = code
-              result.errMsg = message
-              resolve(result)
-            },
-            onAdCached: () => {
-            }
-          })
-
-        } else {
-          result.status = AdvanceAdLoadState.failed
-          result.errCode = ADV_ERR_DATA_NULL
-          result.errMsg = '未找到该adn策略信息'
-          resolve(result)
+    if (initResult.success) { // 初始化成功
+      //执行广告加载流程
+      let spotId = this.unitData.supplier.adspotid
+      let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
+      let adSlot = new AdSlotBuilder()
+        .setCodeId(spotId)
+        .build()
+      mAdCreator.loadRewardAd(adSlot, {
+        onAdLoaded: (rewardAd: CSJRewardAd) => {
+          BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
+          this.csj_ad = rewardAd
+          // 穿山甲变现SDK不提供ecpm获取
+          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
+        },
+        onError: (code: number, message: string) => {
+          BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${code} message: ${message}`)
+          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
+        },
+        onAdCached: () => {
         }
+      })
 
-      } else { // 初始化失败
-        result.status = AdvanceAdLoadState.failed
-        result.errCode = initResult.code
-        result.errMsg = initResult.msg
-        resolve(result)
-      }
-    })
+    } else { // 初始化失败
+      this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier!, new AdvanceError(initResult.code, initResult.msg))
+    }
   }
 
   adapter_showAd(windowStage: window.WindowStage) {
@@ -80,7 +59,7 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
   protected interactionListener: RewardAdInteractionListener = {
     onShow: () => {
       BYLog.debug(TAG + "激励视频回调 - onDidShow")
-      this.bridge?.bridge_didAdShow()
+      this.bridge?.bridge_didAdShow(this.unitData.supplier)
     },
     onClose: () => {
       BYLog.debug(TAG + `激励视频回调 - onDidClose`)
@@ -88,7 +67,7 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     },
     onClick: () => {
       BYLog.debug(TAG + "激励视频回调 - onDidClick")
-      this.bridge?.bridge_didAdClick()
+      this.bridge?.bridge_didAdClick(this.unitData.supplier)
     },
     onSkip: () => {
       BYLog.debug(TAG + "激励视频回调 - onDidSkip")

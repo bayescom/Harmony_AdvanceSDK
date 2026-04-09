@@ -8,8 +8,9 @@ import { logToast, toast } from '../util/Toast'
 @Entry
 @Component
 struct Splash {
-  @State placementId: string = '10014541' // mercury
+  @State placementId: string = '10014760' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10014760', '开屏-Bidding'],
     ['10014541', '开屏-倍业'],
     ['10014521', '开屏-穿山甲'],
     ['10014522', '开屏-优量汇'],

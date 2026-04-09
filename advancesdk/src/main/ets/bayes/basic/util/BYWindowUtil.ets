@@ -1,4 +1,4 @@
-import { BYApp, BYConstant, BYStrUtil } from "../../../../../../Index"
+import { BYApp, BYConstant } from "../../../../../../Index"
 import { window } from "@kit.ArkUI";
 
 
@@ -17,12 +17,12 @@ export class BYWindowUtil {
     }
     try {
       //创建窗口
-      let subWindow = await windowStage.createSubWindow(SUB_WINDOW_NAME_DEFAULT);
+      let subWindow = await windowStage.createSubWindow(SUB_WINDOW_NAME_DEFAULT)
       let storage: LocalStorage = new LocalStorage()
-      storage.setOrCreate(adName, object);
+      storage.setOrCreate(adName, object)
       await subWindow.setWindowLayoutFullScreen(true)
       await subWindow.loadContentByName(content, storage)
-      await subWindow.showWindow();
+      await subWindow.showWindow()
     } catch (err) {
       console.log('创建子窗口失败')
     }

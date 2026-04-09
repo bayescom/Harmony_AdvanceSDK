@@ -8,8 +8,9 @@ import { logToast, toast } from '../util/Toast'
 @Entry
 @Component
 struct Interstitial {
-  @State placementId: string = '10014606' // mercury
+  @State placementId: string = '10014806' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10014806', '激励视频-Bidding'],
     ['10014606', '激励视频-倍业'],
     ['10014605', '激励视频-穿山甲'],
     ['10014604', '激励视频-优量汇'],

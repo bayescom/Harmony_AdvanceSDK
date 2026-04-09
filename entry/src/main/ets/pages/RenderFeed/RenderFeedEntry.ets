@@ -5,8 +5,9 @@ import { router } from '@kit.ArkUI';
 @Entry
 @Component
 struct RenderFeedEntry {
-  @State placementId: string = '10014698' // mercury
+  @State placementId: string = '10014809' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10014809', '自渲染信息流-Bidding'],
     ['10014698', '自渲染信息流-倍业'],
     ['10014696', '自渲染信息流-穿山甲'],
     ['10014697', '自渲染信息流-优量汇'],
