@@ -1,0 +1,12 @@
+{
+  "name": "mercury_adapter",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "mercuryadhar": "file:libs/mercuryadhar.har",
+    "advancesdk": "file:../advancesdk"
+  }
+}

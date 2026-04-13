@@ -1,33 +1,56 @@
 import { router } from '@kit.ArkUI';
+import { AdvanceSDK } from 'advancesdk';
+import { PageTitleView } from '../components/PageTitleView';
 
 @Entry
 @Component
 struct Index {
-  @State message: string = 'OH_AdvanceDemo';
-
-  aboutToAppear(): void {
-  }
 
   build() {
-    Column() {
-      Text(this.message)
-        .id('HelloWorld')
-        .fontSize(30)
-        .padding(20)
+    Column({space: 20}) {
+      PageTitleView({title: 'AdvanceDemo'})
+      Text(`V${AdvanceSDK.getSDKVersion()}`)
+        .fontSize(20)
         .fontWeight(FontWeight.Bold)
-        .alignRules({
-          // center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
+        .fontColor(Color.Gray)
+      Button('开屏广告')
+        .width('100%')
+        .onClick(() => {
+          router.pushUrl({ url: "pages/Splash" })
         })
-
-      Button('开屏广告').margin(10).onClick((ev) => {
-        router.pushUrl({ url: "pages/Splash" })
-      })
-      Button('信息流广告').margin(10).onClick((ev) => {
-        router.pushUrl({ url: "pages/FeedChoose" })
-      })
+      Button('横幅广告')
+        .width('100%')
+        .onClick(() => {
+          router.pushUrl({ url: "pages/Banner" })
+        })
+      Button('插屏广告')
+        .width('100%')
+        .onClick(() => {
+          router.pushUrl({ url: "pages/Interstitial" })
+        })
+      Button('激励视频广告')
+        .width('100%')
+        .onClick(() => {
+          router.pushUrl({ url: "pages/RewardVideo" })
+        })
+      Button('信息流广告（模版渲染）')
+        .width('100%')
+        .onClick(() => {
+          router.pushUrl({ url: "pages/NativeExpress/NativeExpressEntry" })
+        })
+      Button('信息流广告（自渲染）')
+        .width('100%')
+        .onClick(() => {
+          router.pushUrl({ url: "pages/RenderFeed/RenderFeedEntry" })
+        })
     }
     .height('100%')
     .width('100%')
+    .padding({
+      top: 10,
+      left: 20,
+      right: 20,
+      bottom: 10
+    })
   }
 }

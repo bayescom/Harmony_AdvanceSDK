@@ -10,27 +10,27 @@
     },
     {
       "name": "EntryAbility_label",
-      "value": "advanceDev"
+      "value": "AdvanceDemo"
     },
     {
       "name": "internet_permission_reason",
-      "value": "获取网络数据"
+      "value": "允许使用Internet网络"
     },
     {
       "name": "oaid_permission_reason",
-      "value": "允许应用读取开放匿名设备标识符。"
+      "value": "允许应用读取开放匿名设备标识符"
     },
     {
       "name": "permission_LOCATION",
-      "value": "用于应用获取设备位置信息"
+      "value": "允许应用获取设备模糊位置信息"
     },
     {
       "name": "net_permission_reason",
-      "value": "允许应用读取网络状态。"
+      "value": "允许应用获取Network信息"
     },
     {
-      "name": "permission_need",
-      "value": "必要权限。"
+      "name": "wifi_permission_reason",
+      "value": "允许应用获取Wi-Fi信息"
     }
   ]
 }

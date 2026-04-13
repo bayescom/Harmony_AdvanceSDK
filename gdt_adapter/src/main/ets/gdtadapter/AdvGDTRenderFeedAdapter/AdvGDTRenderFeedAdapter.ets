@@ -1,0 +1,105 @@
+import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
+  GDTRenderListener,
+  GDTVideoStateListener,
+  GDTManualAd} from '@gdt/gdt-union-sdk';
+import {
+  BYLog,
+  AdvanceError,
+  ADV_ERR_DATA_NULL,
+  ADV_ERR_AD_Invalid_Expired,
+  AdvanceRenderFeedCommonAdapter,
+  BYConstant,
+  AdvanceRenderFeedWrapper,
+} from 'advancesdk';
+import { AdvGDTUtil } from '../AdvGDTUtil';
+import { AdvGDTRenderFeedAdWrapper } from './AdvGDTRenderFeedAdWrapper';
+
+
+const TAG = `[AdvGDTRenderFeedAdapter]`
+
+export class AdvGDTRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
+  protected gdt_ad?: GDTManualAd
+  protected wrapper?: AdvanceRenderFeedWrapper | undefined
+
+  adapter_loadAd() {
+    //执行广告加载流程
+    let spotId = this.unitData.supplier.adspotid
+    const config: GDTAdLoadConfig = {
+      posId: spotId,
+      count: 1,
+    };
+    GDTAdSDK.getAdLoader().loadManualAd(config, {
+      onAdLoad: (ads: Array<GDTManualAd>): void => {
+        if (ads && ads.length > 0) {
+          BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
+          this.gdt_ad = ads[0]
+          this.wrapper = new AdvGDTRenderFeedAdWrapper(this.gdt_ad)
+          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
+        } else {
+          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+        };
+      },
+      onError: (err: GDTError): void => {
+        BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      }
+    })
+  }
+
+  adapter_render(context: UIContext): void {
+    this.gdt_ad?.setInteractionListener(this.interactionListener);
+    this.gdt_ad?.setRenderListener(this.renderListener);
+    this.gdt_ad?.setVideoStateListener(this.videoStateListener)
+    if (this.gdt_ad?.isValid()) {
+      this.gdt_ad?.render(BYConstant.windowStage, context);
+    } else {
+      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+    }
+  }
+
+  protected renderListener: GDTRenderListener = {
+    onRenderSuccess: (): void => {
+      BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderSuccess")
+      this.bridge?.bridge_didAdRenderSuccess(this.unitData.supplier, this.wrapper!)
+    },
+    onRenderFail: (err: GDTError): void => {
+      BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderFail")
+      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(err.code, err.message))
+    }
+  };
+
+  protected interactionListener: GDTInteractionListener = {
+    onAdExposure: (): void => {
+      BYLog.debug(TAG + "自渲染信息流回调 - onAdExposure")
+      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+    },
+    onAdClick: (): void => {
+      BYLog.debug(TAG + "自渲染信息流回调 - onAdClick")
+      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+    },
+    onAdClose: (): void => {
+      BYLog.debug(TAG + `自渲染信息流回调 - onAdClose`)
+      // this.bridge?.bridge_didAdClose()
+    },
+    onError: (err: GDTError): void => {
+      BYLog.debug(TAG + "自渲染信息流回调 - onShowError")
+      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(err.code, err.message))
+    }
+  }
+
+  protected videoStateListener: GDTVideoStateListener = {
+    onVideoStart: (): void => {
+      BYLog.debug(TAG + "自渲染信息流回调 - onVideoStart")
+      this.bridge?.bridge_didAdVideoPlayStart()
+    },
+    onVideoComplete: (): void => {
+      BYLog.debug(TAG + "自渲染信息流回调 - onVideoEnd")
+      this.bridge?.bridge_didAdVideoPlayEnd()
+    },
+    onVideoError: (err: GDTError): void => {
+      BYLog.debug(TAG + `自渲染信息流回调 - onVideoFailed`)
+      this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(err.code, err.message))
+    }
+  }
+
+}

@@ -1,0 +1,11 @@
+{
+  "module": {
+    "name": "mercury_adapter",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet",
+      "2in1"
+    ]
+  }
+}

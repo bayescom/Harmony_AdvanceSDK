@@ -2,8 +2,12 @@
   "src": [
     "pages/Index",
     "pages/Splash",
-    "pages/FeedChoose",
-    "pages/Native",
-    "pages/Feed"
+    "pages/Banner",
+    "pages/Interstitial",
+    "pages/RewardVideo",
+    "pages/NativeExpress/NativeExpressEntry",
+    "pages/NativeExpress/NativeExpress",
+    "pages/RenderFeed/RenderFeedEntry",
+    "pages/RenderFeed/RenderFeed"
   ]
 }

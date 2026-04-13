@@ -1,0 +1,12 @@
+{
+  "name": "csj_adapter",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@csj/openadsdk": "file:libs/openadsdk_7.3.0.har",
+    "advancesdk": "file:../advancesdk"
+  }
+}
