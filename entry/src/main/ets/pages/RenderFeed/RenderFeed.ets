@@ -5,6 +5,7 @@ import {
   AdvanceAdInfo,
   AdvanceRenderFeedWrapper,
   AdvanceRenderFeed,
+  AdvanceRenderFeedListener,
 } from 'advancesdk';
 import { util } from '@kit.ArkTS';
 import { logToast } from '../../util/Toast';
@@ -28,40 +29,42 @@ export struct RenderFeed {
     this.loadRenderFeedAd()
   }
 
+  listener: AdvanceRenderFeedListener = {
+    onAdLoaded: (adInfo: AdvanceAdInfo) => {
+      logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
+    },
+    onAdLoadFailed: (err: AdvanceError): void => {
+      logToast(`onAdLoadFailed , err = ${err.toString()}`)
+      this.renderFeedAd = undefined
+    },
+    onRenderSuccess: (wrapper: AdvanceRenderFeedWrapper): void => {
+      logToast(`onRenderSuccess`)
+      // 在指定位置插入当前信息流对象
+      if (wrapper) {
+        this.listArray.splice(2, 0, wrapper)
+      }
+    },
+    onRenderFail: (err: AdvanceError): void => {
+      logToast(`onRenderFail , ${err.toString()}`)
+      this.renderFeedAd = undefined
+    },
+    onAdShow: (): void => {
+      logToast(`onAdShow`)
+    },
+    onAdClick: (): void => {
+      logToast(`onAdClick`)
+    },
+    onVideoPlayEnd: () => {
+      logToast(`onAdVideoEnd`)
+    }
+  }
+
   loadRenderFeedAd(): void {
     let config: AdvanceAdLoadConfig = {
       placementId: this.placementId
     }
     this.renderFeedAd = new AdvanceRenderFeed(config)
-    this.renderFeedAd.setAdListener({
-      onAdLoaded: (adInfo: AdvanceAdInfo) => {
-        logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
-      },
-      onAdLoadFailed: (err: AdvanceError): void => {
-        logToast(`onAdLoadFailed , err = ${err.toString()}`)
-        this.renderFeedAd = undefined
-      },
-      onRenderSuccess: (wrapper: AdvanceRenderFeedWrapper): void => {
-        logToast(`onRenderSuccess`)
-        // 在指定位置插入当前信息流对象
-        if (wrapper) {
-          this.listArray.splice(2, 0, wrapper)
-        }
-      },
-      onRenderFail: (err: AdvanceError): void => {
-        logToast(`onRenderFail , ${err.toString()}`)
-        this.renderFeedAd = undefined
-      },
-      onAdShow: (): void => {
-        logToast(`onAdShow`)
-      },
-      onAdClick: (): void => {
-        logToast(`onAdClick`)
-      },
-      onVideoPlayEnd: () => {
-        logToast(`onAdVideoEnd`)
-      }
-    })
+    this.renderFeedAd.setAdListener(this.listener)
     this.renderFeedAd.loadAd()
   }
 

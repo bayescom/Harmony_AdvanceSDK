@@ -1,5 +1,6 @@
 import {
-  AdvanceError, AdvanceAdLoadConfig, AdvanceInterstitial, AdvanceAdInfo
+  AdvanceError, AdvanceAdLoadConfig, AdvanceInterstitial, AdvanceAdInfo,
+  AdvanceInterstitialListener
 } from 'advancesdk'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -18,6 +19,30 @@ struct Interstitial {
   ];
   interstitialAd?: AdvanceInterstitial = undefined
 
+  listener: AdvanceInterstitialListener = {
+    onAdLoaded: (adInfo: AdvanceAdInfo) => {
+      logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
+    },
+    onAdLoadFailed: (err: AdvanceError) => {
+      logToast(`onAdLoadFailed, err: ${err.toString()}`)
+      this.interstitialAd = undefined
+    },
+    onAdShow: () => {
+      logToast(`onAdShow`)
+    },
+    onAdShowFailed: (error: AdvanceError) => {
+      logToast(`onAdShowFailed, err: ${error.toString()}`)
+      this.interstitialAd = undefined
+    },
+    onAdClick: () => {
+      logToast(`onAdClick`)
+    },
+    onAdClose: () => {
+      // logToast(`onAdClose`)
+      this.interstitialAd = undefined
+    },
+  }
+
   build() {
     Column({ space: 20 }) {
       PageTitleView({title: '插屏广告'})
@@ -32,29 +57,7 @@ struct Interstitial {
             placementId: this.placementId,
           }
           this.interstitialAd = new AdvanceInterstitial(config)
-          this.interstitialAd.setAdListener({
-            onAdLoaded: (adInfo: AdvanceAdInfo) => {
-              logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
-            },
-            onAdLoadFailed: (err: AdvanceError) => {
-              logToast(`onAdLoadFailed, err: ${err.toString()}`)
-              this.interstitialAd = undefined
-            },
-            onAdShow: () => {
-              logToast(`onAdShow`)
-            },
-            onAdShowFailed: (error: AdvanceError) => {
-              logToast(`onAdShowFailed, err: ${error.toString()}`)
-              this.interstitialAd = undefined
-            },
-            onAdClick: () => {
-              logToast(`onAdClick`)
-            },
-            onAdClose: () => {
-              // logToast(`onAdClose`)
-              this.interstitialAd = undefined
-            },
-          })
+          this.interstitialAd.setAdListener(this.listener)
           this.interstitialAd.loadAd()
         })
       Button('展示广告')

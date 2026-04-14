@@ -1,5 +1,5 @@
 import {
-  AdvanceError, AdvanceAdLoadConfig, AdvanceBanner, AdvanceAdInfo
+  AdvanceError, AdvanceAdLoadConfig, AdvanceBanner, AdvanceAdInfo, AdvanceBannerListener
 } from 'advancesdk'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -18,6 +18,33 @@ struct Banner {
   @State isShowAd: boolean = false
   bannerAd?: AdvanceBanner = undefined
 
+  listener: AdvanceBannerListener = {
+    onAdLoaded: (adInfo: AdvanceAdInfo) => {
+      logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
+      this.isShowAd = true
+    },
+    onAdLoadFailed: (err: AdvanceError) => {
+      logToast(`onAdLoadFailed, err: ${err.toString()}`)
+      this.bannerAd = undefined
+    },
+    onAdShow: () => {
+      logToast(`onAdShow`)
+    },
+    onAdShowFailed: (error: AdvanceError) => {
+      logToast(`onAdShowFailed, err: ${error.toString()}`)
+      this.bannerAd = undefined
+      this.isShowAd = false
+    },
+    onAdClick: () => {
+      logToast(`onAdClick`)
+    },
+    onAdClose: () => {
+      // logToast(`onAdClose`)
+      this.bannerAd = undefined
+      this.isShowAd = false
+    },
+  }
+
   build() {
     Column({ space: 20 }) {
       PageTitleView({title: '横幅广告'})
@@ -28,39 +55,14 @@ struct Banner {
       Button('加载并展示广告')
         .width('100%')
         .onClick(() => {
+          this.isShowAd = false
           let config: AdvanceAdLoadConfig = {
             placementId: this.placementId,
             adWidth: 375,
             adHeight: 120
           }
-          this.isShowAd = false
           this.bannerAd = new AdvanceBanner(config)
-          this.bannerAd.setAdListener({
-            onAdLoaded: (adInfo: AdvanceAdInfo) => {
-              logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
-              this.isShowAd = true
-            },
-            onAdLoadFailed: (err: AdvanceError) => {
-              logToast(`onAdLoadFailed, err: ${err.toString()}`)
-              this.bannerAd = undefined
-            },
-            onAdShow: () => {
-              logToast(`onAdShow`)
-            },
-            onAdShowFailed: (error: AdvanceError) => {
-              logToast(`onAdShowFailed, err: ${error.toString()}`)
-              this.bannerAd = undefined
-              this.isShowAd = false
-            },
-            onAdClick: () => {
-              logToast(`onAdClick`)
-            },
-            onAdClose: () => {
-              // logToast(`onAdClose`)
-              this.bannerAd = undefined
-              this.isShowAd = false
-            },
-          })
+          this.bannerAd.setAdListener(this.listener)
           this.bannerAd.loadAd()
         })
       if (this.isShowAd && this.bannerAd?.isAdValid()) {

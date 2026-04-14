@@ -1,5 +1,5 @@
 import {
-  AdvanceError, AdvanceSplash, AdvanceAdInfo, AdvanceAdLoadConfig
+  AdvanceError, AdvanceSplash, AdvanceAdInfo, AdvanceAdLoadConfig, AdvanceSplashListener
 } from 'advancesdk'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -18,6 +18,30 @@ struct Splash {
   ];
   splashAd?: AdvanceSplash = undefined
 
+  listener: AdvanceSplashListener = {
+    onAdLoaded: (adInfo: AdvanceAdInfo) => {
+      logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
+    },
+    onAdLoadFailed: (err: AdvanceError) => {
+      logToast(`onAdLoadFailed, err: ${err.toString()}`)
+      this.splashAd = undefined
+    },
+    onAdShow: () => {
+      logToast(`onAdShow`)
+    },
+    onAdShowFailed: (error: AdvanceError) => {
+      logToast(`onAdShowFailed, err: ${error.toString()}`)
+      this.splashAd = undefined
+    },
+    onAdClick: () => {
+      logToast(`onAdClick`)
+    },
+    onAdClose: () => {
+      // logToast(`onAdClose`)
+      this.splashAd = undefined
+    },
+  }
+
   build() {
     Column({ space: 20 }) {
       PageTitleView({title: '开屏广告'})
@@ -32,29 +56,7 @@ struct Splash {
             placementId: this.placementId,
           }
           this.splashAd = new AdvanceSplash(config)
-          this.splashAd.setAdListener({
-            onAdLoaded: (adInfo: AdvanceAdInfo) => {
-              logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
-            },
-            onAdLoadFailed: (err: AdvanceError) => {
-              logToast(`onAdLoadFailed, err: ${err.toString()}`)
-              this.splashAd = undefined
-            },
-            onAdShow: () => {
-              logToast(`onAdShow`)
-            },
-            onAdShowFailed: (error: AdvanceError) => {
-              logToast(`onAdShowFailed, err: ${error.toString()}`)
-              this.splashAd = undefined
-            },
-            onAdClick: () => {
-              logToast(`onAdClick`)
-            },
-            onAdClose: () => {
-              // logToast(`onAdClose`)
-              this.splashAd = undefined
-            },
-          })
+          this.splashAd.setAdListener(this.listener)
           this.splashAd.loadAd()
         })
       Button('展示广告')

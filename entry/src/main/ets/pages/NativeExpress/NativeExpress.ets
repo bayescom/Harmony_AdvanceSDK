@@ -1,5 +1,6 @@
 import { logToast } from '../../util/Toast';
-import { AdvanceError, AdvanceNativeExpress, AdvanceAdLoadConfig, AdvanceAdInfo } from 'advancesdk'
+import { AdvanceError, AdvanceNativeExpress, AdvanceAdLoadConfig, AdvanceAdInfo,
+  AdvanceNativeExpressListener } from 'advancesdk'
 import { router } from '@kit.ArkUI';
 
 @Entry
@@ -21,6 +22,40 @@ export struct NativeExpress {
     this.loadNativeExpressAd()
   }
 
+  listener: AdvanceNativeExpressListener = {
+    onAdLoaded: (adInfo: AdvanceAdInfo) => {
+      logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
+    },
+    onAdLoadFailed: (err: AdvanceError): void => {
+      logToast(`onAdLoadFailed , err = ${err.toString()}`)
+      this.nativeExpressAd = undefined
+    },
+    onRenderSuccess: (): void => {
+      logToast(`onRenderSuccess`)
+      // 在指定位置插入当前信息流对象
+      if (this.nativeExpressAd) {
+        this.listArray.splice(2, 0, this.nativeExpressAd)
+      }
+    },
+    onRenderFail: (err: AdvanceError): void => {
+      logToast(`onRenderFail , ${err.toString()}`)
+      this.nativeExpressAd = undefined
+    },
+    onAdShow: (): void => {
+      logToast(`onAdShow`)
+    },
+    onAdClick: (): void => {
+      logToast(`onAdClick`)
+    },
+    onAdClose: () => {
+      this.listArray.splice(2, 1); // 从数组中移除数据
+      this.nativeExpressAd = undefined
+    },
+    onVideoPlayEnd: () => {
+      logToast(`onAdVideoEnd`)
+    }
+  }
+
   loadNativeExpressAd(): void {
     let config: AdvanceAdLoadConfig = {
       placementId: this.placementId,
@@ -28,39 +63,7 @@ export struct NativeExpress {
       adHeight: 0
     }
     this.nativeExpressAd = new AdvanceNativeExpress(config)
-    this.nativeExpressAd.setAdListener({
-      onAdLoaded: (adInfo: AdvanceAdInfo) => {
-        logToast(`onAdLoaded, adInfo: ${JSON.stringify(adInfo)}`)
-      },
-      onAdLoadFailed: (err: AdvanceError): void => {
-        logToast(`onAdLoadFailed , err = ${err.toString()}`)
-        this.nativeExpressAd = undefined
-      },
-      onRenderSuccess: (): void => {
-        logToast(`onRenderSuccess`)
-        // 在指定位置插入当前信息流对象
-        if (this.nativeExpressAd) {
-          this.listArray.splice(2, 0, this.nativeExpressAd)
-        }
-      },
-      onRenderFail: (err: AdvanceError): void => {
-        logToast(`onRenderFail , ${err.toString()}`)
-        this.nativeExpressAd = undefined
-      },
-      onAdShow: (): void => {
-        logToast(`onAdShow`)
-      },
-      onAdClick: (): void => {
-        logToast(`onAdClick`)
-      },
-      onAdClose: () => {
-        this.listArray.splice(2, 1); // 从数组中移除数据
-        this.nativeExpressAd = undefined
-      },
-      onVideoPlayEnd: () => {
-        logToast(`onAdVideoEnd`)
-      }
-    })
+    this.nativeExpressAd.setAdListener(this.listener)
     this.nativeExpressAd.loadAd()
   }
 
