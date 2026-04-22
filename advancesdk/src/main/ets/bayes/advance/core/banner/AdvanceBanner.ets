@@ -28,8 +28,8 @@ export class AdvanceBanner extends AdvanceAdBase {
     adapter.adapter_loadAd()
   }
 
-  // Bidding失败（渠道广告全部加载失败）
-  protected override allAdnBiddingFail(err: AdvanceError): void {
+  // 所有Bidding渠道返回广告失败
+  protected override allAdnLoadAdFailed(err: AdvanceError): void {
     BYLog.debug(`渠道广告全部加载失败: err = ${err.toString()}`)
     this.mListener?.onAdLoadFailed(err)
     this.destroyAdapters()

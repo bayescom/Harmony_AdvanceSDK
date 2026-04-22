@@ -1,7 +1,19 @@
-import { AdvanceADNUnitData } from './AdvanceADNUnitData'
 import { AdvanceConstant } from '../../define/AdvanceConstant'
 import { AdvanceCommonAdapter } from './AdvanceCommonAdapter'
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
+import { AdvanceAdType } from '../../define/AdvanceDefine'
+
+// 传递给adapter内的参数信息
+export class AdvanceADNUnitData {
+  // adn渠道对象
+  supplier = new AdvanceSupplierModel()
+  // 广告位类型
+  adType: AdvanceAdType = AdvanceAdType.unknown
+  // 广告位宽度
+  vpWidth?: number
+  // 广告位高度
+  vpHeight?: number
+}
 
 export class AdvanceAdnInitResult{
   success: boolean = false
@@ -45,6 +57,7 @@ export class AdvanceADNManager {
     }
   }
 
+  //初始化ADN
   static async loadADN(supplier: AdvanceSupplierModel): Promise<AdvanceAdnInitResult> {
     let result = new AdvanceAdnInitResult()
     let harName = ''
@@ -75,6 +88,40 @@ export class AdvanceADNManager {
       }
       default:
         return result
+    }
+  }
+
+  //获取ADN版本号
+  static async getSDKVersion(supplierId: string): Promise<string> {
+    let version = ''
+    let harName = ''
+    switch (supplierId) {
+      case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
+        harName = 'csj_adapter';
+        const ns: ESObject = await import(harName);
+        version = ns.AdvCSJUtil.getCSJSDKVersion()
+        return version
+      }
+      case AdvanceConstant.ADV_SDK_ID_GDT:{ // 广点通
+        harName = 'gdt_adapter';
+        const ns: ESObject = await import(harName);
+        version = ns.AdvGDTUtil.getGDTSDKVersion()
+        return version
+      }
+      case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
+        harName = 'ks_adapter';
+        const ns: ESObject = await import(harName);
+        version = ns.AdvKSUtil.getKSSDKVersion()
+        return version
+      }
+      case AdvanceConstant.ADV_SDK_ID_MERCURY:{ // 倍业
+        harName = 'mercury_adapter';
+        const ns: ESObject = await import(harName);
+        version = ns.AdvMercuryUtil.getMercurySDKVersion()
+        return version
+      }
+      default:
+        return version
     }
   }
 }

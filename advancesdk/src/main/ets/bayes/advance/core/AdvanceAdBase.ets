@@ -1,6 +1,5 @@
 import { BYLog } from '../../basic/BYLog'
 import { AdvanceAdLoadConfig } from '../config/AdvanceAdConfig'
-import { AdvanceADNUnitData, AdvanceSupplierExt } from './adn/AdvanceADNUnitData'
 import {
   AdvanceError,
   ADV_ERR_SDK_INIT_MISS,
@@ -16,11 +15,11 @@ import { taskpool } from '@kit.ArkTS'
 import AdvanceNet from '../net/AdvanceRequest'
 import { AdvanceUtil } from './AdvanceUtil'
 import { BYConstant } from '../../basic/BYConstant'
-import { AdvanceAdnLoadAdState,
-  AdvanceAdnReportTKEventType,
-   } from '../define/AdvanceDefine'
+import {
+  AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType,
+} from '../define/AdvanceDefine'
 import { AdvanceAdInfo } from '../model/AdvanceAdInfo'
-import { AdvanceADNManager } from './adn/AdvanceADNManager'
+import { AdvanceADNManager, AdvanceADNUnitData } from './adn/AdvanceADNManager'
 import { systemDateTime } from '@kit.BasicServicesKit'
 
 
@@ -51,7 +50,7 @@ export abstract class AdvanceAdBase {
   // abstract startBidding(suppliers: AdvanceSupplierModel[])
   protected abstract loadAnyAdnAdapter(adapter: AdvanceCommonAdapter)
 
-  protected abstract allAdnBiddingFail(err: AdvanceError)
+  protected abstract allAdnLoadAdFailed(err: AdvanceError)
 
   protected abstract adnBidWin(adInfo: AdvanceAdInfo)
 
@@ -97,7 +96,8 @@ export abstract class AdvanceAdBase {
     if (this.strategyModel.setting.head_bidding_group.length == 0 && !this.bidTargetSupplier) { // 瀑布流模式，无head_bidding渠道
       // 策略组无数据说明所有的组加载广告全部没有成功（因为第一层执行完总会被remove掉）
       if (this.strategyModel.setting.parallel_group.length == 0) {
-        this.allAdnBiddingFail(new AdvanceError(ADV_ERR_ALL_ADN_FAILED, `所有平台都未返回广告（失败或超时）\n详情：${JSON.stringify(Array.from(this.errorInfo))}`))
+        this.allAdnLoadAdFailed(new AdvanceError(ADV_ERR_ALL_ADN_FAILED,
+          `所有平台都未返回广告（失败或超时）\n详情：${JSON.stringify(Array.from(this.errorInfo))}`))
         return
       }
     }
@@ -113,6 +113,11 @@ export abstract class AdvanceAdBase {
         return supplier.priority === priority
       })[0]
     })
+    // 对parallelSuppliers进行排序
+    if (this.parallelSuppliers.length > 1) {
+      this.sortedForPriceWithSuppliers(this.parallelSuppliers)
+    }
+
     // 合并2个组，开始执行竞价策略的回调
     let templeSuppliers = new Array<AdvanceSupplierModel>()
     if (this.biddingSuppliers.length) {
@@ -129,15 +134,15 @@ export abstract class AdvanceAdBase {
       let adnData = new AdvanceADNUnitData()
       adnData.supplier = supplier
       adnData.adType = this.adSlotType
-      adnData.ext = new AdvanceSupplierExt()
       //宽高属性值设置
-      adnData.ext.vpWidth = this.adConfig.adWidth ?? 0
-      adnData.ext.vpHeight = this.adConfig.adHeight ?? 0
+      adnData.vpWidth = this.adConfig.adWidth ?? 0
+      adnData.vpHeight = this.adConfig.adHeight ?? 0
       // 初始化SDK
       let initResult = await AdvanceADNManager.loadADN(supplier)
       if (!initResult.success) {
         BYLog.debug(`${supplier.name}渠道SDK执行初始化失败`)
-        this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, new AdvanceError(ADV_ERR_ADN_INIT_FAILED, `${supplier.name}初始化失败：code: ${initResult.code}, msg: ${initResult.msg}`))
+        this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, new AdvanceError(ADV_ERR_ADN_INIT_FAILED,
+          `${supplier.name}初始化失败：code: ${initResult.code}, msg: ${initResult.msg}`))
         return // 在 forEach 中相当于 continue
       }
       BYLog.debug(`${supplier.name}渠道SDK执行初始化成功`)
@@ -334,11 +339,12 @@ export abstract class AdvanceAdBase {
    * @param supplier 渠道对象
    * @param error 错误信息
    */
-  protected reportAdnTask(eventType: AdvanceAdnReportTKEventType, supplier: AdvanceSupplierModel, error?: AdvanceError) {
+  protected reportAdnTask(eventType: AdvanceAdnReportTKEventType, supplier: AdvanceSupplierModel,
+    error?: AdvanceError) {
     if (error) {
       this.collectAdnError(supplier, error)
     }
-     let reportUrls = new Array<string>()
+    let reportUrls = new Array<string>()
     switch (eventType) {
       case AdvanceAdnReportTKEventType.loaded:
         reportUrls = supplier.loadedtk

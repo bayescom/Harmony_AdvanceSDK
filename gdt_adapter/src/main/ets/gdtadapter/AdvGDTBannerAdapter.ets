@@ -28,8 +28,8 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
   adapter_loadAd() {
     //执行广告加载流程
     let spotId = this.unitData.supplier.adspotid
-    let width = this.unitData.ext?.vpWidth ?? 0
-    let height = this.unitData.ext?.vpHeight ?? 0
+    let width = this.unitData.vpWidth ?? 0
+    let height = this.unitData.vpHeight ?? 0
     const config: GDTAdLoadConfig = {
       posId: spotId,
       adSize: new GDTAdSize(width, height)

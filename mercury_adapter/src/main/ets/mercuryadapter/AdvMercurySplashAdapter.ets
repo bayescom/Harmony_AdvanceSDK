@@ -3,9 +3,8 @@ import {
   BYLog,
   AdvanceError,
   AdvanceSplashCommonAdapter,
-  BYApp,
 } from 'advancesdk';
-import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryRenderOption, MercurySplash } from 'mercuryadhar';
+import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryRenderOption, MercurySplash, MercurySplashRenderListener } from 'mercuryadhar';
 
 
 const TAG = `[AdvMercurySplashAdapter]`
@@ -36,27 +35,29 @@ export class AdvMercurySplashAdapter extends AdvanceSplashCommonAdapter {
   }
 
   adapter_showAd(windowStage: window.WindowStage) {
-    this.mercury_ad?.setRenderListener({
-      onShow: (): void => {
-        BYLog.debug(TAG + "开屏回调 - onAdExposure")
-        this.bridge?.bridge_didAdShow(this.unitData.supplier)
-      },
-      onClick: (): void => {
-        BYLog.debug(TAG + "开屏回调 - onAdClick")
-        this.bridge?.bridge_didAdClick(this.unitData.supplier)
-      },
-      onRenderErr: (err: MercuryErr): void => {
-        BYLog.debug(TAG + "开屏回调 - onShowError")
-        this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.msg))
-      },
-      onClose: (type: MercuryCloseType): void => {
-        BYLog.debug(TAG + `开屏回调 - onAdClose`)
-        this.bridge?.bridge_didAdClose()
-      }
-    })
+    this.mercury_ad?.setRenderListener(this.interactionListener)
     let renOp = new MercuryRenderOption()
-    renOp.windowStage = BYApp.getWindowStage()
+    renOp.windowStage = windowStage
     this.mercury_ad?.showAd(renOp)
+  }
+
+  protected interactionListener: MercurySplashRenderListener = {
+    onShow: (): void => {
+      BYLog.debug(TAG + "开屏回调 - onAdExposure")
+      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+    },
+    onClick: (): void => {
+      BYLog.debug(TAG + "开屏回调 - onAdClick")
+      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+    },
+    onRenderErr: (err: MercuryErr): void => {
+      BYLog.debug(TAG + "开屏回调 - onShowError")
+      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.msg))
+    },
+    onClose: (type: MercuryCloseType): void => {
+      BYLog.debug(TAG + `开屏回调 - onAdClose`)
+      this.bridge?.bridge_didAdClose()
+    }
   }
 
 }

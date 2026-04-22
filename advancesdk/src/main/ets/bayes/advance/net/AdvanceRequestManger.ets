@@ -17,6 +17,7 @@ import { AdvanceError,
 import { AdvanceConstant } from '../define/AdvanceConstant';
 import { BYConstant } from '../../basic/BYConstant';
 import { AdvanceSetting } from '../config/AdvanceSetting';
+import { AdvanceADNManager } from '../core/adn/AdvanceADNManager';
 
 export class AdvanceRequestManger {
   static async prepareReqAdData(adConfig: AdvanceAdLoadConfig): Promise<AdvanceReqModel> {
@@ -32,6 +33,7 @@ export class AdvanceRequestManger {
       let bundleInfo =
         await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION)
       req.appver = bundleInfo.versionName;
+      req.ext = await AdvanceRequestManger.addSDKVersion()
       req.device_encinfo = await AdvanceRequestManger.getEncryptedDeviceInf()
 
     } catch (e) {
@@ -124,6 +126,20 @@ export class AdvanceRequestManger {
     } catch (e) {
       BYLog.printE(e)
     }
+  }
+
+  //添加各ADN版本号
+  static async addSDKVersion(): Promise<Record<string, string>> {
+    let extra: Record<string, string> = {}
+    //添加CSJ版本号
+    extra['csj_v'] = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_CSJ)
+    //添加GDT版本号
+    extra['gdt_v'] = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_GDT)
+    //添加Mercury版本号
+    extra['mry_v'] = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_MERCURY)
+    //添加KS版本号
+    extra['ks_v'] = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_KS)
+    return extra
   }
 
 

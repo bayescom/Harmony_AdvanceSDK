@@ -23,12 +23,12 @@ export interface AdvanceRenderFeedWrapper {
   registerViewForInteraction(uiContext: UIContext, rootViewId: string, clickableViewIds:string[]): void;
 
   // 控件点击监听 (ks、mercury)
-  getClickHandler(): (event: ClickEvent) => void
+  getClickHandler(): (event: ClickEvent) => void;
 
   // 获取可⻅区域监听数组
-  getVisibleAreaRatios(): number[]
+  getVisibleAreaRatios(): number[];
 
   // 可见区域监听方法，用于SDK内部判断页面展示比例，处理广告曝光&视频播放等
-  getVisibleAreaChangeListener(): (isVisible: boolean, currentRatio: number) => void
+  getVisibleAreaChangeListener(): (isVisible: boolean, currentRatio: number) => void;
 
 }

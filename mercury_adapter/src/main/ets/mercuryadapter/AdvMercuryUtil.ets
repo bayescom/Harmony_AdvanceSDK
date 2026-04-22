@@ -60,6 +60,7 @@ export class AdvMercuryUtil {
         let appKey = supplier.mediakey
         let v = AdvMercuryUtil.getMercurySDKVersion()
         BYLog.debug(TAG + `mercury版本号：${v}`)
+        // MercuryAD.debug()
         MercuryAD.initWindow(BYApp.getWindowStage())
         MercuryAD.init(BYConstant.context, appID, appKey)
         result.success = true

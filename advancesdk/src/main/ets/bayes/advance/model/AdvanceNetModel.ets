@@ -1,4 +1,3 @@
-import { AdvanceConstant } from '../define/AdvanceConstant'
 import { AdvanceAdnLoadAdState } from '../define/AdvanceDefine'
 
 // 	"version": "3.1.0",
@@ -20,6 +19,7 @@ export class AdvanceReqModel {
   adspotid: string = ''
   appver: string = ''
   reqid: string = ''
+  ext: Record<string, string> = {}
   device_encinfo: string = ''
 }
 

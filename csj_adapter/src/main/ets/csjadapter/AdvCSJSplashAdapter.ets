@@ -24,8 +24,8 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
   adapter_loadAd() {
     //执行广告加载流程
     let spotId = this.unitData.supplier.adspotid
-    let w = this.unitData.ext?.vpWidth ?? 0
-    let h = this.unitData.ext?.vpHeight ?? 0
+    let w = this.unitData.vpWidth ?? 0
+    let h = this.unitData.vpHeight ?? 0
 
     //未配置的话取屏幕宽高
     if (w <= 0) {
@@ -76,7 +76,7 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
       this.bridge?.bridge_didAdShow(this.unitData.supplier)
     },
     onDidClose: (closeType: CSJSplashAdCloseType) => {
-      BYLog.debug(TAG + `开屏回调 - onDidClose 关闭原因：${closeType}`)
+      BYLog.debug(TAG + `开屏回调 - onDidClose`)
       this.bridge?.bridge_didAdClose()
     },
     onDidClick: () => {

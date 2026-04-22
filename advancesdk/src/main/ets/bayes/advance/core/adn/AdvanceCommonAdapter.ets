@@ -1,5 +1,5 @@
-import { AdvanceADNUnitData } from './AdvanceADNUnitData';
 import { NodeController, window } from '@kit.ArkUI';
+import { AdvanceADNUnitData } from '../../../../../../../Index';
 
 export abstract class AdvanceCommonAdapter {
   //渠道参数

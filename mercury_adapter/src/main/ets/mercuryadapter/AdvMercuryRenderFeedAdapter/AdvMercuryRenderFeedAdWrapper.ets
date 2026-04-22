@@ -18,7 +18,7 @@ export class AdvMercuryRenderFeedAdWrapper implements AdvanceRenderFeedWrapper {
   }
 
   getButtonText(): string {
-    return '查看详情'
+    return this.data?.getButtonText() ?? ""
   }
 
   getIconUrl(): string {
@@ -38,7 +38,7 @@ export class AdvMercuryRenderFeedAdWrapper implements AdvanceRenderFeedWrapper {
   }
 
   getAdComponent(): NodeController | undefined {
-    return undefined
+    return this.data?.getMaterialComponent()
   }
 
   registerViewForInteraction(uiContext: UIContext, rootViewId: string, clickableViewIds:string[]) {
