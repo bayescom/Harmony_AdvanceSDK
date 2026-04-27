@@ -4,7 +4,7 @@ import {
   AdvanceError,
   AdvanceSplashCommonAdapter,
 } from 'advancesdk';
-import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryRenderOption, MercurySplash, MercurySplashRenderListener } from 'mercuryadhar';
+import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryRenderOption, MercurySplash, MercurySplashRenderListener } from 'mercury_ad';
 
 
 const TAG = `[AdvMercurySplashAdapter]`

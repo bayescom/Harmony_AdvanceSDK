@@ -5,7 +5,7 @@ import {
   AdvanceNativeExpressCommonAdapter,
   BYDisplay,
 } from 'advancesdk';
-import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryFeed, MercuryVideoPlayListener, MercuryFeedRenderListener } from 'mercuryadhar';
+import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryFeed, MercuryVideoPlayListener, MercuryFeedRenderListener } from 'mercury_ad';
 
 
 const TAG = `[AdvMercuryNativeExpressAdapter]`

@@ -6,7 +6,7 @@ import {
 } from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr,
   MercuryInterstitial,
-  MercuryRenderOption, MercuryInterstitialRenderListener } from 'mercuryadhar';
+  MercuryRenderOption, MercuryInterstitialRenderListener } from 'mercury_ad';
 
 
 const TAG = `[AdvMercuryInterstitialAdapter]`

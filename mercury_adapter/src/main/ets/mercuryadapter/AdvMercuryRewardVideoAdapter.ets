@@ -6,7 +6,7 @@ import {
 } from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr,
   MercuryReward,
-  MercuryRenderOption, MercuryRewardRenderListener } from 'mercuryadhar';
+  MercuryRenderOption, MercuryRewardRenderListener } from 'mercury_ad';
 
 
 const TAG = `[AdvMercuryRewardVideoAdapter]`

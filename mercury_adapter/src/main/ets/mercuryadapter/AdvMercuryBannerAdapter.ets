@@ -5,7 +5,7 @@ import {
   AdvanceBannerCommonAdapter,
 } from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr,
-  MercuryBanner, MercuryBannerRenderListener } from 'mercuryadhar';
+  MercuryBanner, MercuryBannerRenderListener } from 'mercury_ad';
 
 
 const TAG = `[AdvMercuryBannerAdapter]`

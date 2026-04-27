@@ -4,7 +4,7 @@ import {
   AdvanceRenderFeedCommonAdapter,
   AdvanceRenderFeedWrapper,
 } from 'advancesdk';
-import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryNative, MercuryNativeRenderListener, MercuryVideoPlayListener } from 'mercuryadhar';
+import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryNative, MercuryNativeRenderListener, MercuryVideoPlayListener } from 'mercury_ad';
 import { AdvMercuryRenderFeedAdWrapper } from './AdvMercuryRenderFeedAdWrapper';
 
 

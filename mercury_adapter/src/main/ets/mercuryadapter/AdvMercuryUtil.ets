@@ -10,7 +10,7 @@ import {
   BYApp,
 } from 'advancesdk'
 import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
-import { MercuryAD } from 'mercuryadhar'
+import { MercuryAD } from 'mercury_ad'
 import { AdvMercuryBannerAdapter } from './AdvMercuryBannerAdapter'
 import { AdvMercuryInterstitialAdapter } from './AdvMercuryInterstitialAdapter'
 import { AdvMercuryNativeExpressAdapter } from './AdvMercuryNativeExpressAdapter'

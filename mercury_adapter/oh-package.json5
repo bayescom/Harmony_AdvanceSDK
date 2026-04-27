@@ -6,7 +6,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "mercuryadhar": "file:libs/mercuryadhar.har",
+    "mercury_ad": "file:libs/mercury_ad.har",
     "advancesdk": "file:../advancesdk"
   }
 }
