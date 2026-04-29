@@ -22,6 +22,8 @@ export const ADV_ERR_ADN_INIT_FAILED = 9905;
 export const ADV_ERR_AD_Invalid_Expired = 9906;
 // 全部渠道加载失败
 export const ADV_ERR_ALL_ADN_FAILED = 9907;
+// 华为渠道广告展示失败
+export const ADV_ERR_HUAWEI_SHOW_FAILED = 9908;
 
 
 export class AdvanceError {

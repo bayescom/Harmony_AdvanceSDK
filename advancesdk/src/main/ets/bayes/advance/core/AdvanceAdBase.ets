@@ -102,17 +102,21 @@ export abstract class AdvanceAdBase {
       }
     }
     // 取BiddingGroup组
-    this.biddingSuppliers = this.strategyModel.setting.head_bidding_group.map((priority: number) => {
-      return this.strategyModel.suppliers.filter((supplier: AdvanceSupplierModel) => {
-        return supplier.priority === priority
-      })[0]
-    })
+    if (this.strategyModel.setting.head_bidding_group.length) {
+      this.biddingSuppliers = this.strategyModel.setting.head_bidding_group.map((priority: number) => {
+        return this.strategyModel.suppliers.filter((supplier: AdvanceSupplierModel) => {
+          return supplier.priority === priority
+        })[0]
+      })
+    }
     // 取parallelGroup当前第一层策略组
-    this.parallelSuppliers = this.strategyModel.setting.parallel_group[0].map((priority: number) => {
-      return this.strategyModel.suppliers.filter((supplier: AdvanceSupplierModel) => {
-        return supplier.priority === priority
-      })[0]
-    })
+    if (this.strategyModel.setting.parallel_group.length) {
+      this.parallelSuppliers = this.strategyModel.setting.parallel_group[0].map((priority: number) => {
+        return this.strategyModel.suppliers.filter((supplier: AdvanceSupplierModel) => {
+          return supplier.priority === priority
+        })[0]
+      })
+    }
     // 对parallelSuppliers进行排序
     if (this.parallelSuppliers.length > 1) {
       this.sortedForPriceWithSuppliers(this.parallelSuppliers)

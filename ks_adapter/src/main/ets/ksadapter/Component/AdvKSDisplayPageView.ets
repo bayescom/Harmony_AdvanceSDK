@@ -2,7 +2,7 @@ import { KSAdBuildSplashView, KSSplashAd, KSBuildNewInterstitialAdView,
   KSNewInterstitialAd } from "ksadsdk"
 
 export const KS_DISPLAY_PAGE_TAG = 'AdvKSDisplayPageView'
-export const STORAGE_AD_KEY = 'AdvKSAdStorageKey'
+export const KS_STORAGE_AD_KEY = 'AdvKSAdStorageKey'
 
 @Entry({ routeName: KS_DISPLAY_PAGE_TAG })
 @Component
@@ -13,7 +13,7 @@ export struct AdvKSDisplayPageView {
     // 在页面中获取共享的LocalStorage实例
     let sharedStorage = this.getUIContext().getSharedLocalStorage();
     if (sharedStorage) {
-      this.ks_ad = sharedStorage.get(STORAGE_AD_KEY)
+      this.ks_ad = sharedStorage.get(KS_STORAGE_AD_KEY)
     }
   }
 

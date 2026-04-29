@@ -72,15 +72,15 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
 
   protected interactionListener: CSJSplashAdInteractionListener = {
     onDidShow: () => {
-      BYLog.debug(TAG + "开屏回调 - onDidShow")
+      BYLog.debug(TAG + "开屏回调 - onAdExposure")
       this.bridge?.bridge_didAdShow(this.unitData.supplier)
     },
     onDidClose: (closeType: CSJSplashAdCloseType) => {
-      BYLog.debug(TAG + `开屏回调 - onDidClose`)
+      BYLog.debug(TAG + `开屏回调 - onAdClose`)
       this.bridge?.bridge_didAdClose()
     },
     onDidClick: () => {
-      BYLog.debug(TAG + "开屏回调 - onDidClick")
+      BYLog.debug(TAG + "开屏回调 - onAdClick")
       this.bridge?.bridge_didAdClick(this.unitData.supplier)
     },
     onVideoDidPlayFinish: () => {

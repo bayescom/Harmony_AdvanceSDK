@@ -52,6 +52,12 @@ export class AdvanceADNManager {
         result = ns.AdvMercuryUtil.getMercuryAdAdapter(adnData)
         return result
       }
+      case AdvanceConstant.ADV_SDK_ID_HUAWEI:{ // 华为
+        harName = 'huawei_adapter';
+        const ns: ESObject = await import(harName);
+        result = ns.AdvHuaweiUtil.getHuaweiAdAdapter(adnData)
+        return result
+      }
       default:
         return result
     }
@@ -84,6 +90,12 @@ export class AdvanceADNManager {
         harName = 'mercury_adapter';
         const ns: ESObject = await import(harName);
         result = await ns.AdvMercuryUtil.loadMercurySDK(supplier)
+        return result
+      }
+      case AdvanceConstant.ADV_SDK_ID_HUAWEI:{ // 华为
+        result.success = true
+        result.code = 0
+        result.msg = '无需初始化'
         return result
       }
       default:

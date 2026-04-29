@@ -70,6 +70,10 @@
     {
       "name": "mercury_adapter",
       "srcPath": "./mercury_adapter",
+    },
+    {
+      "name": "huawei_adapter",
+      "srcPath": "./huawei_adapter",
     }
   ]
 }

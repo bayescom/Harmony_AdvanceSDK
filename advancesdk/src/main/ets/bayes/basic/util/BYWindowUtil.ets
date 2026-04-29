@@ -22,6 +22,8 @@ export class BYWindowUtil {
       storage.setOrCreate(adName, object)
       await subWindow.setWindowLayoutFullScreen(true)
       await subWindow.loadContentByName(content, storage)
+      //窗口设置透明
+      subWindow.setWindowBackgroundColor('#00000000')
       await subWindow.showWindow()
     } catch (err) {
       console.log('创建子窗口失败')

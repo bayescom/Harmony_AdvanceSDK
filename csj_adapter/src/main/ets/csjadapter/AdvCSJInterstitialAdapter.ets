@@ -47,22 +47,22 @@ export class AdvCSJInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
 
   protected interactionListener: FullAdInteractionListener = {
     onShow: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidShow")
+      BYLog.debug(TAG + "插屏回调 - onAdExposure")
       this.bridge?.bridge_didAdShow(this.unitData.supplier)
     },
     onClose: () => {
-      BYLog.debug(TAG + `插屏回调 - onDidClose`)
+      BYLog.debug(TAG + `插屏回调 - onAdClose`)
       this.bridge?.bridge_didAdClose()
     },
     onClick: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidClick")
+      BYLog.debug(TAG + "插屏回调 - onAdClick")
       this.bridge?.bridge_didAdClick(this.unitData.supplier)
     },
     onSkip: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidSkip")
+      BYLog.debug(TAG + "插屏回调 - onAdSkip")
     },
     onComplete: () => {
-      BYLog.debug(TAG + "插屏回调 - onDidComplete")
+      BYLog.debug(TAG + "插屏回调 - onAdPlayEnd")
     },
   }
 

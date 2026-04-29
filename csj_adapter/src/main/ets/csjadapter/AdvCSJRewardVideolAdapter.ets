@@ -49,26 +49,26 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
 
   protected interactionListener: RewardAdInteractionListener = {
     onShow: () => {
-      BYLog.debug(TAG + "激励视频回调 - onDidShow")
+      BYLog.debug(TAG + "激励视频回调 - onAdExposure")
       this.bridge?.bridge_didAdShow(this.unitData.supplier)
     },
     onClose: () => {
-      BYLog.debug(TAG + `激励视频回调 - onDidClose`)
+      BYLog.debug(TAG + `激励视频回调 - onAdClose`)
       this.bridge?.bridge_didAdClose()
     },
     onClick: () => {
-      BYLog.debug(TAG + "激励视频回调 - onDidClick")
+      BYLog.debug(TAG + "激励视频回调 - onAdClick")
       this.bridge?.bridge_didAdClick(this.unitData.supplier)
     },
     onSkip: () => {
-      BYLog.debug(TAG + "激励视频回调 - onDidSkip")
+      BYLog.debug(TAG + "激励视频回调 - onAdSkip")
     },
     onRewardArrived: (isVerify, rewardType, extraInfo) => {
-      BYLog.debug(TAG + "激励视频回调 - onDidReward")
+      BYLog.debug(TAG + "激励视频回调 - onAdReward")
       this.bridge?.bridge_didAdReward()
     },
     onComplete: () => {
-      BYLog.debug(TAG + "激励视频回调 - onDidComplete")
+      BYLog.debug(TAG + "激励视频回调 - onAdPlayEnd")
       this.bridge?.bridge_didAdVideoPlayEnd()
     }
   }

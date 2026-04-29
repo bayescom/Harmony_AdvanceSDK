@@ -16,6 +16,7 @@ struct Interstitial {
     ['10014592', '插屏-穿山甲'],
     ['10014591', '插屏-优量汇'],
     ['10014594', '插屏-快手'],
+    ['10014971', '插屏-华为'],
   ];
   interstitialAd?: AdvanceInterstitial = undefined
 

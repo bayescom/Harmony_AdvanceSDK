@@ -6,7 +6,7 @@ import {
   AdvanceError,
 } from 'advancesdk';
 import { KSAdScene, KSAdSDK, KSSplashAd, KSAdInteractionType} from 'ksadsdk';
-import { KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY } from './Component/AdvKSDisplayPageView';
+import { KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY } from './Component/AdvKSDisplayPageView';
 
 
 const TAG = `[AdvKSSplashAdapter]`
@@ -66,7 +66,7 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
         },
         onCloseLandingPage() {}
       })
-      BYWindowUtil.createWindow(KS_DISPLAY_PAGE_TAG, STORAGE_AD_KEY, that.ks_ad)
+      BYWindowUtil.createWindow(KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY, that.ks_ad)
     }
   }
 

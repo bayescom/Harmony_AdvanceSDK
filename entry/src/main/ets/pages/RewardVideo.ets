@@ -16,6 +16,7 @@ struct Interstitial {
     ['10014605', '激励视频-穿山甲'],
     ['10014604', '激励视频-优量汇'],
     ['10014607', '激励视频-快手'],
+    ['10014972', '激励视频-华为'],
   ];
   rewardVideoAd?: AdvanceRewardVideo = undefined
 

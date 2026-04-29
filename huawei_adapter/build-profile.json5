@@ -1,15 +1,9 @@
 {
   "apiType": "stageMode",
   "buildOption": {
-    "arkOptions": {
-      "runtimeOnly": {
-        "packages": [
-          "csj_adapter",
-          "gdt_adapter",
-          "ks_adapter",
-          "mercury_adapter",
-          "huawei_adapter"
-        ]
+    "resOptions": {
+      "copyCodeResource": {
+        "enable": false
       }
     }
   },
@@ -19,13 +13,16 @@
       "arkOptions": {
         "obfuscation": {
           "ruleOptions": {
-            "enable": true,
+            "enable": false,
             "files": [
               "./obfuscation-rules.txt"
             ]
-          }
+          },
+          "consumerFiles": [
+            "./consumer-rules.txt"
+          ]
         }
-      }
+      },
     },
   ],
   "targets": [
@@ -33,7 +30,7 @@
       "name": "default"
     },
     {
-      "name": "ohosTest",
+      "name": "ohosTest"
     }
   ]
 }
