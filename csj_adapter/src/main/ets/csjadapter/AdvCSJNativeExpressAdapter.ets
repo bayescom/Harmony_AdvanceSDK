@@ -38,6 +38,7 @@ export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
           BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
           this.csj_ad = ads[0]
           // 穿山甲变现SDK不提供ecpm获取
+          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
           this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
         } else {
           this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))

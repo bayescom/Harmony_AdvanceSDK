@@ -8,7 +8,10 @@ export interface AdvanceCommonAdapterBridge {
   bridge_didAdLoadFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => void
   bridge_didAdShow: (supplier: AdvanceSupplierModel) => void
   bridge_didAdClick: (supplier: AdvanceSupplierModel) => void
+  // 是否缓存广告对象
+  bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => void
 }
+
 export interface AdvanceSplashAdapterBridge extends AdvanceCommonAdapterBridge {
   bridge_didAdShowFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => void
   bridge_didAdClose: () => void

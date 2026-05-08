@@ -46,6 +46,7 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
         BYLog.debug(TAG + "开屏回调 - onAdLoaded")
         this.csj_ad = splashAd
         // 穿山甲变现SDK不提供ecpm获取
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
         this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
       },
       onError: (code: number, message: string) => {

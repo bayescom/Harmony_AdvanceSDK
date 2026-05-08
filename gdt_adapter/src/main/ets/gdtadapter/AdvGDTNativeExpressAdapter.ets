@@ -43,6 +43,7 @@ export class AdvGDTNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
         if (ads && ads.length > 0) {
           BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
           this.gdt_ad = ads[0]
+          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.gdt_ad.getEcpm())
           this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
         } else {
           this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))

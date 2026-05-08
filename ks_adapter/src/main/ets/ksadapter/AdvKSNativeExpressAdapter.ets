@@ -48,6 +48,7 @@ export class AdvKSNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter
         if (ads && ads.length > 0) {
           BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
           that.ks_ad = ads[0]
+          that.bridge?.bridge_cacheAdapterIfNeeded(that, that.unitData.supplier, that.ks_ad.getEcpm())
           that.bridge?.bridge_didAdLoaded(that.unitData.supplier, that.ks_ad.getEcpm())
         } else {
           that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))

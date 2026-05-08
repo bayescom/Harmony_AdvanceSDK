@@ -6,4 +6,5 @@ export class AdvanceAdInfo {
   adSlotID: string = ""
   biddingType: number = 0 // 0 非bidding， 1 客户端bidding
   price: number = 0
+  fromCache: boolean = false
 }

@@ -33,6 +33,7 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
       onAdLoad: (ad: GDTRewardAd): void => {
         BYLog.debug(TAG + "激励视频 - onAdLoaded")
         this.gdt_ad = ad
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, ad.getEcpm())
         this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
       },
       onError: (err: GDTError): void => {

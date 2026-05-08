@@ -37,6 +37,7 @@ export class AdvKSRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
         // 广告成功加载，可以展示
         BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
         that.ks_ad = ad
+        that.bridge?.bridge_cacheAdapterIfNeeded(that, that.unitData.supplier, ad.getEcpm())
         that.bridge?.bridge_didAdLoaded(that.unitData.supplier, ad.getEcpm())
       }
     })

@@ -29,6 +29,7 @@ export class AdvCSJInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
         BYLog.debug(TAG + "插屏回调 - onAdLoaded")
         this.csj_ad = fullAd
         // 穿山甲变现SDK不提供ecpm获取
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
         this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
       },
       onError: (code: number, message: string) => {

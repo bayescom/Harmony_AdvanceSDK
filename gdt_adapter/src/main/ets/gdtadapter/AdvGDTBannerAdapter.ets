@@ -39,6 +39,7 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
         BYLog.debug(TAG + "横幅回调 - onAdLoaded")
         ad.setRefresh(0);
         this.gdt_ad = ad
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, ad.getEcpm())
         this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
       },
       onError: (err: GDTError): void => {

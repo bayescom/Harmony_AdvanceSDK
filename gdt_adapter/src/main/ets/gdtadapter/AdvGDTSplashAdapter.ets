@@ -32,6 +32,7 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
       onAdLoad: (ad: GDTSplashAd): void => {
         BYLog.debug(TAG + "开屏回调 - onAdLoaded")
         this.gdt_ad = ad
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, ad.getEcpm())
         this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
       },
       onError: (err: GDTError): void => {

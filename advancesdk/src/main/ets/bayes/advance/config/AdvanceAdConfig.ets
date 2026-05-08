@@ -4,6 +4,7 @@ export interface AdvanceAdLoadConfig {
   placementId: string
   adWidth?: number // 单位：vp
   adHeight?: number // 单位: vp
+  reqId?: string
 }
 
 

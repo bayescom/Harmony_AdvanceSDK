@@ -6,7 +6,7 @@ import { AdvanceError } from '../define/AdvanceError';
 import { AdvanceAdnReportTKEventType } from '../define/AdvanceDefine';
 
 export class AdvanceUtil {
-  static getAdvanceAdInfo(supplier: AdvanceSupplierModel): AdvanceAdInfo {
+  static getAdvanceAdInfo(supplier: AdvanceSupplierModel, fromCache: boolean): AdvanceAdInfo {
     let result = new AdvanceAdInfo()
     if (supplier) {
       result.adnID = supplier.id
@@ -15,6 +15,7 @@ export class AdvanceUtil {
       result.adSlotID = supplier.adspotid
       result.biddingType = supplier.is_head_bidding
       result.price = supplier.sdk_price
+      result.fromCache = fromCache
     }
     return result
   }

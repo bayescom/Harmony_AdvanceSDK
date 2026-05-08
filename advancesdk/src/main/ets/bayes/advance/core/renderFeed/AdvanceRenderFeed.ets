@@ -6,6 +6,7 @@ import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } fro
 import { AdvanceAdInfo, AdvanceError, AdvanceAdLoadConfig, BYApp, BYLog } from '../../../../../../../Index';
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
 import { AdvanceRenderFeedAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
+import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
 
 export class AdvanceRenderFeed extends AdvanceAdBase {
   constructor(option: AdvanceAdLoadConfig) {
@@ -24,7 +25,11 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
   // 加载某一个渠道对象
   protected override loadAnyAdnAdapter(adapter: AdvanceRenderFeedCommonAdapter): void {
     adapter.setRenderFeedAdapterBridge(this.adapterBridge)
-    adapter.adapter_loadAd()
+    if (adapter.isFromCache) {
+      this.adapterBridge.bridge_didAdLoaded(adapter.unitData.supplier, adapter.price)
+    } else {
+      adapter.adapter_loadAd()
+    }
   }
 
   // 所有Bidding渠道返回广告失败
@@ -50,6 +55,11 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
   }
 
   protected adapterBridge: AdvanceRenderFeedAdapterBridge = {
+    bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => {
+      if (supplier.enable_cache) { // 缓存adapter
+        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "", supplier.sdk_id)
+      }
+    },
     bridge_didAdLoaded: (supplier: AdvanceSupplierModel, price: number) => {
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
@@ -69,6 +79,10 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
     bridge_didAdShow: (supplier: AdvanceSupplierModel) => {
       this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
       this.mListener?.onAdShow()
+      // 删除缓存Adapter
+      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
+        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
+      }
     },
     bridge_didAdClick: (supplier: AdvanceSupplierModel) => {
       this.reportAdnTask(AdvanceAdnReportTKEventType.clicked, supplier)

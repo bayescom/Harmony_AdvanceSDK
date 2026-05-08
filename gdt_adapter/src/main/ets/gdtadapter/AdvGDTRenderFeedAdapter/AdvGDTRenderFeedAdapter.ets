@@ -34,6 +34,7 @@ export class AdvGDTRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
           BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
           this.gdt_ad = ads[0]
           this.wrapper = new AdvGDTRenderFeedAdWrapper(this.gdt_ad)
+          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.gdt_ad.getEcpm())
           this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
         } else {
           this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))

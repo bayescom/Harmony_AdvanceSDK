@@ -13,7 +13,7 @@ import { BYPermissionUtil } from './util/BYPermissionUtil';
 import wifiManager from '@ohos.wifiManager';
 import { BYSetting } from './BYSetting';
 import {BYConstant, BY_CACHE_KEY_AAID, BY_CACHE_KEY_OAID, BY_CACHE_KEY_ODID, BY_CACHE_KEY_UA } from './BYConstant';
-import { BYCacheResult, BYCacheUtil, CACHE_TIME_MONTH } from './cache/BYCacheUtil';
+import { BYCacheResult, BYCustomCacheUtil, CACHE_TIME_MONTH } from './cache/BYCustomCacheUtil';
 
 const TAG: string = "BYDevice---"
 
@@ -29,7 +29,7 @@ export class BYDevice {
         return insUA
       }
       //取本地缓存值
-      let saved = BYCacheUtil.get<string>(BY_CACHE_KEY_UA)
+      let saved = BYCustomCacheUtil.get<string>(BY_CACHE_KEY_UA)
       result = saved?.cacheValue ?? ''
     } catch (e) {
       BYLog.printE(e)
@@ -44,7 +44,7 @@ export class BYDevice {
   static needUAUpdate(): boolean {
     let result = false
     try {
-      let saved = BYCacheUtil.get<string>(BY_CACHE_KEY_UA, CACHE_TIME_MONTH)
+      let saved = BYCustomCacheUtil.get<string>(BY_CACHE_KEY_UA, CACHE_TIME_MONTH)
       //未获取到缓存值，或者缓存值为空，或者需要刷新
       if (!saved  || saved.needRefresh || BYStrUtil.isEmpty(saved.cacheValue)) {
         result = true
@@ -66,7 +66,7 @@ export class BYDevice {
       }
 
       //oaid 失效期内可用直接返回
-      let cacheV: BYCacheResult<string> = BYCacheUtil.get(BY_CACHE_KEY_OAID, CACHE_TIME_MONTH)
+      let cacheV: BYCacheResult<string> = BYCustomCacheUtil.get(BY_CACHE_KEY_OAID, CACHE_TIME_MONTH)
       if (!cacheV.needRefresh && cacheV.cacheValue && BYStrUtil.isNotEmpty(cacheV.cacheValue)) {
         BYLog.debug(TAG + ' getOAID - 使用本地存储值')
         return cacheV.cacheValue
@@ -85,7 +85,7 @@ export class BYDevice {
       BYLog.debug(TAG + `getOAID result : ${oaid} , cost : ${cost}`)
       if (BYStrUtil.isNotEmpty(oaid)) {
         BYSetting.get().savedOAID = oaid
-        BYCacheUtil.save(BY_CACHE_KEY_OAID, oaid)
+        BYCustomCacheUtil.save(BY_CACHE_KEY_OAID, oaid)
       }
       return oaid
     } catch (e) {
@@ -103,7 +103,7 @@ export class BYDevice {
         return result
       }
 
-      let cacheV: BYCacheResult<string> = BYCacheUtil.get(BY_CACHE_KEY_AAID, CACHE_TIME_MONTH)
+      let cacheV: BYCacheResult<string> = BYCustomCacheUtil.get(BY_CACHE_KEY_AAID, CACHE_TIME_MONTH)
       if (!cacheV.needRefresh && cacheV.cacheValue && BYStrUtil.isNotEmpty(cacheV.cacheValue)) {
         return cacheV.cacheValue
       }
@@ -113,7 +113,7 @@ export class BYDevice {
       let w5 = systemDateTime.getTime();
       let x5 = w5 - v5;
       BYSetting.get().savedAAID = result
-      BYCacheUtil.save(BY_CACHE_KEY_AAID, result)
+      BYCustomCacheUtil.save(BY_CACHE_KEY_AAID, result)
 
       BYLog.debug(TAG + ` get aaid: ${result}, cost time: ${x5}`);
     } catch (e) {
@@ -301,14 +301,14 @@ export class BYDevice {
         return result
       }
 
-      let cacheV: BYCacheResult<string> = BYCacheUtil.get(BY_CACHE_KEY_ODID, CACHE_TIME_MONTH)
+      let cacheV: BYCacheResult<string> = BYCustomCacheUtil.get(BY_CACHE_KEY_ODID, CACHE_TIME_MONTH)
       if (!cacheV.needRefresh && cacheV.cacheValue && BYStrUtil.isNotEmpty(cacheV.cacheValue)) {
         return cacheV.cacheValue
       }
 
       result = deviceInfo.ODID
       BYSetting.get().savedODID = result
-      BYCacheUtil.save(BY_CACHE_KEY_ODID, result)
+      BYCustomCacheUtil.save(BY_CACHE_KEY_ODID, result)
     } catch (e) {
       BYLog.printE(e)
     }

@@ -7,6 +7,7 @@ import { AdvanceBannerCommonAdapter } from '../adn/AdvanceBannerCommonAdapter';
 import { AdvanceAdInfo, AdvanceError, BYApp, BYLog } from '../../../../../../../Index';
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
 import { AdvanceBannerAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
+import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
 
 export class AdvanceBanner extends AdvanceAdBase {
   constructor(option: AdvanceAdLoadConfig) {
@@ -25,7 +26,11 @@ export class AdvanceBanner extends AdvanceAdBase {
   // 加载某一个渠道对象
   protected override loadAnyAdnAdapter(adapter: AdvanceBannerCommonAdapter): void {
     adapter.setBannerAdapterBridge(this.adapterBridge)
-    adapter.adapter_loadAd()
+    if (adapter.isFromCache) {
+      this.adapterBridge.bridge_didAdLoaded(adapter.unitData.supplier, adapter.price)
+    } else {
+      adapter.adapter_loadAd()
+    }
   }
 
   // 所有Bidding渠道返回广告失败
@@ -46,7 +51,7 @@ export class AdvanceBanner extends AdvanceAdBase {
     this.mListener = listener
   }
 
-  isAdValid() : boolean {
+  isAdValid(): boolean {
     return this.winAdapter?.adapter_isAdValid() ?? false
   }
 
@@ -67,6 +72,11 @@ export class AdvanceBanner extends AdvanceAdBase {
   }
 
   protected adapterBridge: AdvanceBannerAdapterBridge = {
+    bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => {
+      if (supplier.enable_cache) { // 缓存adapter
+        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "", supplier.sdk_id)
+      }
+    },
     bridge_didAdLoaded: (supplier: AdvanceSupplierModel, price: number) => {
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
@@ -77,6 +87,10 @@ export class AdvanceBanner extends AdvanceAdBase {
     bridge_didAdShow: (supplier: AdvanceSupplierModel) => {
       this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
       this.mListener?.onAdShow()
+      // 删除缓存Adapter
+      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
+        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
+      }
     },
     bridge_didAdShowFailed: (supplier:AdvanceSupplierModel, error: AdvanceError) => {
       this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)

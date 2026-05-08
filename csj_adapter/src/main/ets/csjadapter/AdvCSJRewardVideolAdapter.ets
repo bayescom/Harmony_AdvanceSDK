@@ -31,6 +31,7 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
         BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
         this.csj_ad = rewardAd
         // 穿山甲变现SDK不提供ecpm获取
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
         this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
       },
       onError: (code: number, message: string) => {

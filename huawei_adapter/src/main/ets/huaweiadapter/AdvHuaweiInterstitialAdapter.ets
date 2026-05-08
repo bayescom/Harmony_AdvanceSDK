@@ -40,6 +40,7 @@ export class AdvHuaweiInterstitialAdapter extends AdvanceInterstitialCommonAdapt
           BYLog.debug(TAG + "插屏回调 - onAdLoaded")
           this.huawei_ad = ads[0]
           const biddingInfo = this.huawei_ad.biddingInfo as BiddingInfo
+          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, biddingInfo.price)
           this.bridge?.bridge_didAdLoaded(this.unitData.supplier, biddingInfo.price)
         } else {
           this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))

@@ -25,7 +25,7 @@ export class AdvanceRequestManger {
     try {
       req.version = AdvanceConstant.ADV_API_VERSION_NAME
       req.sdk_version = AdvanceConstant.ADV_SDK_VERSION_NAME
-      req.reqid = BYUtil.getReqID()
+      req.reqid = adConfig.reqId ?? BYUtil.getReqID()
       req.time = systemDateTime.getTime(false) + ""
       let appid = AdvanceSetting.get().appId
       req.appid = appid

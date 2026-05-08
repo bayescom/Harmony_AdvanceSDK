@@ -38,6 +38,7 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
         // 广告成功加载，可以展示
         BYLog.debug(TAG + "开屏回调 - onAdLoaded")
         that.ks_ad = splashAd
+        that.bridge?.bridge_cacheAdapterIfNeeded(that, that.unitData.supplier, splashAd.getEcpm())
         that.bridge?.bridge_didAdLoaded(that.unitData.supplier, splashAd.getEcpm())
       }
     })

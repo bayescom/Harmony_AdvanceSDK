@@ -38,6 +38,7 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
           BYLog.debug(TAG + "横幅回调 - onAdLoaded")
           this.csj_ad = ads[0]
           // 穿山甲变现SDK不提供ecpm获取
+          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
           this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
         } else {
           this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier,

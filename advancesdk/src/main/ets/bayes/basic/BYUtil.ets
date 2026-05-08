@@ -10,7 +10,7 @@ import { window } from '@kit.ArkUI';
 import { BYSetting } from './BYSetting';
 import { BYConstant, BY_CACHE_KEY_UA } from './BYConstant';
 import { BYDisplay } from './BYDisplay';
-import { BYCacheUtil, CACHE_TIME_MONTH } from './cache/BYCacheUtil';
+import { BYCustomCacheUtil, CACHE_TIME_MONTH } from './cache/BYCustomCacheUtil';
 
 export class BYUtil {
   static isDev(): boolean {

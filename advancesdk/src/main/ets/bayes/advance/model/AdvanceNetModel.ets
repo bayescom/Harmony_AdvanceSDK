@@ -113,11 +113,15 @@ export class AdvanceSupplierModel {
   timeout: number = 5000
   priority: number = 0 // 上游sdk优先级，数值越小优先级越高 最高为1
   sdk_price: number = 0
-  index: number = 0
   bid_ratio: number = 0
+  index: number = 0
+  enable_cache: number = 0 // 1：表示需要缓存 0：表示不需要缓存
+  cache_timeout: number | null = null // 缓存时间（秒），enable_cache 为 1 时有值
+
   // [User Defined] 接口返回的是object类型，并非class实例。因为实例并未初始化，故自定义字段默认值为undefined。要转实例得使用class-transformer.
   isHit: boolean | undefined = undefined // 被命中
   loadAdState: AdvanceAdnLoadAdState | undefined = undefined
+  cachedReqId: string | undefined = undefined // 缓存广告的reqId，用于tk上报
 }
 
 // "setting": {

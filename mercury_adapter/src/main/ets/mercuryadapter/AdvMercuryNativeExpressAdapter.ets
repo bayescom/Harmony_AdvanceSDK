@@ -33,7 +33,8 @@ export class AdvMercuryNativeExpressAdapter extends AdvanceNativeExpressCommonAd
     this.mercury_ad.loadAd({
       onAdLoaded: () => {
         BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.mercury_ad?.getPrice())
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
+        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
       },
       onAdError: (err: MercuryErr): void => {
         BYLog.debug(TAG + `模板信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.msg}`)

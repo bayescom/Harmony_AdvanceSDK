@@ -24,7 +24,8 @@ export class AdvMercuryRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter 
       onAdLoaded: () => {
         BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
         this.wrapper = new AdvMercuryRenderFeedAdWrapper(this.mercury_ad)
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.mercury_ad?.getPrice())
+        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
+        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
       },
       onAdError: (err: MercuryErr): void => {
         BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.msg}`)

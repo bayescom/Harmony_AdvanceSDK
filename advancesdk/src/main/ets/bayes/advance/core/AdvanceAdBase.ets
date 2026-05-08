@@ -21,6 +21,8 @@ import {
 import { AdvanceAdInfo } from '../model/AdvanceAdInfo'
 import { AdvanceADNManager, AdvanceADNUnitData } from './adn/AdvanceADNManager'
 import { systemDateTime } from '@kit.BasicServicesKit'
+import { BYUtil } from '../../basic/BYUtil'
+import { AdvanceAdCacheManager } from '../cache/AdvanceAdCacheManager'
 
 
 const TAG = `[AdvanceAdBase] `
@@ -56,6 +58,7 @@ export abstract class AdvanceAdBase {
 
   protected constructor(config: AdvanceAdLoadConfig) {
     this.adConfig = config
+    this.adConfig.reqId = BYUtil.getReqID()
   }
 
   protected loadStrategy(): void {
@@ -84,7 +87,7 @@ export abstract class AdvanceAdBase {
         return
       }
       this.strategyModel = data
-      // success back
+      // success callback
       // this.loadStrategySuccess(data)
       // 执行SDK策略
       this.loadSuppliersConcurrently()
@@ -152,8 +155,20 @@ export abstract class AdvanceAdBase {
       BYLog.debug(`${supplier.name}渠道SDK执行初始化成功`)
       this.reportAdnTask(AdvanceAdnReportTKEventType.loadend, supplier)
 
-      // 生成用来加载广告adn的适配器，进行后续广告请求及展示操作
-      let adapter = await AdvanceADNManager.generateAdnAdapter(adnData)
+      let adapter: AdvanceCommonAdapter | undefined = undefined
+      // 尝试获取Adapter缓存
+      let cacheModel = AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)
+      if (supplier.enable_cache && cacheModel) {
+        // 此次加载允许缓存 且 内存中存在Adapter缓存时
+        supplier.cachedReqId = cacheModel.sourceReqId; //用于tk上报
+        adapter = cacheModel.adObject as AdvanceCommonAdapter
+        adapter.unitData = adnData
+        adapter.isFromCache = true
+        adapter.price = cacheModel.price
+      } else {
+        // 生成用来加载广告adn的适配器，进行后续广告请求及展示操作
+        adapter = await AdvanceADNManager.generateAdnAdapter(adnData)
+      }
       // 添加元素
       if (adapter) {
         this.adapterMap?.set(supplier.sdk_id, adapter)
@@ -309,7 +324,7 @@ export abstract class AdvanceAdBase {
       clearTimeout(this.timeoutId)
       target.isHit = true
       this.winAdapter = this.adapterMap?.get(target.sdk_id)
-      this.adnBidWin(AdvanceUtil.getAdvanceAdInfo(target))
+      this.adnBidWin(AdvanceUtil.getAdvanceAdInfo(target, this.winAdapter?.isFromCache ?? false))
       // 竞胜上报
       this.reportAdnTask(AdvanceAdnReportTKEventType.bidWin, target)
     }
@@ -375,9 +390,9 @@ export abstract class AdvanceAdBase {
         break
     }
     if (reportUrls && reportUrls.length) {
-      // taskpool.execute(global_requestAdnEventTasks, reportUrls, eventType, supplier.sdk_price, this.loadTimestamp, undefined,
+      // taskpool.execute(global_requestAdnEventTasks, reportUrls, eventType, supplier.sdk_price, this.loadTimestamp, supplier.cachedReqId,
       //   error)
-      this.requestAdnEventTasks(reportUrls, eventType, supplier.sdk_price, this.loadTimestamp, undefined,
+      this.requestAdnEventTasks(reportUrls, eventType, supplier.sdk_price, this.loadTimestamp, supplier.cachedReqId,
         error)
     }
   }

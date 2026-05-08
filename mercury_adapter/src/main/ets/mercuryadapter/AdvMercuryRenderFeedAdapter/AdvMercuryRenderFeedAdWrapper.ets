@@ -5,8 +5,8 @@ import { MercuryNative, MercuryNativeData } from 'mercury_ad';
 export class AdvMercuryRenderFeedAdWrapper implements AdvanceRenderFeedWrapper {
   data: MercuryNativeData | undefined
 
-  constructor(ad: MercuryNative) {
-    this.data = ad.getSelfRenderData()
+  constructor(ad?: MercuryNative) {
+    this.data = ad?.getSelfRenderData()
   }
 
   getTitle(): string {
