@@ -10,7 +10,7 @@ import {
 } from 'advancesdk'
 import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 import { KSAdSDK, KSAdSDKInitConfig } from 'ksadsdk'
-import { AdvKSRenderFeedAdapter } from './AdvGDTRenderFeedAdapter/AdvKSRenderFeedAdapter'
+import { AdvKSRenderFeedAdapter } from './AdvKSRenderFeedAdapter/AdvKSRenderFeedAdapter'
 import { AdvKSInterstitialAdapter } from './AdvKSInterstitialAdapter'
 import { AdvKSNativeExpressAdapter } from './AdvKSNativeExpressAdapter'
 import { AdvKSRewardVideoAdapter } from './AdvKSRewardVideoAdapter'

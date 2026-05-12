@@ -10,7 +10,7 @@ import {
   BYCustomNodeController,
 } from 'advancesdk';
 import { advertising, AdComponent } from '@kit.AdsKit';
-import { BYDevice } from 'advancesdk/src/main/ets/bayes/basic/BYDevice';
+import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
 import { BiddingInfo } from './AdvHuaweiUtil';
 import { AdvHuaweiDisplayData } from './Component/AdvHuaweiDisplayPageView';
 
@@ -46,7 +46,7 @@ export class AdvHuaweiNativeExpressAdapter extends AdvanceNativeExpressCommonAda
       // 原生广告扩展参数，是否直接返回广告，不用等待所有广告素材下载完成
       enableDirectReturnVideoAd: true,
       // 开放匿名设备标识符
-      oaid: await BYDevice.getOAID(),
+      oaid: await AdvanceDeviceManager.getOAID(),
       // 这边设置宽高没有用，可忽略
       // adWidth: width,
       // adHeight: height,

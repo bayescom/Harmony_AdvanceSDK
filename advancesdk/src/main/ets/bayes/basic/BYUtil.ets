@@ -5,12 +5,10 @@ import { crypto } from './util/crypto';
 import { CryptoUtil } from './util/CryptoUtil';
 import { Decimal, util } from '@kit.ArkTS';
 import { BYStrUtil } from './util/BYStrUtil';
-import { BYDevice } from './BYDevice';
 import { window } from '@kit.ArkUI';
 import { BYSetting } from './BYSetting';
-import { BYConstant, BY_CACHE_KEY_UA } from './BYConstant';
+import { BYConstant } from './BYConstant';
 import { BYDisplay } from './BYDisplay';
-import { BYCustomCacheUtil, CACHE_TIME_MONTH } from './cache/BYCustomCacheUtil';
 
 export class BYUtil {
   static isDev(): boolean {

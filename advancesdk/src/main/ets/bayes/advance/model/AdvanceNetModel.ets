@@ -25,26 +25,20 @@ export class AdvanceReqModel {
 
 //设备信息，请求时加密传输使用
 export class AdvanceDeviceModel {
-  // ua: string = ""
   network: number = 0
   os: number = 4 // 4 代表鸿蒙os
   osv: string = ""
-  devicetype: number = 1
-  // sw: number = 0
-  // sh: number = 0
-  // ppi: number = 0
-  // dpi: number = 0
-  // density: number = 0
-  imei: string = ""
-  mac: string = ""
-  aaid: string = ""
-  oaid: string = ""
-  odid: string = "" //鸿蒙odid，类似Androidid，示例返回： 64a2face-c129-e3fc-abfe-171f1da096d2
-  operator: number = 0 //鸿蒙运营商名称、运营商信息, 枚举值 0:未知, 1:中国移动, 2:中国联通, 3:中国电信, 99:其他运营商
+  devicetype: number = 0
+  carrier: string = ""
   make: string = ""
   model: string = ""
-  brand: string = ""
-  oaid_support: number = 0 //-1、-2代表代码报错，0代表不支持，1代表支持,2代表使用用户传递的非空OAID值，未进行获取操作
+  /**
+   * 区分以下三类id
+   * https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs/faq-basics-service-kit-14
+   */
+  oaid: string = ""
+  aaid: string = ""
+  odid: string = ""
 }
 
 // {

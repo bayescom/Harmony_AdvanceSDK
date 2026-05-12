@@ -1,7 +1,5 @@
 import http from '@ohos.net.http';
-import { BYDevice } from '../../basic/BYDevice';
 import { BYLog } from '../../basic/BYLog';
-import { BYStrUtil } from '../../basic/util/BYStrUtil';
 import { AdvanceSetting } from '../config/AdvanceSetting';
 import {
   ADV_ERR_NET_UNSUPPORT_TYPE,
@@ -12,26 +10,21 @@ import {
 import { AdvanceStrategyModel } from '../model/AdvanceNetModel';
 
 
-const TAG = "【AdvanceRequest】";
+const TAG = "【AdvanceNetwork】";
 const baseUrl = "http://cruiser.bayescom.cn/"
 const baseUrlHttps = "https://cruiser.bayescom.cn/"
 
-export default class AdvanceNet {
-  private static instance: AdvanceNet;
+export default class AdvanceNetwork {
+  private static instance: AdvanceNetwork;
 
   private constructor() {
   }
 
-  static get(): AdvanceNet {
-    if (AdvanceNet.instance === undefined) {
-      AdvanceNet.instance = new AdvanceNet();
+  static shared(): AdvanceNetwork {
+    if (AdvanceNetwork.instance === undefined) {
+      AdvanceNetwork.instance = new AdvanceNetwork();
     }
-    return AdvanceNet.instance;
-  }
-
-  // 普通的上报请求，get方式
-  async reportUrl(oriUrl: string): Promise<AdvanceStrategyModel | object> {
-    return requestSync(oriUrl, http.RequestMethod.GET)
+    return AdvanceNetwork.instance;
   }
 
   //获取策略信息
@@ -39,9 +32,15 @@ export default class AdvanceNet {
     let reqUrl = `${getBaseUrl()}cruiser`
     return requestSync(reqUrl, http.RequestMethod.POST, http.HttpDataType.OBJECT, body, true)
   }
+
+  // 普通的上报请求，get方式
+  async reportUrl(oriUrl: string): Promise<AdvanceStrategyModel | object> {
+    return requestSync(oriUrl, http.RequestMethod.GET)
+  }
+
 }
 
-
+// 网络请求方法
 async function requestSync(url: string, method: http.RequestMethod,
   expectDataType: http.HttpDataType = http.HttpDataType.STRING,
   extraData?: string | Object | ArrayBuffer, forceTimeout: boolean = false): Promise<AdvanceStrategyModel> {
@@ -90,10 +89,10 @@ async function requestSync(url: string, method: http.RequestMethod,
       })
 
       //get请求需要请求头添加ua
-      let ua = BYDevice.getUA()
-      if (method == http.RequestMethod.GET && BYStrUtil.isNotEmpty(ua)) {
-        reqOption.header = { 'User-Agent': ua }
-      }
+      // let ua = AdvanceDeviceManager.getUA()
+      // if (method == http.RequestMethod.GET && BYStrUtil.isNotEmpty(ua)) {
+      //   reqOption.header = { 'User-Agent': ua }
+      // }
 
       httpRequest.request(
         url, reqOption, (err, data) => {

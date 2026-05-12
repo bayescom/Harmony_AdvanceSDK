@@ -7,7 +7,7 @@ import {
   ADV_ERR_DATA_NULL, ADV_ERR_HUAWEI_SHOW_FAILED,
 } from 'advancesdk';
 import { advertising } from '@kit.AdsKit';
-import { BYDevice } from 'advancesdk/src/main/ets/bayes/basic/BYDevice';
+import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
 import { BiddingInfo } from './AdvHuaweiUtil';
 import { BusinessError, commonEventManager } from '@kit.BasicServicesKit';
 
@@ -32,7 +32,7 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
       // 广告类型
       adType: 7,
       // 开放匿名设备标识符
-      oaid: await BYDevice.getOAID()
+      oaid: await AdvanceDeviceManager.getOAID()
     };
     // 创建AdLoader广告对象
     const adLoader: advertising.AdLoader = new advertising.AdLoader(BYConstant.context);

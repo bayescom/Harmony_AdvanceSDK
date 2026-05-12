@@ -9,10 +9,10 @@ import {
   ADV_ERR_ADN_INIT_FAILED
 } from '../define/AdvanceError'
 import { AdvanceStrategyModel, AdvanceSupplierModel } from '../model/AdvanceNetModel'
-import { AdvanceRequestManger } from '../net/AdvanceRequestManger'
+import { AdvanceRequestManager } from '../net/AdvanceRequestManager'
 import { AdvanceCommonAdapter } from './adn/AdvanceCommonAdapter'
 import { taskpool } from '@kit.ArkTS'
-import AdvanceNet from '../net/AdvanceRequest'
+import AdvanceNetwork from '../net/AdvanceNetwork'
 import { AdvanceUtil } from './AdvanceUtil'
 import { BYConstant } from '../../basic/BYConstant'
 import {
@@ -72,7 +72,7 @@ export abstract class AdvanceAdBase {
     }
 
     this.loadTimestamp = systemDateTime.getTime()
-    AdvanceRequestManger.requestStrategy(this.adConfig, (err, data) => {
+    AdvanceRequestManager.requestAdStrategy(this.adConfig, (err, data) => {
       if (err) {
         BYLog.error(TAG + err.msg)
         this.loadStrategyFailed(err)
@@ -411,7 +411,7 @@ export abstract class AdvanceAdBase {
     loadTimeStamp: number, cacheReqId?: string, error?: AdvanceError) {
     urls.forEach(async (url: string) => {
       let reportUrl = AdvanceUtil.joinUrlParameters(url, eventType, price, loadTimeStamp, cacheReqId, error)
-      let model = await AdvanceNet.get().reportUrl(reportUrl) as AdvanceStrategyModel
+      let model = await AdvanceNetwork.shared().reportUrl(reportUrl) as AdvanceStrategyModel
       if (model.code === 200) {
         BYLog.debug(`AdvanceTK上报成功：${reportUrl}`)
       } else {
@@ -427,7 +427,7 @@ export abstract class AdvanceAdBase {
 //   loadTimeStamp: number, cacheReqId?: string, error?: AdvanceError) {
 //   urls.forEach(async (url: string) => {
 //     let reportUrl = AdvanceUtil.joinUrlParameters(url, eventType, price, loadTimeStamp, cacheReqId, error)
-//     let model = await AdvanceNet.get().reportUrl(reportUrl) as AdvanceStrategyModel
+//     let model = await AdvanceNetwork.shared().reportUrl(reportUrl) as AdvanceStrategyModel
 //     if (model.code === 200) {
 //       BYLog.debug(`AdvanceTK上报成功：${reportUrl}`)
 //     } else {

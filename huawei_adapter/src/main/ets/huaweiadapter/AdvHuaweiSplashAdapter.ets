@@ -6,7 +6,7 @@ import {
   BYWindowUtil
 } from 'advancesdk';
 import { advertising } from '@kit.AdsKit';
-import { BYDevice } from 'advancesdk/src/main/ets/bayes/basic/BYDevice';
+import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
 import { BiddingInfo } from './AdvHuaweiUtil';
 import { AdvHuaweiDisplayData, HUAWEI_DISPLAY_PAGE_TAG, HUAWEI_STORAGE_AD_KEY } from './Component/AdvHuaweiDisplayPageView';
 
@@ -31,7 +31,7 @@ export class AdvHuaweiSplashAdapter extends AdvanceSplashCommonAdapter {
       // 请求的广告数量
       adCount: 1,
       // 开放匿名设备标识符
-      oaid: await BYDevice.getOAID()
+      oaid: await AdvanceDeviceManager.getOAID()
     };
     // 创建AdLoader广告对象
     const adLoader: advertising.AdLoader = new advertising.AdLoader(BYConstant.context);
