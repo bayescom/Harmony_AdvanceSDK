@@ -1,7 +1,8 @@
 import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
   GDTRenderListener,
   GDTVideoStateListener,
-  GDTManualAd} from '@gdt/gdt-union-sdk';
+  GDTManualAd,
+  GDTBiddingConstants} from '@gdt/gdt-union-sdk';
 import {
   BYLog,
   AdvanceError,
@@ -56,6 +57,19 @@ export class AdvGDTRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
     } else {
       this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
     }
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.gdt_ad?.sendWinNotification(new Map([
+      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
+      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
+    ]))
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.gdt_ad?.sendLossNotification(new Map([
+      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
+    ]))
   }
 
   protected renderListener: GDTRenderListener = {

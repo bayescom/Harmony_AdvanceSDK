@@ -55,6 +55,14 @@ export class AdvCSJRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
     this.csj_ad?.render(context)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.csj_ad?.win(secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.csj_ad?.loss(firstPrice)
+  }
+
   protected renderListener: ExpressRenderListener = {
     onRenderSuccess: (width: number, height: number, isExpress: boolean) => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderSuccess")

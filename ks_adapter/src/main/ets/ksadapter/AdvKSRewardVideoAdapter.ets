@@ -4,7 +4,7 @@ import {
   AdvanceError,
   AdvanceRewardVideoCommonAdapter,
 } from 'advancesdk';
-import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSRewardAd} from 'ksadsdk';
+import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSRewardAd, KSAdExposureFailCode} from 'ksadsdk';
 
 
 const TAG = `[AdvKSRewardVideoAdapter]`
@@ -70,6 +70,14 @@ export class AdvKSRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
       })
       that.ks_ad?.show({videoSoundEnable: false })
     }
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.ks_ad?.setBidEcpmAndHighestLoss(winPrice, secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: firstPrice})
   }
 
 }

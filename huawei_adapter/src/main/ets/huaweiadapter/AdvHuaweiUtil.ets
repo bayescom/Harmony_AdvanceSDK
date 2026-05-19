@@ -1,12 +1,13 @@
 import {
   AdvanceCommonAdapter,
   AdvanceADNUnitData,
-  AdvanceAdType,
+  AdvanceAdType, BYLog,
 } from 'advancesdk'
 import { AdvHuaweiSplashAdapter } from './AdvHuaweiSplashAdapter'
 import { AdvHuaweiInterstitialAdapter } from './AdvHuaweiInterstitialAdapter'
 import { AdvHuaweiRewardVideoAdapter } from './AdvHuaweiRewardVideoAdapter'
 import { AdvHuaweiNativeExpressAdapter } from './AdvHuaweiNativeExpressAdapter'
+import { rcp } from '@kit.RemoteCommunicationKit'
 
 
 export interface BiddingInfo {
@@ -38,5 +39,17 @@ export class AdvHuaweiUtil {
     }
   }
   
+}
+
+export async function sendBiddingResult(url: string): Promise<void> {
+  let session: rcp.Session | undefined = undefined;
+  try {
+    session = rcp.createSession();
+    await session.get(url);
+  } catch (e) {
+    BYLog.debug(`Failed to send bidding result. Code is ${e.code}, message is ${e.message}`);
+  } finally {
+    session?.close();
+  }
 }
 

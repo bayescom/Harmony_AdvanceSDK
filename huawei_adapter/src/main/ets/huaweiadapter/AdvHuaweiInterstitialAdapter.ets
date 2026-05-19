@@ -7,7 +7,7 @@ import {
 } from 'advancesdk';
 import { advertising } from '@kit.AdsKit';
 import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
-import { BiddingInfo } from './AdvHuaweiUtil';
+import { BiddingInfo, sendBiddingResult } from './AdvHuaweiUtil';
 import { BusinessError, commonEventManager } from '@kit.BasicServicesKit';
 
 const TAG = `[AdvHuaweiInterstitialAdapter]`
@@ -56,6 +56,36 @@ export class AdvHuaweiInterstitialAdapter extends AdvanceInterstitialCommonAdapt
   adapter_showAd(windowStage: window.WindowStage) {
     this.registerPPSReceiver()
     advertising.showAd(this.huawei_ad, {mute: true}, BYConstant.context)
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
+    if (biddingInfo.nurl) {
+      const url: string = biddingInfo.nurl
+      // 竞胜时，其他DSP最高出价
+        .replace('SECOND_PRICE', secondPrice.toString())
+        // 价格币种
+        .replace('AUCTION_CURRENCY', 'CNY');
+      sendBiddingResult(url).catch((error: BusinessError) => {
+        BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
+      });
+    }
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
+    if (biddingInfo.lurl) {
+      const url: string = biddingInfo.lurl
+      // 竞败时，其他DSP最高出价
+        .replace('AUCTION_PRICE', firstPrice.toString())
+        // 竞价结果
+        .replace('AUCTION_LOSS', '102')
+        // 价格币种
+        .replace('AUCTION_CURRENCY', 'CNY')
+      sendBiddingResult(url).catch((error: BusinessError) => {
+        BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
+      });
+    }
   }
 
   protected registerPPSReceiver(): void {

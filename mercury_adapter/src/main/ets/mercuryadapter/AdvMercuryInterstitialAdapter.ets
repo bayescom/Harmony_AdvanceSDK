@@ -45,6 +45,10 @@ export class AdvMercuryInterstitialAdapter extends AdvanceInterstitialCommonAdap
     this.mercury_ad?.showAd(renOp)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+
+  adapter_sendLossNotification(firstPrice: number): void {}
+
   protected interactionListener: MercuryInterstitialRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "插屏回调 - onAdExposure")

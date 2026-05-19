@@ -1,4 +1,6 @@
-import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
+import { GDTAdLoadConfig, GDTAdSDK,
+  GDTBiddingConstants,
+  GDTError, GDTInteractionListener,
   GDTRewardAd,
   GDTVideoStateListener} from '@gdt/gdt-union-sdk';
 import { window } from '@kit.ArkUI';
@@ -47,6 +49,19 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     this.gdt_ad?.setInteractionListener(this.interactionListener)
     this.gdt_ad?.setVideoStateListener(this.videoStateListener)
     this.gdt_ad?.show(windowStage)
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.gdt_ad?.sendWinNotification(new Map([
+      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
+      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
+    ]))
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.gdt_ad?.sendLossNotification(new Map([
+      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
+    ]))
   }
 
   protected interactionListener: GDTInteractionListener = {

@@ -71,6 +71,14 @@ export class AdvCSJSplashAdapter extends AdvanceSplashCommonAdapter {
     this.csj_ad?.showSplashAd(windowStage)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.csj_ad?.win(secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.csj_ad?.loss(firstPrice)
+  }
+
   protected interactionListener: CSJSplashAdInteractionListener = {
     onDidShow: () => {
       BYLog.debug(TAG + "开屏回调 - onAdExposure")

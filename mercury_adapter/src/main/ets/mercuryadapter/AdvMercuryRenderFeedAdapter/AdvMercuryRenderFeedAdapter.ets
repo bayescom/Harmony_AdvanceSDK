@@ -43,6 +43,10 @@ export class AdvMercuryRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter 
     this.mercury_ad?.setVideoPlayListener(this.videoStateListener)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+
+  adapter_sendLossNotification(firstPrice: number): void {}
+
   protected interactionListener: MercuryNativeRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdExposure")

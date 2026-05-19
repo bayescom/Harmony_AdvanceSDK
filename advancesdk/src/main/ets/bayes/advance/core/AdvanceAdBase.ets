@@ -40,6 +40,8 @@ export abstract class AdvanceAdBase {
   private parallelSuppliers: AdvanceSupplierModel[] = []
   // head_bidding组渠道
   private biddingSuppliers: AdvanceSupplierModel[] = []
+  // 所有参与并发的渠道
+  private allSuppliers: AdvanceSupplierModel[] = []
   // 混合策略组渠道
   private mixedSuppliers: AdvanceSupplierModel[] = []
   // bidding组中最高价渠道
@@ -99,6 +101,10 @@ export abstract class AdvanceAdBase {
     if (this.strategyModel.setting.head_bidding_group.length == 0 && !this.bidTargetSupplier) { // 瀑布流模式，无head_bidding渠道
       // 策略组无数据说明所有的组加载广告全部没有成功（因为第一层执行完总会被remove掉）
       if (this.strategyModel.setting.parallel_group.length == 0) {
+        // Adn竞败通知
+        this.allSuppliers.forEach((supplier: AdvanceSupplierModel) => {
+          this.adapterMap?.get(supplier.sdk_id)?.adapter_sendLossNotification(0)
+        })
         this.allAdnLoadAdFailed(new AdvanceError(ADV_ERR_ALL_ADN_FAILED,
           `所有平台都未返回广告（失败或超时）\n详情：${JSON.stringify(Array.from(this.errorInfo))}`))
         return
@@ -136,6 +142,8 @@ export abstract class AdvanceAdBase {
     // this.startBidding(templeSuppliers)
     // 并发执行混合策略下队列中的广告请求
     templeSuppliers.forEach(async (supplier: AdvanceSupplierModel) => {
+      // 这样写防止丢失parallelGroup第二组的渠道
+      this.allSuppliers.push(supplier)
       this.reportAdnTask(AdvanceAdnReportTKEventType.loaded, supplier)
 
       let adnData = new AdvanceADNUnitData()
@@ -325,8 +333,21 @@ export abstract class AdvanceAdBase {
       target.isHit = true
       this.winAdapter = this.adapterMap?.get(target.sdk_id)
       this.adnBidWin(AdvanceUtil.getAdvanceAdInfo(target, this.winAdapter?.isFromCache ?? false))
+      // Adn竞胜通知
+      let secondPrice = 0
+      if (suppliers.length > 1) {
+        secondPrice = suppliers[1].sdk_price
+      }
+      this.winAdapter?.adapter_sendWinNotification(secondPrice, target.sdk_price)
       // 竞胜上报
       this.reportAdnTask(AdvanceAdnReportTKEventType.bidWin, target)
+
+      // Adn竞败通知
+      this.allSuppliers.filter((supplier: AdvanceSupplierModel) => {
+        return supplier !== target
+      }).forEach((supplier: AdvanceSupplierModel) => {
+        this.adapterMap?.get(supplier.sdk_id)?.adapter_sendLossNotification(target.sdk_price)
+      })
     }
   }
 

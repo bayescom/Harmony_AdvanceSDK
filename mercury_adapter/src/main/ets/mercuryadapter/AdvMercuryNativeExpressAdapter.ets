@@ -52,6 +52,10 @@ export class AdvMercuryNativeExpressAdapter extends AdvanceNativeExpressCommonAd
     this.mercury_ad?.setVideoPlayListener(this.videoStateListener)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+
+  adapter_sendLossNotification(firstPrice: number): void {}
+
   protected interactionListener: MercuryFeedRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "模板信息流回调 - onAdExposure")

@@ -5,7 +5,7 @@ import {
   AdvanceInterstitialCommonAdapter,
   AdvanceError,
 } from 'advancesdk';
-import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSNewInterstitialAd} from 'ksadsdk';
+import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSNewInterstitialAd, KSAdExposureFailCode} from 'ksadsdk';
 import { KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY } from './Component/AdvKSDisplayPageView';
 
 
@@ -67,6 +67,14 @@ export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
       })
       BYWindowUtil.createWindow(KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY, that.ks_ad)
     }
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.ks_ad?.setBidEcpmAndHighestLoss(winPrice, secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: firstPrice})
   }
 
 }

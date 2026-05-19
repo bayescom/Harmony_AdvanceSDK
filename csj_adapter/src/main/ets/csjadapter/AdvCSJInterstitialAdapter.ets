@@ -46,6 +46,14 @@ export class AdvCSJInterstitialAdapter extends AdvanceInterstitialCommonAdapter 
     this.csj_ad?.showFullAd(windowStage)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.csj_ad?.win(secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.csj_ad?.loss(firstPrice)
+  }
+
   protected interactionListener: FullAdInteractionListener = {
     onShow: () => {
       BYLog.debug(TAG + "插屏回调 - onAdExposure")

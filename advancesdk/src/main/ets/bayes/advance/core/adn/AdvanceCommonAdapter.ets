@@ -27,4 +27,10 @@ export abstract class AdvanceCommonAdapter {
 
   adapter_render(context: UIContext) {} // for banner & native express & render feed
 
+  //Adn竞胜后回传二价
+  abstract adapter_sendWinNotification(secondPrice: number, winPrice: number)
+
+  //Adn竞败后回传最高价
+  abstract adapter_sendLossNotification(firstPrice: number)
+
 }

@@ -42,6 +42,10 @@ export class AdvMercurySplashAdapter extends AdvanceSplashCommonAdapter {
     this.mercury_ad?.showAd(renOp)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+
+  adapter_sendLossNotification(firstPrice: number): void {}
+
   protected interactionListener: MercurySplashRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "开屏回调 - onAdExposure")

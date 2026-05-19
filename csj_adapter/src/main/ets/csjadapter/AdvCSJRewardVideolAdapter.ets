@@ -48,6 +48,14 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     this.csj_ad?.showRewardAd(windowStage)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.csj_ad?.win(secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.csj_ad?.loss(firstPrice)
+  }
+
   protected interactionListener: RewardAdInteractionListener = {
     onShow: () => {
       BYLog.debug(TAG + "激励视频回调 - onAdExposure")

@@ -6,7 +6,7 @@ import {
   AdvanceError,
   BYCustomNodeController,
 } from 'advancesdk';
-import { KSAdScene, KSAdSDK, KSBuildFeedAdView, KSFeedAd, KSVideoPlayError} from 'ksadsdk';
+import { KSAdExposureFailCode, KSAdScene, KSAdSDK, KSBuildFeedAdView, KSFeedAd, KSVideoPlayError} from 'ksadsdk';
 import { NodeController } from '@kit.ArkUI';
 
 
@@ -81,23 +81,30 @@ export class AdvKSNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter
       that.ks_ad.setVideoPlayListener({
         onVideoPlayStart() {
           BYLog.debug(TAG + "模板信息流回调 - onVideoStart")
-          this.bridge?.bridge_didAdVideoPlayStart()
+          that.bridge?.bridge_didAdVideoPlayStart()
         },
         onVideoPlayComplete() {
           BYLog.debug(TAG + "模板信息流回调 - onVideoEnd")
-          this.bridge?.bridge_didAdVideoPlayEnd()
+          that.bridge?.bridge_didAdVideoPlayEnd()
         },
         onVideoPlayError(code: KSVideoPlayError, extra: string) {
           BYLog.debug(TAG + `模板信息流回调 - onVideoFailed`)
-          this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(code, extra))
+          that.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(code, extra))
         }
       })
     }
   }
 
   adapter_getAdComponent(): NodeController | undefined {
-    const that = this
-    return new BYCustomNodeController(wrapBuilder(KSBuildFeedAdView), that.ks_ad)
+    return new BYCustomNodeController(wrapBuilder(KSBuildFeedAdView), this.ks_ad)
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.ks_ad?.setBidEcpmAndHighestLoss(winPrice, secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: firstPrice})
   }
 
 }

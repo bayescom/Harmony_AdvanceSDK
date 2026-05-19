@@ -45,6 +45,10 @@ export class AdvMercuryRewardVideoAdapter extends AdvanceRewardVideoCommonAdapte
     this.mercury_ad?.showAd(renOp)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+
+  adapter_sendLossNotification(firstPrice: number): void {}
+
   protected interactionListener: MercuryRewardRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "激励视频回调 - onAdExposure")

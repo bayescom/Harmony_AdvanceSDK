@@ -44,6 +44,10 @@ export class AdvMercuryBannerAdapter extends AdvanceBannerCommonAdapter {
     this.mercury_ad?.setRenderListener(this.interactionListener)
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+
+  adapter_sendLossNotification(firstPrice: number): void {}
+
   protected interactionListener: MercuryBannerRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "横幅回调 - onAdExposure")

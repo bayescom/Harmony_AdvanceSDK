@@ -62,6 +62,14 @@ export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
     return this.csj_ad?.getAdComponent()
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.csj_ad?.win(secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.csj_ad?.loss(firstPrice)
+  }
+
   protected interactionListener: ExpressAdInteractionListener = {
     onRenderSuccess: (width: number, height: number) => {
       BYLog.debug(TAG + "模板信息流回调 - onAdRenderSuccess")

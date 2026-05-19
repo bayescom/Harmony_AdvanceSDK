@@ -63,6 +63,14 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
     return this.csj_ad?.getAdComponent()
   }
 
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.csj_ad?.win(secondPrice)
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.csj_ad?.loss(firstPrice)
+  }
+
   protected interactionListener: ExpressAdInteractionListener = {
     onRenderSuccess: (width: number, height: number) => {
       BYLog.debug(TAG + "横幅回调 - onAdRenderSuccess")

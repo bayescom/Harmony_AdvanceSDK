@@ -1,4 +1,6 @@
-import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener, GDTSplashAd } from '@gdt/gdt-union-sdk';
+import { GDTAdLoadConfig, GDTAdSDK,
+  GDTBiddingConstants,
+  GDTError, GDTInteractionListener, GDTSplashAd } from '@gdt/gdt-union-sdk';
 import { window } from '@kit.ArkUI';
 import {
   BYLog,
@@ -45,6 +47,19 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
   adapter_showAd(windowStage: window.WindowStage) {
     this.gdt_ad?.setInteractionListener(this.interactionListener)
     this.gdt_ad?.show(windowStage)
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.gdt_ad?.sendWinNotification(new Map([
+      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
+      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
+    ]))
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.gdt_ad?.sendLossNotification(new Map([
+      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
+    ]))
   }
 
   protected interactionListener: GDTInteractionListener = {

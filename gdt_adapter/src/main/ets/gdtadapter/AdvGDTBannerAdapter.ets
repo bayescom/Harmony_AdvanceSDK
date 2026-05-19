@@ -1,7 +1,8 @@
 import { GDTAdLoadConfig, GDTAdSDK, GDTError, GDTInteractionListener,
   GDTBannerAd,
   GDTAdSize,
-  GDTRenderListener} from '@gdt/gdt-union-sdk';
+  GDTRenderListener,
+  GDTBiddingConstants} from '@gdt/gdt-union-sdk';
 import { NodeController } from '@kit.ArkUI';
 import {
   BYLog,
@@ -57,6 +58,19 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
 
   adapter_getAdComponent(): NodeController | undefined {
     return this.gdt_ad?.getAdComponent()
+  }
+
+  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
+    this.gdt_ad?.sendWinNotification(new Map([
+      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
+      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
+    ]))
+  }
+
+  adapter_sendLossNotification(firstPrice: number): void {
+    this.gdt_ad?.sendLossNotification(new Map([
+      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
+    ]))
   }
 
   protected renderListener: GDTRenderListener = {
