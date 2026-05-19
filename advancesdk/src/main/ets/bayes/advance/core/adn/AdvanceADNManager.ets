@@ -24,116 +24,185 @@ export class AdvanceAdnInitResult{
 export class AdvanceADNManager {
   //生成对应adapter实现类
   static async generateAdnAdapter(adnData: AdvanceADNUnitData): Promise<AdvanceCommonAdapter | undefined> {
-    let result: AdvanceCommonAdapter | undefined = undefined
-    let sdkId = adnData.supplier?.id
-    let harName = ''
-    switch (sdkId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
-        harName = 'csj_adapter';
-        const ns: ESObject = await import(harName);
-        result = ns.AdvCSJUtil.getCSJAdAdapter(adnData)
-        return result
+    return new Promise<AdvanceCommonAdapter | undefined>((resolve) => {
+      let result: AdvanceCommonAdapter | undefined = undefined
+      let sdkId = adnData.supplier?.id
+      let harName = ''
+      switch (sdkId) {
+        case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
+          harName = 'csj_adapter';
+          import(harName).then((ns:ESObject) => {
+            result = ns.AdvCSJUtil.getCSJAdAdapter(adnData)
+            resolve(result)
+          }).catch((error: Error) => {
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_GDT:{ // 广点通
+          harName = 'gdt_adapter';
+          import(harName).then((ns:ESObject) => {
+            result = ns.AdvGDTUtil.getGDTAdAdapter(adnData)
+            resolve(result)
+          }).catch((error: Error) => {
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
+          harName = 'ks_adapter';
+          import(harName).then((ns:ESObject) => {
+            result = ns.AdvKSUtil.getKSAdAdapter(adnData)
+            resolve(result)
+          }).catch((error: Error) => {
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_MERCURY:{ // 倍业
+          harName = 'mercury_adapter';
+          import(harName).then((ns:ESObject) => {
+            result = ns.AdvMercuryUtil.getMercuryAdAdapter(adnData)
+            resolve(result)
+          }).catch((error: Error) => {
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_HUAWEI:{ // 华为
+          harName = 'huawei_adapter';
+          import(harName).then((ns:ESObject) => {
+            result = ns.AdvHuaweiUtil.getHuaweiAdAdapter(adnData)
+            resolve(result)
+          }).catch((error: Error) => {
+            resolve(result)
+          });
+          break
+        }
+        default:
+          resolve(result)
       }
-      case AdvanceConstant.ADV_SDK_ID_GDT:{ // 广点通
-        harName = 'gdt_adapter';
-        const ns: ESObject = await import(harName);
-        result = ns.AdvGDTUtil.getGDTAdAdapter(adnData)
-        return result
-      }
-      case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
-        harName = 'ks_adapter';
-        const ns: ESObject = await import(harName);
-        result = ns.AdvKSUtil.getKSAdAdapter(adnData)
-        return result
-      }
-      case AdvanceConstant.ADV_SDK_ID_MERCURY:{ // 倍业
-        harName = 'mercury_adapter';
-        const ns: ESObject = await import(harName);
-        result = ns.AdvMercuryUtil.getMercuryAdAdapter(adnData)
-        return result
-      }
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI:{ // 华为
-        harName = 'huawei_adapter';
-        const ns: ESObject = await import(harName);
-        result = ns.AdvHuaweiUtil.getHuaweiAdAdapter(adnData)
-        return result
-      }
-      default:
-        return result
-    }
+    })
   }
 
   //初始化ADN
   static async loadADN(supplier: AdvanceSupplierModel): Promise<AdvanceAdnInitResult> {
-    let result = new AdvanceAdnInitResult()
-    let harName = ''
-    switch (supplier.id) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
-        harName = 'csj_adapter';
-        const ns: ESObject = await import(harName);
-        result = await ns.AdvCSJUtil.loadCSJSDK(supplier)
-        return result
+    return new Promise<AdvanceAdnInitResult>((resolve) => {
+      let result = new AdvanceAdnInitResult()
+      let harName = ''
+      switch (supplier.id) {
+        case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
+          harName = 'csj_adapter';
+          import(harName).then(async (ns:ESObject) => {
+            result = await ns.AdvCSJUtil.loadCSJSDK(supplier)
+            resolve(result)
+          }).catch((error: Error) => {
+            result.msg = error.message
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_GDT:{ // 广点通
+          harName = 'gdt_adapter';
+          import(harName).then(async (ns:ESObject) => {
+            result = await ns.AdvGDTUtil.loadGDTSDK(supplier)
+            resolve(result)
+          }).catch((error: Error) => {
+            result.msg = error.message
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
+          harName = 'ks_adapter';
+          import(harName).then(async (ns:ESObject) => {
+            result = await ns.AdvKSUtil.loadKSSDK(supplier)
+            resolve(result)
+          }).catch((error: Error) => {
+            result.msg = error.message
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_MERCURY:{ // 倍业
+          harName = 'mercury_adapter';
+          import(harName).then(async (ns:ESObject) => {
+            result = await ns.AdvMercuryUtil.loadMercurySDK(supplier)
+            resolve(result)
+          }).catch((error: Error) => {
+            result.msg = error.message
+            resolve(result)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_HUAWEI:{ // 华为
+          harName = 'huawei_adapter';
+          import(harName).then(async (ns:ESObject) => {
+            result.success = true
+            result.code = 0
+            result.msg = '无需初始化'
+            resolve(result)
+          }).catch((error: Error) => {
+            result.msg = error.message
+            resolve(result)
+          });
+          break
+        }
+        default:
+          resolve(result)
       }
-      case AdvanceConstant.ADV_SDK_ID_GDT:{ // 广点通
-        harName = 'gdt_adapter';
-        const ns: ESObject = await import(harName);
-        result = await ns.AdvGDTUtil.loadGDTSDK(supplier)
-        return result
-      }
-      case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
-        harName = 'ks_adapter';
-        const ns: ESObject = await import(harName);
-        result = await ns.AdvKSUtil.loadKSSDK(supplier)
-        return result
-      }
-      case AdvanceConstant.ADV_SDK_ID_MERCURY:{ // 倍业
-        harName = 'mercury_adapter';
-        const ns: ESObject = await import(harName);
-        result = await ns.AdvMercuryUtil.loadMercurySDK(supplier)
-        return result
-      }
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI:{ // 华为
-        result.success = true
-        result.code = 0
-        result.msg = '无需初始化'
-        return result
-      }
-      default:
-        return result
-    }
+    })
   }
 
   //获取ADN版本号
   static async getSDKVersion(supplierId: string): Promise<string> {
-    let version = ''
-    let harName = ''
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
-        harName = 'csj_adapter';
-        const ns: ESObject = await import(harName);
-        version = ns.AdvCSJUtil.getCSJSDKVersion()
-        return version
+    return new Promise<string>((resolve) => {
+      let version = ''
+      let harName = ''
+      switch (supplierId) {
+        case AdvanceConstant.ADV_SDK_ID_CSJ:{ // 穿山甲
+          harName = 'csj_adapter';
+          import(harName).then((ns:ESObject) => {
+            version = ns.AdvCSJUtil.getCSJSDKVersion()
+            resolve(version)
+          }).catch((error: Error) => {
+            resolve(version)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_GDT:{ // 广点通
+          harName = 'gdt_adapter';
+          import(harName).then((ns:ESObject) => {
+            version = ns.AdvGDTUtil.getGDTSDKVersion()
+            resolve(version)
+          }).catch((error: Error) => {
+            resolve(version)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
+          harName = 'ks_adapter';
+          import(harName).then((ns:ESObject) => {
+            version = ns.AdvKSUtil.getKSSDKVersion()
+            resolve(version)
+          }).catch((error: Error) => {
+            resolve(version)
+          });
+          break
+        }
+        case AdvanceConstant.ADV_SDK_ID_MERCURY: { // 倍业
+          harName = 'mercury_adapter';
+          import(harName).then((ns: ESObject) => {
+            version = ns.AdvMercuryUtil.getMercurySDKVersion()
+            resolve(version)
+          }).catch((error: Error) => {
+            resolve(version)
+          });
+          break
+        }
+        default:
+          resolve(version)
       }
-      case AdvanceConstant.ADV_SDK_ID_GDT:{ // 广点通
-        harName = 'gdt_adapter';
-        const ns: ESObject = await import(harName);
-        version = ns.AdvGDTUtil.getGDTSDKVersion()
-        return version
-      }
-      case AdvanceConstant.ADV_SDK_ID_KS:{ // 快手
-        harName = 'ks_adapter';
-        const ns: ESObject = await import(harName);
-        version = ns.AdvKSUtil.getKSSDKVersion()
-        return version
-      }
-      case AdvanceConstant.ADV_SDK_ID_MERCURY:{ // 倍业
-        harName = 'mercury_adapter';
-        const ns: ESObject = await import(harName);
-        version = ns.AdvMercuryUtil.getMercurySDKVersion()
-        return version
-      }
-      default:
-        return version
-    }
+    })
   }
 }
