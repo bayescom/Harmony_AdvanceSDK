@@ -4,7 +4,7 @@ import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
-import { AdvanceAdInfo, AdvanceError, BYLog } from '../../../../../../../Index';
+import { AdvanceAdInfo, AdvRewardCallbackInfo, AdvanceError, BYLog } from '../../../../../../../Index';
 import { AdvanceRewardVideoCommonAdapter } from '../adn/AdvanceRewardVideoCommonAdapter';
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
 import { AdvanceRewardVideoAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
@@ -104,8 +104,14 @@ export class AdvanceRewardVideo extends AdvanceAdBase {
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
     },
-    bridge_didAdReward: () => {
-      this.mListener?.onAdReward()
+    bridge_didAdReward: (supplier: AdvanceSupplierModel) => {
+      this.verifyRewardVideo(this.adConfig.rewardVideoModel, supplier, this.adConfig.placementId, (rewardInfo?: AdvRewardCallbackInfo, error?: AdvanceError) => {
+        if (error === undefined) {
+          this.mListener?.onAdRewardSuccess(rewardInfo!)
+        } else {
+          this.mListener?.onAdServerRewardFail(error)
+        }
+      })
     },
     bridge_didAdVideoPlayEnd: () => {
       if (this.mListener?.onVideoPlayEnd) {

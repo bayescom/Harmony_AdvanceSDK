@@ -1,10 +1,12 @@
 import { window } from '@kit.ArkUI'
+import { AdvRewardVideoModel } from '../model/AdvanceAdInfo'
 
 export interface AdvanceAdLoadConfig {
   placementId: string
   adWidth?: number // 单位：vp
   adHeight?: number // 单位: vp
   reqId?: string
+  rewardVideoModel?: AdvRewardVideoModel // 奖励信息
 }
 
 

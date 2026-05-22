@@ -8,3 +8,20 @@ export class AdvanceAdInfo {
   price: number = 0
   fromCache: boolean = false
 }
+
+export interface AdvRewardVideoModel {
+  //app user Identifier
+  userId?: string
+  //optional. serialized string.
+  extra?: string
+  //reward name.
+  rewardName?: string
+  //number of rewards
+  rewardAmount?: number
+}
+
+export interface AdvRewardCallbackInfo {
+  sourceId: string // SDK渠道Id
+  rewardName: string // 激励名称
+  rewardAmount: number // 激励数量
+}

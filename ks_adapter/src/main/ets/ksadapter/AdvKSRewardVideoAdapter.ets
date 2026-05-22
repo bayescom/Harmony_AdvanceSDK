@@ -22,7 +22,11 @@ export class AdvKSRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     const scene: KSAdScene = new KSAdScene()
       .setPosId(spotId)
       .setAdNum(1)
-      .setScreenOrientation(KSAdScreenDirection.vertical);
+      .setScreenOrientation(KSAdScreenDirection.vertical)
+      .setRewardExtraData({
+        thirdUserId: this.unitData.rewardVideoModel?.userId,
+        extraData: this.unitData.rewardVideoModel?.extra
+      })
     const that = this // 参照快手demo内写法；因为callback内获取的this不是当前adpater对象，而是listener对象
     KSAdSDK.getLoadManager().loadRewardAd(scene, {
       onRequestSuccess(ad: KSRewardAd) {
@@ -61,7 +65,7 @@ export class AdvKSRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
         },
         onRewardVerify() {
           BYLog.debug(TAG + `激励视频回调 - onAdReward`)
-          that.bridge?.bridge_didAdReward()
+          that.bridge?.bridge_didAdReward(that.unitData.supplier)
         },
         onVideoPlayEnd() {
           BYLog.debug(TAG + `激励视频回调 - onAdPlayEnd`)

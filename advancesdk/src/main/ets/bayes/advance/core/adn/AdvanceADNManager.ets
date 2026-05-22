@@ -1,7 +1,8 @@
 import { AdvanceConstant } from '../../define/AdvanceConstant'
 import { AdvanceCommonAdapter } from './AdvanceCommonAdapter'
-import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
+import { AdvanceServerReward, AdvanceSupplierModel } from '../../model/AdvanceNetModel'
 import { AdvanceAdType } from '../../define/AdvanceDefine'
+import { AdvRewardVideoModel } from '../../model/AdvanceAdInfo'
 
 // 传递给adapter内的参数信息
 export class AdvanceADNUnitData {
@@ -13,6 +14,10 @@ export class AdvanceADNUnitData {
   vpWidth?: number
   // 广告位高度
   vpHeight?: number
+  // 激励视频奖励信息（外部传入）
+  rewardVideoModel?: AdvRewardVideoModel
+  // 激励视频服务端验证对象
+  serverReward?: AdvanceServerReward
 }
 
 export class AdvanceAdnInitResult{

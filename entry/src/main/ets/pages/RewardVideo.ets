@@ -1,6 +1,7 @@
 import {
-  AdvanceError, AdvanceAdLoadConfig, AdvanceRewardVideo, AdvanceAdInfo,
-  AdvanceRewardVideoListener
+  AdvanceError, AdvanceAdLoadConfig, AdvanceRewardVideo, AdvanceAdInfo, AdvRewardVideoModel,
+  AdvanceRewardVideoListener,
+  AdvRewardCallbackInfo
 } from 'advancesdk'
 import { PageTitleView } from '../components/PageTitleView';
 import { PosIdSelector } from '../components/PosIdSelector'
@@ -9,6 +10,7 @@ import { logToast, toast } from '../util/Toast'
 @Entry
 @Component
 struct Interstitial {
+  // 10012265: 服务端激励验证
   @State placementId: string = '10014806' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
     ['10014806', '激励视频-Bidding'],
@@ -42,8 +44,11 @@ struct Interstitial {
       // logToast(`onAdClose`)
       this.rewardVideoAd = undefined
     },
-    onAdReward: () => {
-      logToast(`onAdReward`)
+    onAdRewardSuccess: (rewardInfo: AdvRewardCallbackInfo) => {
+      logToast(`onAdRewardSuccess`)
+    },
+    onAdServerRewardFail: (error: AdvanceError) => {
+      logToast(`onAdServerRewardFail`)
     },
     onVideoPlayEnd: () => {
       logToast(`onVideoPlayEnd`)
@@ -60,8 +65,16 @@ struct Interstitial {
       Button('加载广告')
         .width('100%')
         .onClick(() => {
+          // 奖励设置（可选）
+          const model: AdvRewardVideoModel = {
+            userId: '123456',
+            rewardAmount: 100,
+            rewardName: '福利',
+            extra: JSON.stringify({"key1": "value1"}) // 透传参数
+            }
           let config: AdvanceAdLoadConfig = {
             placementId: this.placementId,
+            rewardVideoModel: model
           }
           this.rewardVideoAd = new AdvanceRewardVideo(config)
           this.rewardVideoAd.setAdListener(this.listener)

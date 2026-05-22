@@ -17,9 +17,6 @@ const baseUrlHttps = "https://cruiser.bayescom.cn/"
 export default class AdvanceNetwork {
   private static instance: AdvanceNetwork;
 
-  private constructor() {
-  }
-
   static shared(): AdvanceNetwork {
     if (AdvanceNetwork.instance === undefined) {
       AdvanceNetwork.instance = new AdvanceNetwork();
@@ -27,23 +24,40 @@ export default class AdvanceNetwork {
     return AdvanceNetwork.instance;
   }
 
-  //获取策略信息
+  // 获取策略信息
   async getStrategy(body?: string | Object | ArrayBuffer): Promise<AdvanceStrategyModel> {
     let reqUrl = `${getBaseUrl()}cruiser`
-    return requestSync(reqUrl, http.RequestMethod.POST, http.HttpDataType.OBJECT, body, true)
+    return requestSync(reqUrl, http.RequestMethod.POST, body, http.HttpDataType.OBJECT, true)
   }
 
   // 普通的上报请求，get方式
-  async reportUrl(oriUrl: string): Promise<AdvanceStrategyModel | object> {
+  async reportUrl(oriUrl: string): Promise<AdvanceStrategyModel> {
     return requestSync(oriUrl, http.RequestMethod.GET)
   }
 
+  // 服务端激励验证
+  async verifyServerSideRewardedURL(oriUrl: string,
+    parameters: Record<string, string | number>): Promise<AdvanceStrategyModel> {
+    return requestSync(oriUrl, http.RequestMethod.POST, parameters, http.HttpDataType.OBJECT, true)
+  }
 }
 
-// 网络请求方法
-async function requestSync(url: string, method: http.RequestMethod,
+/**
+ * 网络请求方法
+ * @param url 请求地址
+ * @param method 请求方法
+ * @param expectDataType 返回数据类型
+ * @param extraData 请求体
+ * @param forceTimeout 超时
+ * @returns 策略对象
+ */
+async function requestSync(
+  url: string,
+  method: http.RequestMethod,
+  extraData?: string | Object | ArrayBuffer,
   expectDataType: http.HttpDataType = http.HttpDataType.STRING,
-  extraData?: string | Object | ArrayBuffer, forceTimeout: boolean = false): Promise<AdvanceStrategyModel> {
+  forceTimeout: boolean = false
+): Promise<AdvanceStrategyModel> {
   return new Promise<AdvanceStrategyModel>((resolve) => {
     let res = new AdvanceStrategyModel()
     let hasResult = false
@@ -116,25 +130,19 @@ async function requestSync(url: string, method: http.RequestMethod,
             }
 
             if (data.resultType === http.HttpDataType.STRING) {
-              // let obj: AdvanceStrategyModel = JSON.parse(JSON.stringify(data.result))
-              //
+              res.code = data.responseCode
+              res.msg = data.result as string
+
+            } else if (data.resultType === http.HttpDataType.OBJECT) {
+              const obj = data.result as AdvanceStrategyModel;
+              res = obj
               // res.suppliers = obj.suppliers
               // res.code = obj.code
               // res.msg = obj.msg
               // res.abtag = obj.abtag
               // res.reqid = obj.reqid
               // res.setting = obj.setting
-              res.code = data.responseCode
-              res.msg = data.result as string
-
-            } else if (data.resultType === http.HttpDataType.OBJECT) {
-              const obj = data.result as AdvanceStrategyModel;
-              res.suppliers = obj.suppliers
-              res.code = obj.code
-              res.msg = obj.msg
-              res.abtag = obj.abtag
-              res.reqid = obj.reqid
-              res.setting = obj.setting
+              // res.server_reward = obj.server_reward
             } else {
               res.code = ADV_ERR_NET_UNSUPPORT_TYPE
               res.msg = `UnSupport data type: ${data.resultType}`

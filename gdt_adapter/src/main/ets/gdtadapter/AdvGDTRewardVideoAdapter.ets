@@ -33,13 +33,13 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     };
     GDTAdSDK.getAdLoader().loadRewardAd(config, {
       onAdLoad: (ad: GDTRewardAd): void => {
-        BYLog.debug(TAG + "激励视频 - onAdLoaded")
+        BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
         this.gdt_ad = ad
         this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, ad.getEcpm())
         this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
       },
       onError: (err: GDTError): void => {
-        BYLog.debug(TAG + `激励视频 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
+        BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
         this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
       }
     })
@@ -83,7 +83,7 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     },
     onReward: (map: Map<string, string>): void => {
       BYLog.debug(TAG + "激励视频回调 - onReward")
-      this.bridge?.bridge_didAdReward()
+      this.bridge?.bridge_didAdReward(this.unitData.supplier)
     },
   }
 

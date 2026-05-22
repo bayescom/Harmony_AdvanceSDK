@@ -23,8 +23,14 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     //执行广告加载流程
     let spotId = this.unitData.supplier.adspotid
     let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
+    let rewardName = this.unitData.rewardVideoModel?.rewardName ?? (this.unitData.serverReward?.name ?? "")
+    let rewardAmount = this.unitData.rewardVideoModel?.rewardAmount ?? (this.unitData.serverReward?.count ?? 0)
     let adSlot = new AdSlotBuilder()
       .setCodeId(spotId)
+      .setUserData(this.unitData.rewardVideoModel?.userId ?? "")
+      .setMediaExtra(this.unitData.rewardVideoModel?.extra ?? "")
+      .setRewardName(rewardName)
+      .setRewardAmount(rewardAmount)
       .build()
     mAdCreator.loadRewardAd(adSlot, {
       onAdLoaded: (rewardAd: CSJRewardAd) => {
@@ -74,7 +80,7 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     },
     onRewardArrived: (isVerify, rewardType, extraInfo) => {
       BYLog.debug(TAG + "激励视频回调 - onAdReward")
-      this.bridge?.bridge_didAdReward()
+      this.bridge?.bridge_didAdReward(this.unitData.supplier)
     },
     onComplete: () => {
       BYLog.debug(TAG + "激励视频回调 - onAdPlayEnd")

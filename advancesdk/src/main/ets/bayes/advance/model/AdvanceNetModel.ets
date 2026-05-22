@@ -60,7 +60,8 @@ export class AdvanceStrategyModel {
   msg: string = ""
   reqid: string = ""
   abtag: string = ""
-  setting : AdvanceSettingModel = new AdvanceSettingModel()
+  setting: AdvanceSettingModel = new AdvanceSettingModel()
+  server_reward?: AdvanceServerReward
 }
 
 
@@ -134,4 +135,14 @@ export class AdvanceSettingModel {
   parallel_group: number[][] = []
   // 需要进行headbidding的渠道SDK （存放is_head_bidding = 1 的 suppliers）
   head_bidding_group: number[] = []
+}
+
+// 服务端激励验证对象
+export class AdvanceServerReward {
+  // 当达成激励时，聚合SDK调用此链接询问服务端验证结果
+  url: string = ''
+  // 奖励发放的内容名称，用来透传
+  name: string = ''
+  // 奖励发放的数量，用来透传
+  count: number = 0
 }

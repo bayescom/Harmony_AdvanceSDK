@@ -22,6 +22,8 @@ export class AdvMercuryRewardVideoAdapter extends AdvanceRewardVideoCommonAdapte
     //执行广告加载流程
     let spotId = this.unitData.supplier.adspotid
     let opt = new MercuryEntry().setCodeId(spotId)
+    // let rewardName = this.unitData.rewardVideoModel?.rewardName ?? (this.unitData.serverReward?.name ?? "")
+    // let rewardAmount = this.unitData.rewardVideoModel?.rewardAmount ?? (this.unitData.serverReward?.count ?? 0)
     this.mercury_ad = new MercuryReward(opt)
     this.mercury_ad.loadAd({
       onAdLoaded: () => {
@@ -68,7 +70,7 @@ export class AdvMercuryRewardVideoAdapter extends AdvanceRewardVideoCommonAdapte
     },
     onReward: () => {
       BYLog.debug(TAG + `激励视频回调 - onAdReward`)
-      this.bridge?.bridge_didAdReward()
+      this.bridge?.bridge_didAdReward(this.unitData.supplier)
     },
     onComplete: () => {
       BYLog.debug(TAG + "激励视频回调 - onVideoComplete")

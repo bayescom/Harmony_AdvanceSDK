@@ -58,7 +58,8 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
 
   adapter_showAd(windowStage: window.WindowStage) {
     this.registerPPSReceiver()
-    advertising.showAd(this.huawei_ad, {}, BYConstant.context)
+    const displayOption: advertising.AdDisplayOptions = {userId: this.unitData.rewardVideoModel?.userId, customData: this.unitData.rewardVideoModel?.extra}
+    advertising.showAd(this.huawei_ad, displayOption, BYConstant.context)
   }
 
   adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
@@ -142,7 +143,7 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
                 break;
               case 'onAdReward':
                 BYLog.debug(TAG + "激励视频回调 - onReward")
-                this.bridge?.bridge_didAdReward()
+                this.bridge?.bridge_didAdReward(this.unitData.supplier)
                 break;
               case 'onVideoPlayEnd':
                 BYLog.debug(TAG + "激励视频回调 - onVideoComplete")

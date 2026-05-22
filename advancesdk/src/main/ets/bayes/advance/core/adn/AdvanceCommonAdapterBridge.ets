@@ -30,7 +30,7 @@ export interface AdvanceInterstitialAdapterBridge extends AdvanceCommonAdapterBr
 export interface AdvanceRewardVideoAdapterBridge extends AdvanceCommonAdapterBridge {
   bridge_didAdShowFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => void
   bridge_didAdClose: () => void
-  bridge_didAdReward: () => void
+  bridge_didAdReward: (supplier: AdvanceSupplierModel) => void // 验证激励回调
   bridge_didAdVideoPlayEnd: () => void
 }
 

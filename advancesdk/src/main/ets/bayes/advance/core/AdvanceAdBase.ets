@@ -18,7 +18,7 @@ import { BYConstant } from '../../basic/BYConstant'
 import {
   AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType,
 } from '../define/AdvanceDefine'
-import { AdvanceAdInfo } from '../model/AdvanceAdInfo'
+import { AdvanceAdInfo, AdvRewardCallbackInfo, AdvRewardVideoModel } from '../model/AdvanceAdInfo'
 import { AdvanceADNManager, AdvanceADNUnitData } from './adn/AdvanceADNManager'
 import { systemDateTime } from '@kit.BasicServicesKit'
 import { BYUtil } from '../../basic/BYUtil'
@@ -152,6 +152,9 @@ export abstract class AdvanceAdBase {
       //宽高属性值设置
       adnData.vpWidth = this.adConfig.adWidth ?? 0
       adnData.vpHeight = this.adConfig.adHeight ?? 0
+      //激励相关设置
+      adnData.rewardVideoModel = this.adConfig.rewardVideoModel
+      adnData.serverReward = this.strategyModel.server_reward
       // 初始化SDK
       let initResult = await AdvanceADNManager.loadADN(supplier)
       if (!initResult.success) {
@@ -439,6 +442,43 @@ export abstract class AdvanceAdBase {
         BYLog.debug(`AdvanceTK上报失败：${reportUrl}`)
       }
     })
+  }
+
+  // 验证激励回调
+  protected verifyRewardVideo(
+    rewardVideoModel: AdvRewardVideoModel | undefined,
+    supplier: AdvanceSupplierModel,
+    placementId: string,
+    completion: (rewardInfo?: AdvRewardCallbackInfo, error?: AdvanceError) => void) {
+
+    let rewardAmount = rewardVideoModel?.rewardAmount ?? (this.strategyModel.server_reward?.count ?? 0)
+    let rewardName = rewardVideoModel?.rewardName ?? (this.strategyModel.server_reward?.name ?? "")
+    let rewardInfo: AdvRewardCallbackInfo = {sourceId: supplier.id, rewardName: rewardName, rewardAmount: rewardAmount}
+
+    if (this.strategyModel.server_reward?.url) { // 服务端回调验证
+      const param: Record<string, string | number> = {
+        "timestamp": systemDateTime.getTime(),
+        "user_id": rewardVideoModel?.userId ?? "",
+        "extra": rewardVideoModel?.extra ?? "",
+        "reward_amount": rewardAmount,
+        "reward_name": rewardName,
+        "trans_id": this.strategyModel.reqid,
+        "placement_id": placementId,
+        "adn_channel_id": supplier.id,
+        "adn_adspot_id": supplier.adspotid,
+        "is_cached": supplier.cachedReqId ? 1 : 0,
+        "cached_reqid": supplier.cachedReqId ?? ""
+      }
+      AdvanceNetwork.shared().verifyServerSideRewardedURL(this.strategyModel.server_reward.url, param).then((model: AdvanceStrategyModel) => {
+        if (model.code === 1) {
+          completion(rewardInfo, undefined)
+        } else {
+          completion(undefined, new AdvanceError(model.code, model.msg))
+        }
+      })
+    } else { // 客户端回调
+      completion(rewardInfo, undefined)
+    }
   }
 }
 
