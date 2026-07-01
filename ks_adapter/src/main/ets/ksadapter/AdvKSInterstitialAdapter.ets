@@ -2,8 +2,10 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   BYWindowUtil,
-  AdvanceInterstitialCommonAdapter,
   AdvanceError,
+  AdvanceCommonInterstitialAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 import { KSAdScene, KSAdSDK, KSAdScreenDirection, KSNewInterstitialAd, KSAdExposureFailCode} from 'ksadsdk';
 import { KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY } from './Component/AdvKSDisplayPageView';
@@ -11,7 +13,7 @@ import { KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY } from './Component/AdvKSDisplay
 
 const TAG = `[AdvKSInterstitialAdapter]`
 
-export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
+export class AdvKSInterstitialAdapter extends AdvanceCommonInterstitialAdapter {
   protected ks_ad?: KSNewInterstitialAd
 
   adapter_isAdValid(): boolean {
@@ -20,7 +22,7 @@ export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const scene: KSAdScene = new KSAdScene()
       .setPosId(spotId)
       .setAdNum(1)
@@ -33,14 +35,13 @@ export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
       onError(code: number, msg: string) {
         // 广告请求失败
         BYLog.debug(TAG + `插屏回调 - onAdLoadFailed code: ${code} message: ${msg}`)
-        that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(code, msg))
+        that.bridge?.interstitial_didAdLoadFailed(that, new AdvanceError(code, msg))
       },
       onAdLoad(ad: KSNewInterstitialAd) {
         // 广告成功加载，可以展示
         BYLog.debug(TAG + "插屏回调 - onAdLoaded")
         that.ks_ad = ad
-        that.bridge?.bridge_cacheAdapterIfNeeded(that, that.unitData.supplier, ad.getEcpm())
-        that.bridge?.bridge_didAdLoaded(that.unitData.supplier, ad.getEcpm())
+        that.bridge?.interstitial_didAdLoaded(that, ad.getEcpm())
       }
     })
   }
@@ -51,16 +52,16 @@ export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
       that.ks_ad?.setInteractListener({
         onAdShow() {
           BYLog.debug(TAG + "插屏回调 - onAdExposure")
-          that.bridge?.bridge_didAdShow(that.unitData.supplier)
+          that.bridge?.interstitial_didAdShow(that)
         },
         onAdClick() {
           BYLog.debug(TAG + "插屏回调 - onAdClick")
-          that.bridge?.bridge_didAdClick(that.unitData.supplier)
+          that.bridge?.interstitial_didAdClick(that)
         },
         onAdClose() {
           BYLog.debug(TAG + `插屏回调 - onAdClose`)
           BYWindowUtil.destroySubWindow()
-          that.bridge?.bridge_didAdClose()
+          that.bridge?.interstitial_didAdClose(that)
         },
         onVideoPlayStart() {},
         onVideoPlayEnd() {},
@@ -69,12 +70,12 @@ export class AdvKSInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
     }
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.ks_ad?.setBidEcpmAndHighestLoss(winPrice, secondPrice)
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: firstPrice})
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.ks_ad?.setBidEcpmAndHighestLoss(result.winPrice, result.secondPrice)
+    } else {
+      this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: result.winPrice})
+    }
   }
 
 }

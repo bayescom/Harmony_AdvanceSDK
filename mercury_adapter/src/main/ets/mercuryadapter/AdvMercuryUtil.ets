@@ -1,44 +1,17 @@
 import {
   BYLog,
-  AdvanceCommonAdapter,
   AdvanceSetting,
   AdvanceAdnInitResult,
-  AdvanceADNUnitData,
-  AdvanceAdType,
   AdvanceAdnInitState,
   BYConstant,
   BYApp,
 } from 'advancesdk'
 import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 import { MercuryAD } from 'mercury_ad'
-import { AdvMercuryBannerAdapter } from './AdvMercuryBannerAdapter'
-import { AdvMercuryInterstitialAdapter } from './AdvMercuryInterstitialAdapter'
-import { AdvMercuryNativeExpressAdapter } from './AdvMercuryNativeExpressAdapter'
-import { AdvMercuryRenderFeedAdapter } from './AdvMercuryRenderFeedAdapter/AdvMercuryRenderFeedAdapter'
-import { AdvMercuryRewardVideoAdapter } from './AdvMercuryRewardVideoAdapter'
-import { AdvMercurySplashAdapter } from './AdvMercurySplashAdapter'
 
 const TAG = `[AdvMercuryUtil] `
 
 export class AdvMercuryUtil {
-  static getMercuryAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (data.adType) {
-      case AdvanceAdType.splash:
-        return new AdvMercurySplashAdapter(data)
-      case AdvanceAdType.banner:
-        return new AdvMercuryBannerAdapter(data)
-      case AdvanceAdType.interstitial:
-        return new AdvMercuryInterstitialAdapter(data)
-      case AdvanceAdType.rewardVideo:
-        return new AdvMercuryRewardVideoAdapter(data)
-      case AdvanceAdType.nativeExpress:
-        return new AdvMercuryNativeExpressAdapter(data)
-      case AdvanceAdType.renderFeed:
-        return new AdvMercuryRenderFeedAdapter(data)
-      default:
-        return undefined
-    }
-  }
 
   static getMercurySDKVersion(): string {
     let version = MercuryAD.getVersion()

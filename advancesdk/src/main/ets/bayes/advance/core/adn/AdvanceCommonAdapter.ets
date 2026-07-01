@@ -1,5 +1,12 @@
 import { NodeController, window } from '@kit.ArkUI';
 import { AdvanceADNUnitData } from '../../../../../../../Index';
+import { AdvBidWinLossResult } from '../../model/AdvanceAdInfo';
+import { AdvanceCommonBannerAdapterBridge } from './AdvanceCommonBannerAdapterBridge';
+import { AdvanceCommonInterstitialAdapterBridge } from './AdvanceCommonInterstitialAdapterBridge';
+import { AdvanceCommonNativeExpressAdapterBridge } from './AdvanceCommonNativeExpressAdapterBridge';
+import { AdvanceCommonRenderFeedAdapterBridge } from './AdvanceCommonRenderFeedAdapterBridge';
+import { AdvanceCommonRewardVideoAdapterBridge } from './AdvanceCommonRewardVideoAdapterBridge';
+import { AdvanceCommonSplashAdapterBridge } from './AdvanceCommonSplashAdapterBridge';
 
 export abstract class AdvanceCommonAdapter {
   //渠道参数
@@ -9,28 +16,103 @@ export abstract class AdvanceCommonAdapter {
   //竞价价格
   price: number = 0
 
+  // 构造函数
   constructor(unitData: AdvanceADNUnitData) {
     this.unitData = unitData
   }
 
+  // 加载广告的方法
   abstract adapter_loadAd()
 
-  adapter_showAd(windowStage: window.WindowStage) {} // 默认实现
-
-  adapter_isAdValid(): boolean {
+  // 广告是否有效
+  adapter_isAdValid(): boolean { // 默认实现
     return true
   }
 
-  adapter_getAdComponent(): NodeController | undefined { // for banner & native express
-    return undefined
+  // Adn竞胜/竞败后回传信息
+  adapter_sendNotification(result: AdvBidWinLossResult) {}
+}
+
+// 开屏广告的adapter广告协议
+export abstract class AdvanceCommonSplashAdapter extends AdvanceCommonAdapter {
+  bridge?: AdvanceCommonSplashAdapterBridge
+
+  /// 设置开屏 bridge 用于回传广告状态
+  adapter_setSplashBridge(bridge: AdvanceCommonSplashAdapterBridge) {
+    this.bridge = bridge
   }
 
-  adapter_render(context: UIContext) {} // for banner & native express & render feed
+  /// 展示广告
+  abstract adapter_showAd(windowStage: window.WindowStage)
+}
 
-  //Adn竞胜后回传二价
-  abstract adapter_sendWinNotification(secondPrice: number, winPrice: number)
+// Banner广告的adapter广告协议
+export abstract class AdvanceCommonBannerAdapter extends AdvanceCommonAdapter {
+  bridge?: AdvanceCommonBannerAdapterBridge
 
-  //Adn竞败后回传最高价
-  abstract adapter_sendLossNotification(firstPrice: number)
+  /// 设置横幅 bridge 用于回传广告状态
+  adapter_setBannerBridge(bridge: AdvanceCommonBannerAdapterBridge) {
+    this.bridge = bridge
+  }
 
+  /// 渲染广告
+  abstract adapter_render(context: UIContext)
+
+  /// 获取广告组件
+  abstract adapter_getAdComponent(): NodeController | undefined
+}
+
+// 插屏广告的adapter广告协议
+export abstract class AdvanceCommonInterstitialAdapter extends AdvanceCommonAdapter {
+  bridge?: AdvanceCommonInterstitialAdapterBridge
+
+  /// 设置插屏 bridge 用于回传广告状态
+  adapter_setInterstitialBridge(bridge: AdvanceCommonInterstitialAdapterBridge) {
+    this.bridge = bridge
+  }
+
+  /// 展示广告
+  abstract adapter_showAd(windowStage: window.WindowStage)
+}
+
+// 激励视频广告的adapter广告协议
+export abstract class AdvanceCommonRewardVideoAdapter extends AdvanceCommonAdapter {
+  bridge?: AdvanceCommonRewardVideoAdapterBridge
+
+  /// 设置激励视频 bridge 用于回传广告状态
+  adapter_setRewardVideoBridge(bridge: AdvanceCommonRewardVideoAdapterBridge) {
+    this.bridge = bridge
+  }
+
+  /// 展示广告
+  abstract adapter_showAd(windowStage: window.WindowStage)
+}
+
+// 信息流（模板渲染）广告的adapter广告协议
+export abstract class AdvanceCommonNativeExpressAdapter extends AdvanceCommonAdapter {
+  bridge?: AdvanceCommonNativeExpressAdapterBridge
+
+  /// 设置信息流 bridge 用于回传广告状态
+  adapter_setNativeExpressBridge(bridge: AdvanceCommonNativeExpressAdapterBridge) {
+    this.bridge = bridge
+  }
+
+  /// 渲染广告
+  abstract adapter_render(context: UIContext)
+
+  /// 获取广告组件
+  abstract adapter_getAdComponent(): NodeController | undefined
+}
+
+// 信息流（自渲染）广告的adapter广告协议
+export abstract class AdvanceCommonRenderFeedAdapter extends AdvanceCommonAdapter {
+  bridge?: AdvanceCommonRenderFeedAdapterBridge
+
+  /// 设置信息流 bridge 用于回传广告状态
+  adapter_setRenderFeedBridge(bridge: AdvanceCommonRenderFeedAdapterBridge) {
+    this.bridge = bridge
+  }
+
+  /// 渲染广告
+  abstract adapter_render(context: UIContext)
 }

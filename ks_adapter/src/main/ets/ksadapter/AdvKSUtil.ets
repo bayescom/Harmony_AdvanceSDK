@@ -1,40 +1,16 @@
 import {
   BYLog,
-  AdvanceCommonAdapter,
   AdvanceSetting,
   AdvanceAdnInitResult,
-  AdvanceADNUnitData,
-  AdvanceAdType,
   AdvanceAdnInitState,
   BYApp,
 } from 'advancesdk'
 import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 import { KSAdSDK, KSAdSDKInitConfig } from 'ksadsdk'
-import { AdvKSRenderFeedAdapter } from './AdvKSRenderFeedAdapter/AdvKSRenderFeedAdapter'
-import { AdvKSInterstitialAdapter } from './AdvKSInterstitialAdapter'
-import { AdvKSNativeExpressAdapter } from './AdvKSNativeExpressAdapter'
-import { AdvKSRewardVideoAdapter } from './AdvKSRewardVideoAdapter'
-import { AdvKSSplashAdapter } from './AdvKSSplashAdapter'
 
 const TAG = `[AdvKSUtil] `
 
 export class AdvKSUtil {
-  static getKSAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (data.adType) {
-      case AdvanceAdType.splash:
-        return new AdvKSSplashAdapter(data)
-      case AdvanceAdType.interstitial:
-        return new AdvKSInterstitialAdapter(data)
-      case AdvanceAdType.rewardVideo:
-        return new AdvKSRewardVideoAdapter(data)
-      case AdvanceAdType.nativeExpress:
-        return new AdvKSNativeExpressAdapter(data)
-      case AdvanceAdType.renderFeed:
-        return new AdvKSRenderFeedAdapter(data)
-      default:
-        return undefined
-    }
-  }
 
   static getKSSDKVersion(): string {
     let version = KSAdSDK.getSDKVersion()

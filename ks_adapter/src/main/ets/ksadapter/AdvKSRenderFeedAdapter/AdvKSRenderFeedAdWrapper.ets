@@ -1,10 +1,10 @@
-import { AdvanceRenderFeedWrapper, BYConstant, BYCustomNodeController } from 'advancesdk';
+import { AdvanceRenderFeedAdWrapper, BYConstant, BYCustomNodeController } from 'advancesdk';
 import { NodeController } from '@kit.ArkUI';
 import { KSAdImage, KSAdInteractionType, KSAdMaterialType, KSAdSourceLogoType,
   KSBuildNativeAdVideoView,
   KSNativeAd } from 'ksadsdk';
 
-export class AdvKSRenderFeedAdWrapper implements AdvanceRenderFeedWrapper {
+export class AdvKSRenderFeedAdWrapper implements AdvanceRenderFeedAdWrapper {
   ad: KSNativeAd
 
   constructor(ad: KSNativeAd) {

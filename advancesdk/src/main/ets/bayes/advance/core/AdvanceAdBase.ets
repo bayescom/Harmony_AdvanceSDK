@@ -18,7 +18,10 @@ import { BYConstant } from '../../basic/BYConstant'
 import {
   AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType,
 } from '../define/AdvanceDefine'
-import { AdvanceAdInfo, AdvRewardCallbackInfo, AdvRewardVideoModel } from '../model/AdvanceAdInfo'
+import { AdvanceAdInfo,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
+  AdvRewardCallbackInfo, AdvRewardVideoModel } from '../model/AdvanceAdInfo'
 import { AdvanceADNManager, AdvanceADNUnitData } from './adn/AdvanceADNManager'
 import { systemDateTime } from '@kit.BasicServicesKit'
 import { BYUtil } from '../../basic/BYUtil'
@@ -103,7 +106,7 @@ export abstract class AdvanceAdBase {
       if (this.strategyModel.setting.parallel_group.length == 0) {
         // Adn竞败通知
         this.allSuppliers.forEach((supplier: AdvanceSupplierModel) => {
-          this.adapterMap?.get(supplier.sdk_id)?.adapter_sendLossNotification(0)
+          this.adapterMap?.get(supplier.sdk_id)?.adapter_sendNotification({bidResultType: AdvBidWinLossResultType.loss, winPrice: 0, secondPrice: 0})
         })
         this.allAdnLoadAdFailed(new AdvanceError(ADV_ERR_ALL_ADN_FAILED,
           `所有平台都未返回广告（失败或超时）\n详情：${JSON.stringify(Array.from(this.errorInfo))}`))
@@ -147,7 +150,9 @@ export abstract class AdvanceAdBase {
       this.reportAdnTask(AdvanceAdnReportTKEventType.loaded, supplier)
 
       let adnData = new AdvanceADNUnitData()
-      adnData.supplier = supplier
+      adnData.adnId = supplier.id
+      adnData.placementId = supplier.adspotid
+      adnData.timeout = supplier.timeout
       adnData.adType = this.adSlotType
       //宽高属性值设置
       adnData.vpWidth = this.adConfig.adWidth ?? 0
@@ -155,6 +160,8 @@ export abstract class AdvanceAdBase {
       //激励相关设置
       adnData.rewardVideoModel = this.adConfig.rewardVideoModel
       adnData.serverReward = this.strategyModel.server_reward
+      //自定义ADN获取扩展信息
+      // adnData.extra = ....
       // 初始化SDK
       let initResult = await AdvanceADNManager.loadADN(supplier)
       if (!initResult.success) {
@@ -198,7 +205,6 @@ export abstract class AdvanceAdBase {
     this.timeoutId = setTimeout(() => {
       this.observeLoadAdTimeout()
     }, this.strategyModel.setting.parallel_timeout)
-
   }
 
   // 超时监测
@@ -341,15 +347,16 @@ export abstract class AdvanceAdBase {
       if (suppliers.length > 1) {
         secondPrice = suppliers[1].sdk_price
       }
-      this.winAdapter?.adapter_sendWinNotification(secondPrice, target.sdk_price)
+      this.winAdapter?.adapter_sendNotification({bidResultType: AdvBidWinLossResultType.win, winPrice: target.sdk_price, secondPrice: secondPrice})
       // 竞胜上报
       this.reportAdnTask(AdvanceAdnReportTKEventType.bidWin, target)
 
       // Adn竞败通知
+      const bidResult: AdvBidWinLossResult = {bidResultType: AdvBidWinLossResultType.loss, winPrice: target.sdk_price, secondPrice: 0}
       this.allSuppliers.filter((supplier: AdvanceSupplierModel) => {
         return supplier !== target
       }).forEach((supplier: AdvanceSupplierModel) => {
-        this.adapterMap?.get(supplier.sdk_id)?.adapter_sendLossNotification(target.sdk_price)
+        this.adapterMap?.get(supplier.sdk_id)?.adapter_sendNotification(bidResult)
       })
     }
   }
@@ -369,6 +376,24 @@ export abstract class AdvanceAdBase {
     if (supplier.is_head_bidding && ecpm > 0) {
       supplier.sdk_price = ecpm
     }
+  }
+
+  // 根据 adapter 匹配 supplier 对象
+  protected matchSupplier(adapter: AdvanceCommonAdapter): AdvanceSupplierModel {
+    // 步骤1：在 adapterMap 中找到匹配的 key
+    let foundKey: string | undefined;
+    this.adapterMap?.forEach((value, key) => {
+      if (value === adapter) {
+        foundKey = key;
+      }
+    });
+    // 步骤2：在 suppliers 数组中查找匹配的对象
+    if (foundKey) {
+      return this.allSuppliers.filter((supplier: AdvanceSupplierModel) => {
+        return supplier.sdk_id === foundKey;
+      })[0]; // 返回第一个匹配项
+    }
+    return new AdvanceSupplierModel();
   }
 
   // 销毁各渠道Adapter对象

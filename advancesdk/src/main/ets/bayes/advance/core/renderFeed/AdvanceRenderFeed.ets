@@ -1,11 +1,10 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceRenderFeedListener } from '../AdvanceAdOpenListener';
-import { AdvanceRenderFeedCommonAdapter } from '../adn/AdvanceRenderFeedCommonAdapter';
-import { AdvanceRenderFeedWrapper } from './AdvanceRenderFeedWrapper';
+import { AdvanceCommonRenderFeedAdapter } from '../adn/AdvanceCommonAdapter';
+import { AdvanceRenderFeedAdWrapper } from './AdvanceRenderFeedAdWrapper';
 import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdInfo, AdvanceError, AdvanceAdLoadConfig, BYApp, BYLog } from '../../../../../../../Index';
-import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
-import { AdvanceRenderFeedAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
+import { AdvanceCommonRenderFeedAdapterBridge } from '../adn/AdvanceCommonRenderFeedAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
 
 export class AdvanceRenderFeed extends AdvanceAdBase {
@@ -23,10 +22,10 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
   }
 
   // 加载某一个渠道对象
-  protected override loadAnyAdnAdapter(adapter: AdvanceRenderFeedCommonAdapter): void {
-    adapter.setRenderFeedAdapterBridge(this.adapterBridge)
+  protected override loadAnyAdnAdapter(adapter: AdvanceCommonRenderFeedAdapter): void {
+    adapter.adapter_setRenderFeedBridge(this.bridge)
     if (adapter.isFromCache) {
-      this.adapterBridge.bridge_didAdLoaded(adapter.unitData.supplier, adapter.price)
+      this.bridge.renderFeed_didAdLoaded(adapter, adapter.price)
     } else {
       adapter.adapter_loadAd()
     }
@@ -43,7 +42,8 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
   protected override adnBidWin(adInfo: AdvanceAdInfo): void {
     this.mListener?.onAdLoaded(adInfo)
     // 竞胜的广告源渲染广告
-    this.winAdapter?.adapter_render(BYApp.getUIContext())
+    let adapter = this.winAdapter as AdvanceCommonRenderFeedAdapter
+    adapter.adapter_render(BYApp.getUIContext())
   }
 
   setAdListener(listener: AdvanceRenderFeedListener) {
@@ -54,51 +54,60 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
     this.loadStrategy()
   }
 
-  protected adapterBridge: AdvanceRenderFeedAdapterBridge = {
-    bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => {
-      if (supplier.enable_cache) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "", supplier.sdk_id)
+  protected bridge: AdvanceCommonRenderFeedAdapterBridge = {
+    renderFeed_didAdLoaded: (adapter: AdvanceCommonRenderFeedAdapter, price: number) => {
+      let supplier = this.matchSupplier(adapter)
+      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
+        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
+          supplier.sdk_id)
       }
-    },
-    bridge_didAdLoaded: (supplier: AdvanceSupplierModel, price: number) => {
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
     },
-    bridge_didAdLoadFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
+    renderFeed_didAdLoadFailed: (adapter: AdvanceCommonRenderFeedAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
     },
-    bridge_didAdRenderSuccess: (supplier: AdvanceSupplierModel, wrapper: AdvanceRenderFeedWrapper) => {
+    renderFeed_didAdRenderSuccess: (adapter: AdvanceCommonRenderFeedAdapter, wrapper: AdvanceRenderFeedAdWrapper) => {
+      let supplier = this.matchSupplier(adapter)
       this.mListener?.onRenderSuccess(wrapper)
-    },
-    bridge_didAdRenderFail: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
-      this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
-      this.mListener?.onRenderFail(error)
-      // 销毁各渠道Adapter对象
-      this.destroyAdapters()
-    },
-    bridge_didAdShow: (supplier: AdvanceSupplierModel) => {
-      this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
-      this.mListener?.onAdShow()
       // 删除缓存Adapter
       if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
         AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
       }
     },
-    bridge_didAdClick: (supplier: AdvanceSupplierModel) => {
+    renderFeed_didAdRenderFail: (adapter: AdvanceCommonRenderFeedAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
+      this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
+      this.mListener?.onRenderFail(error)
+      // 销毁各渠道Adapter对象
+      this.destroyAdapters()
+      // 删除缓存Adapter
+      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
+        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
+      }
+    },
+    renderFeed_didAdShow: (adapter: AdvanceCommonRenderFeedAdapter) => {
+      let supplier = this.matchSupplier(adapter)
+      this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
+      this.mListener?.onAdShow()
+    },
+    renderFeed_didAdClick: (adapter: AdvanceCommonRenderFeedAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.clicked, supplier)
       this.mListener?.onAdClick()
     },
-    bridge_didAdVideoPlayStart: () => {
+    renderFeed_didAdVideoPlayStart: (adapter: AdvanceCommonRenderFeedAdapter) => {
       if (this.mListener?.onVideoPlayStart) {
         this.mListener?.onVideoPlayStart()
       }
     },
-    bridge_didAdVideoPlayEnd: () => {
+    renderFeed_didAdVideoPlayEnd: (adapter: AdvanceCommonRenderFeedAdapter) => {
       if (this.mListener?.onVideoPlayEnd) {
         this.mListener?.onVideoPlayEnd()
       }
     },
-    bridge_didAdVideoPlayFailed: (error: AdvanceError) => {
+    renderFeed_didAdVideoPlayFailed: (adapter: AdvanceCommonRenderFeedAdapter, error: AdvanceError) => {
       if (this.mListener?.onVideoPlayFailed) {
         this.mListener?.onVideoPlayFailed(error)
       }

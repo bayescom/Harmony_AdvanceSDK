@@ -1,44 +1,17 @@
 import { CSJAdSdk, SDKConfig, SDKConfigBuilder } from '@csj/openadsdk'
 import {
   BYLog,
-  AdvanceCommonAdapter,
   AdvanceSetting,
   AdvanceAdnInitResult,
-  AdvanceADNUnitData,
-  AdvanceAdType,
   BYConstant,
   AdvanceAdnInitState,
   BYSetting
 } from 'advancesdk'
 import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
-import { AdvCSJBannerAdapter } from './AdvCSJBannerAdapter'
-import { AdvCSJInterstitialAdapter } from './AdvCSJInterstitialAdapter'
-import { AdvCSJNativeExpressAdapter } from './AdvCSJNativeExpressAdapter'
-import { AdvCSJRenderFeedAdapter } from './AdvCSJRenderFeedAdapter/AdvCSJRenderFeedAdapter'
-import { AdvCSJRewardVideoAdapter } from './AdvCSJRewardVideolAdapter'
-import { AdvCSJSplashAdapter } from './AdvCSJSplashAdapter'
 
 const TAG = `[AdvCSJUtil] `
 
 export class AdvCSJUtil {
-  static getCSJAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (data.adType) {
-      case AdvanceAdType.splash:
-        return new AdvCSJSplashAdapter(data)
-      case AdvanceAdType.banner:
-        return new AdvCSJBannerAdapter(data)
-      case AdvanceAdType.interstitial:
-        return new AdvCSJInterstitialAdapter(data)
-      case AdvanceAdType.rewardVideo:
-        return new AdvCSJRewardVideoAdapter(data)
-      case AdvanceAdType.nativeExpress:
-        return new AdvCSJNativeExpressAdapter(data)
-      case AdvanceAdType.renderFeed:
-        return new AdvCSJRenderFeedAdapter(data)
-      default:
-        return undefined
-    }
-  }
 
   static getCSJSDKVersion(): string {
     let version = CSJAdSdk.getSDKVersion()

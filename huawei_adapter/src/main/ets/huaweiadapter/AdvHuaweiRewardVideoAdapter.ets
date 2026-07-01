@@ -2,9 +2,12 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  AdvanceRewardVideoCommonAdapter,
   BYConstant,
-  ADV_ERR_DATA_NULL, ADV_ERR_HUAWEI_SHOW_FAILED,
+  ADV_ERR_DATA_NULL,
+  ADV_ERR_HUAWEI_SHOW_FAILED,
+  AdvanceCommonRewardVideoAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 import { advertising } from '@kit.AdsKit';
 import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
@@ -14,7 +17,7 @@ import { BusinessError, commonEventManager } from '@kit.BasicServicesKit';
 
 const TAG = `[AdvHuaweiRewardVideoAdapter]`
 
-export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
+export class AdvHuaweiRewardVideoAdapter extends AdvanceCommonRewardVideoAdapter {
   protected huawei_ad?: advertising.Advertisement
   protected subscriber: commonEventManager.CommonEventSubscriber | null = null
   protected hasExposed = false
@@ -25,7 +28,7 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
 
   async adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const adRequestParams: advertising.AdRequestParams = {
       // 广告位ID
       adId: 'testx9dtjwj8hp',
@@ -43,49 +46,41 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
           BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
           this.huawei_ad = ads[0]
           const biddingInfo = this.huawei_ad.biddingInfo as BiddingInfo
-          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, biddingInfo.price)
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, biddingInfo.price)
+          this.bridge?.rewardVideo_didAdLoaded(this, biddingInfo.price)
         } else {
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          this.bridge?.rewardVideo_didAdLoadFailed(this,
+            new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
         }
       },
       onAdLoadFailure: (errorCode: number, errorMsg: string) => {
         BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${errorCode} message: ${errorMsg}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(errorCode, errorMsg))
+        this.bridge?.rewardVideo_didAdLoadFailed(this, new AdvanceError(errorCode, errorMsg))
       },
     })
   }
 
   adapter_showAd(windowStage: window.WindowStage) {
     this.registerPPSReceiver()
-    const displayOption: advertising.AdDisplayOptions = {userId: this.unitData.rewardVideoModel?.userId, customData: this.unitData.rewardVideoModel?.extra}
+    const displayOption: advertising.AdDisplayOptions =
+      { userId: this.unitData.rewardVideoModel?.userId, customData: this.unitData.rewardVideoModel?.extra }
     advertising.showAd(this.huawei_ad, displayOption, BYConstant.context)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
-    if (biddingInfo.nurl) {
-      const url: string = biddingInfo.nurl
-      // 竞胜时，其他DSP最高出价
-        .replace('SECOND_PRICE', secondPrice.toString())
-        // 价格币种
-        .replace('AUCTION_CURRENCY', 'CNY');
-      sendBiddingResult(url).catch((error: BusinessError) => {
-        BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
-      });
-    }
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
     const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
     if (biddingInfo.lurl) {
-      const url: string = biddingInfo.lurl
-      // 竞败时，其他DSP最高出价
-        .replace('AUCTION_PRICE', firstPrice.toString())
-        // 竞价结果
-        .replace('AUCTION_LOSS', '102')
-        // 价格币种
-        .replace('AUCTION_CURRENCY', 'CNY')
+      let url: string = biddingInfo.lurl
+      if (result.bidResultType === AdvBidWinLossResultType.win) {
+        // 竞胜时，其他DSP最高出价
+        url = url.replace('SECOND_PRICE', result.secondPrice.toString())
+      } else {
+        // 竞败时，其他DSP最高出价
+        url = url.replace('AUCTION_PRICE', result.winPrice.toString())
+        // 102：竞价失败
+          .replace('AUCTION_LOSS', '102')
+      }
+      // 价格币种
+      url = url.replace('AUCTION_CURRENCY', 'CNY')
       sendBiddingResult(url).catch((error: BusinessError) => {
         BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
       });
@@ -105,7 +100,7 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
     commonEventManager.createSubscriber(subscribeInfo,
       (err: BusinessError, commonEventSubscriber: commonEventManager.CommonEventSubscriber) => {
         if (err) {
-          BYLog.debug( TAG + `Failed to create subscriber. Code is ${err.code}, message is ${err.message}`);
+          BYLog.debug(TAG + `Failed to create subscriber. Code is ${err.code}, message is ${err.message}`);
           return;
         }
         this.subscriber = commonEventSubscriber;
@@ -113,7 +108,7 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
         commonEventManager.subscribe(this.subscriber,
           (err: BusinessError, commonEventData: commonEventManager.CommonEventData) => {
             if (err) {
-              BYLog.debug( TAG + `Failed to subscribe. Code is ${err.code}, message is ${err.message}`);
+              BYLog.debug(TAG + `Failed to subscribe. Code is ${err.code}, message is ${err.message}`);
               return
             }
             // 获取激励视频广告变化状态
@@ -124,30 +119,31 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
                   return
                 }
                 BYLog.debug(TAG + "激励视频回调 - onAdExposure")
-                this.bridge?.bridge_didAdShow(this.unitData.supplier)
+                this.bridge?.rewardVideo_didAdShow(this)
                 this.hasExposed = true
                 break;
               case 'onAdClick':
                 BYLog.debug(TAG + "激励视频回调 - onAdClick")
-                this.bridge?.bridge_didAdClick(this.unitData.supplier)
+                this.bridge?.rewardVideo_didAdClick(this)
                 break;
               case 'onAdClose':
                 BYLog.debug(TAG + `激励视频回调 - onAdClose`)
-                this.bridge?.bridge_didAdClose()
+                this.bridge?.rewardVideo_didAdClose(this)
                 this.unRegisterPPSReceiver()
                 break;
               case 'onAdFail':
                 BYLog.debug(TAG + "激励视频回调 - onShowError")
-                this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, '华为广告展示失败'))
+                this.bridge?.rewardVideo_didAdShowFailed(this,
+                  new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, '华为广告展示失败'))
                 this.unRegisterPPSReceiver()
                 break;
               case 'onAdReward':
                 BYLog.debug(TAG + "激励视频回调 - onReward")
-                this.bridge?.bridge_didAdReward(this.unitData.supplier)
+                this.bridge?.rewardVideo_didAdReward(this)
                 break;
               case 'onVideoPlayEnd':
                 BYLog.debug(TAG + "激励视频回调 - onVideoComplete")
-                this.bridge?.bridge_didAdVideoPlayEnd()
+                this.bridge?.rewardVideo_didAdVideoPlayEnd(this)
                 break;
               default:
                 break;
@@ -159,12 +155,11 @@ export class AdvHuaweiRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter
   protected unRegisterPPSReceiver(): void {
     commonEventManager.unsubscribe(this.subscriber, (err: BusinessError) => {
       if (err) {
-        BYLog.debug( TAG + `Failed to unsubscribe. Code is ${err.code}, message is ${err.message}`);
+        BYLog.debug(TAG + `Failed to unsubscribe. Code is ${err.code}, message is ${err.message}`);
       } else {
-        BYLog.debug( TAG + 'Succeeded in unsubscribing');
+        BYLog.debug(TAG + 'Succeeded in unsubscribing');
         this.subscriber = null;
       }
     });
   }
-
 }

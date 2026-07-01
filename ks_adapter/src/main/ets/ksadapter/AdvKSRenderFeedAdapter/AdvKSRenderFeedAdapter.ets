@@ -1,9 +1,11 @@
 import {
   BYLog,
   ADV_ERR_DATA_NULL,
-  AdvanceRenderFeedCommonAdapter,
   AdvanceError,
-  AdvanceRenderFeedWrapper,
+  AdvanceRenderFeedAdWrapper,
+  AdvanceCommonRenderFeedAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 import { KSAdExposureFailCode, KSAdScene, KSAdSDK, KSNativeAd, KSVideoPlayError} from 'ksadsdk';
 import { AdvKSRenderFeedAdWrapper } from './AdvKSRenderFeedAdWrapper';
@@ -11,13 +13,13 @@ import { AdvKSRenderFeedAdWrapper } from './AdvKSRenderFeedAdWrapper';
 
 const TAG = `[AdvKSRenderFeedAdapter]`
 
-export class AdvKSRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
+export class AdvKSRenderFeedAdapter extends AdvanceCommonRenderFeedAdapter {
   protected ks_ad?: KSNativeAd
-  protected wrapper?: AdvanceRenderFeedWrapper | undefined
+  protected wrapper?: AdvanceRenderFeedAdWrapper | undefined
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const scene: KSAdScene = new KSAdScene()
       .setPosId(spotId)
       .setAdNum(1)
@@ -29,7 +31,7 @@ export class AdvKSRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
       onError(code: number, msg: string) {
         // 广告请求失败
         BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${code} message: ${msg}`)
-        that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(code, msg))
+        that.bridge?.renderFeed_didAdLoadFailed(that, new AdvanceError(code, msg))
       },
       onAdLoad(ads: KSNativeAd[]) {
         // 广告成功加载，可以展示
@@ -37,10 +39,9 @@ export class AdvKSRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
           BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
           that.ks_ad = ads[0]
           that.wrapper = new AdvKSRenderFeedAdWrapper(that.ks_ad)
-          that.bridge?.bridge_cacheAdapterIfNeeded(that, that.unitData.supplier, that.ks_ad.getEcpm())
-          that.bridge?.bridge_didAdLoaded(that.unitData.supplier, that.ks_ad.getEcpm())
+          that.bridge?.renderFeed_didAdLoaded(that, that.ks_ad.getEcpm())
         } else {
-          that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          that.bridge?.renderFeed_didAdLoadFailed(that, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
         };
       }
     })
@@ -50,42 +51,42 @@ export class AdvKSRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
     const that = this
     if (that.ks_ad) {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderSuccess")
-      that.bridge?.bridge_didAdRenderSuccess(that.unitData.supplier, that.wrapper!)
+      that.bridge?.renderFeed_didAdRenderSuccess(that, that.wrapper!)
 
       that.ks_ad.setInteractListener({
         onAdShow() {
           BYLog.debug(TAG + "自渲染信息流回调 - onAdExposure")
-          that.bridge?.bridge_didAdShow(that.unitData.supplier)
+          that.bridge?.renderFeed_didAdShow(that)
         },
         onAdClick() {
           BYLog.debug(TAG + "自渲染信息流回调 - onAdClick")
-          that.bridge?.bridge_didAdClick(that.unitData.supplier)
+          that.bridge?.renderFeed_didAdClick(that)
         }
       })
 
       that.ks_ad.setVideoPlayListener({
         onVideoPlayStart() {
           BYLog.debug(TAG + "自渲染信息流回调 - onVideoStart")
-          that.bridge?.bridge_didAdVideoPlayStart()
+          that.bridge?.renderFeed_didAdVideoPlayStart(that)
         },
         onVideoPlayComplete() {
           BYLog.debug(TAG + "自渲染信息流回调 - onVideoEnd")
-          that.bridge?.bridge_didAdVideoPlayEnd()
+          that.bridge?.renderFeed_didAdVideoPlayEnd(that)
         },
         onVideoPlayError(code: KSVideoPlayError, extra: string) {
           BYLog.debug(TAG + `自渲染信息流回调 - onVideoFailed`)
-          that.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(code, extra))
+          that.bridge?.renderFeed_didAdVideoPlayFailed(that, new AdvanceError(code, extra))
         }
       })
     }
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.ks_ad?.setBidEcpmAndHighestLoss(winPrice, secondPrice)
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: firstPrice})
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.ks_ad?.setBidEcpmAndHighestLoss(result.winPrice, result.secondPrice)
+    } else {
+      this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: result.winPrice})
+    }
   }
 
 }

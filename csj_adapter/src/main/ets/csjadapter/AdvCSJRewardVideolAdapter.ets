@@ -2,7 +2,8 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  AdvanceRewardVideoCommonAdapter,
+  AdvanceCommonRewardVideoAdapter, AdvBidWinLossResultType,
+  AdvBidWinLossResult,
 } from 'advancesdk';
 import {
   AdSlotBuilder, CSJAdCreator, CSJAdSdk,
@@ -12,7 +13,7 @@ import {
 
 const TAG = `[AdvCSJRewardVideoAdapter]`
 
-export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
+export class AdvCSJRewardVideoAdapter extends AdvanceCommonRewardVideoAdapter {
   protected csj_ad?: CSJRewardAd
 
   adapter_isAdValid(): boolean {
@@ -21,7 +22,7 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
     let rewardName = this.unitData.rewardVideoModel?.rewardName ?? (this.unitData.serverReward?.name ?? "")
     let rewardAmount = this.unitData.rewardVideoModel?.rewardAmount ?? (this.unitData.serverReward?.count ?? 0)
@@ -37,12 +38,11 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
         BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
         this.csj_ad = rewardAd
         // 穿山甲变现SDK不提供ecpm获取
-        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
+        this.bridge?.rewardVideo_didAdLoaded(this, 0)
       },
       onError: (code: number, message: string) => {
         BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${code} message: ${message}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
+        this.bridge?.rewardVideo_didAdLoadFailed(this, new AdvanceError(code, message))
       },
       onAdCached: () => {
       }
@@ -54,37 +54,37 @@ export class AdvCSJRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     this.csj_ad?.showRewardAd(windowStage)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.csj_ad?.win(secondPrice)
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.csj_ad?.loss(firstPrice)
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.csj_ad?.win(result.secondPrice)
+    } else {
+      this.csj_ad?.loss(result.winPrice)
+    }
   }
 
   protected interactionListener: RewardAdInteractionListener = {
     onShow: () => {
       BYLog.debug(TAG + "激励视频回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdShow(this)
     },
     onClose: () => {
       BYLog.debug(TAG + `激励视频回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.rewardVideo_didAdClose(this)
     },
     onClick: () => {
       BYLog.debug(TAG + "激励视频回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdClick(this)
     },
     onSkip: () => {
       BYLog.debug(TAG + "激励视频回调 - onAdSkip")
     },
     onRewardArrived: (isVerify, rewardType, extraInfo) => {
       BYLog.debug(TAG + "激励视频回调 - onAdReward")
-      this.bridge?.bridge_didAdReward(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdReward(this)
     },
     onComplete: () => {
       BYLog.debug(TAG + "激励视频回调 - onAdPlayEnd")
-      this.bridge?.bridge_didAdVideoPlayEnd()
+      this.bridge?.rewardVideo_didAdVideoPlayEnd(this)
     }
   }
 

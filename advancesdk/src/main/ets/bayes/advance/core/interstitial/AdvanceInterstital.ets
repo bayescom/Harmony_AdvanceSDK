@@ -4,10 +4,9 @@ import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
-import { AdvanceInterstitialCommonAdapter } from '../adn/AdvanceInterstitialCommonAdapter';
-import { AdvanceAdInfo, AdvanceError, BYLog } from '../../../../../../../Index';
-import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
-import { AdvanceInterstitialAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
+import { AdvanceCommonInterstitialAdapter } from '../adn/AdvanceCommonAdapter';
+import { AdvanceAdInfo, AdvanceError, BYLog, ADV_ERR_AD_Invalid_Expired } from '../../../../../../../Index';
+import { AdvanceCommonInterstitialAdapterBridge } from '../adn/AdvanceCommonInterstitialAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
 
 export class AdvanceInterstitial extends AdvanceAdBase {
@@ -25,10 +24,10 @@ export class AdvanceInterstitial extends AdvanceAdBase {
   }
 
   // 加载某一个渠道对象
-  protected override loadAnyAdnAdapter(adapter: AdvanceInterstitialCommonAdapter): void {
-    adapter.setInterstitialAdapterBridge(this.adapterBridge)
+  protected override loadAnyAdnAdapter(adapter: AdvanceCommonInterstitialAdapter): void {
+    adapter.adapter_setInterstitialBridge(this.bridge)
     if (adapter.isFromCache) {
-      this.adapterBridge.bridge_didAdLoaded(adapter.unitData.supplier, adapter.price)
+      this.bridge.interstitial_didAdLoaded(adapter, adapter.price)
     } else {
       adapter.adapter_loadAd()
     }
@@ -51,7 +50,11 @@ export class AdvanceInterstitial extends AdvanceAdBase {
   }
 
   isAdValid(): boolean {
-    return this.winAdapter?.adapter_isAdValid() ?? false
+    const valid = this.winAdapter?.adapter_isAdValid() ?? false
+    if (!valid) {
+      this.bridge.interstitial_didAdShowFailed(this.winAdapter as AdvanceCommonInterstitialAdapter, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+    }
+    return valid
   }
 
   loadAd() {
@@ -65,23 +68,26 @@ export class AdvanceInterstitial extends AdvanceAdBase {
     if (!windowStage) {
       windowStage = BYApp.getWindowStage()
     }
-    this.winAdapter?.adapter_showAd(windowStage)
+    let adapter = this.winAdapter as AdvanceCommonInterstitialAdapter
+    adapter.adapter_showAd(windowStage)
   }
 
-  protected adapterBridge: AdvanceInterstitialAdapterBridge = {
-    bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => {
-      if (supplier.enable_cache) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "", supplier.sdk_id)
+  protected bridge: AdvanceCommonInterstitialAdapterBridge = {
+    interstitial_didAdLoaded: (adapter: AdvanceCommonInterstitialAdapter, price: number) => {
+      let supplier = this.matchSupplier(adapter)
+      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
+        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
+          supplier.sdk_id)
       }
-    },
-    bridge_didAdLoaded: (supplier: AdvanceSupplierModel, price: number) => {
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
     },
-    bridge_didAdLoadFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
+    interstitial_didAdLoadFailed: (adapter: AdvanceCommonInterstitialAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
     },
-    bridge_didAdShow: (supplier: AdvanceSupplierModel) => {
+    interstitial_didAdShow: (adapter: AdvanceCommonInterstitialAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
       this.mListener?.onAdShow()
       // 删除缓存Adapter
@@ -89,17 +95,23 @@ export class AdvanceInterstitial extends AdvanceAdBase {
         AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
       }
     },
-    bridge_didAdShowFailed: (supplier:AdvanceSupplierModel, error: AdvanceError) => {
+    interstitial_didAdShowFailed: (adapter: AdvanceCommonInterstitialAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
       this.mListener?.onAdShowFailed(error)
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
+      // 删除缓存Adapter
+      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
+        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
+      }
     },
-    bridge_didAdClick: (supplier: AdvanceSupplierModel) => {
+    interstitial_didAdClick: (adapter: AdvanceCommonInterstitialAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.clicked, supplier)
       this.mListener?.onAdClick()
     },
-    bridge_didAdClose: () => {
+    interstitial_didAdClose: (adapter: AdvanceCommonInterstitialAdapter) => {
       this.mListener?.onAdClose()
       // 销毁各渠道Adapter对象
       this.destroyAdapters()

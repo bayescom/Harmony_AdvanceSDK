@@ -1,8 +1,8 @@
 import { CSJArrayList, CSJConstant, CSJFeedAd } from '@csj/openadsdk';
-import { AdvanceRenderFeedWrapper, BYCustomNodeController, BYStrUtil } from 'advancesdk';
+import { AdvanceRenderFeedAdWrapper, BYCustomNodeController, BYStrUtil } from 'advancesdk';
 import { NodeController } from '@kit.ArkUI';
 
-export class AdvCSJRenderFeedAdWrapper implements AdvanceRenderFeedWrapper {
+export class AdvCSJRenderFeedAdWrapper implements AdvanceRenderFeedAdWrapper {
   ad: CSJFeedAd
 
   constructor(ad: CSJFeedAd) {

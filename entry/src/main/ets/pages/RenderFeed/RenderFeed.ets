@@ -3,7 +3,7 @@ import {
   AdvanceError,
   AdvanceAdLoadConfig,
   AdvanceAdInfo,
-  AdvanceRenderFeedWrapper,
+  AdvanceRenderFeedAdWrapper,
   AdvanceRenderFeed,
   AdvanceRenderFeedListener,
 } from 'advancesdk';
@@ -13,7 +13,7 @@ import { logToast } from '../../util/Toast';
 @Entry
 @Component
 export struct RenderFeed {
-  @State private listArray: Array<string | AdvanceRenderFeedWrapper> = new Array();
+  @State private listArray: Array<string | AdvanceRenderFeedAdWrapper> = new Array();
   private placementId: string = ''
   renderFeedAd?: AdvanceRenderFeed = undefined
 
@@ -37,7 +37,7 @@ export struct RenderFeed {
       logToast(`onAdLoadFailed , err = ${err.toString()}`)
       this.renderFeedAd = undefined
     },
-    onRenderSuccess: (wrapper: AdvanceRenderFeedWrapper): void => {
+    onRenderSuccess: (wrapper: AdvanceRenderFeedAdWrapper): void => {
       logToast(`onRenderSuccess`)
       // 在指定位置插入当前信息流对象
       if (wrapper) {
@@ -74,7 +74,7 @@ export struct RenderFeed {
   build() {
     Row() {
       List() {
-        ForEach(this.listArray, (item: string | AdvanceRenderFeedWrapper) => {
+        ForEach(this.listArray, (item: string | AdvanceRenderFeedAdWrapper) => {
           ListItem() {
             if (typeof item === 'string') {
               this.BuildCommonItem(item)
@@ -85,7 +85,7 @@ export struct RenderFeed {
           .align(Alignment.Center)
           .backgroundColor((typeof item === 'string') ? Color.Orange : Color.White)
           .width('100%')
-        }, (item: string | AdvanceRenderFeedWrapper, index: number) => {
+        }, (item: string | AdvanceRenderFeedAdWrapper, index: number) => {
           return item.toString() + "_" + index
         })
       }
@@ -122,7 +122,7 @@ export struct RenderFeed {
    * @param ad
    */
   @Builder
-  private buildAdLayout(wrapper: AdvanceRenderFeedWrapper, clickViewIds: string[] = new Array<string>(), rootViewId: string = util.generateRandomUUID()) {
+  private buildAdLayout(wrapper: AdvanceRenderFeedAdWrapper, clickViewIds: string[] = new Array<string>(), rootViewId: string = util.generateRandomUUID()) {
     Column() {
       Row() {
         Row() {
@@ -234,7 +234,7 @@ export struct RenderFeed {
    * @param ad
    */
   @Builder
-  buildImageLayout(wrapper: AdvanceRenderFeedWrapper,clickViewIds: string[]) {
+  buildImageLayout(wrapper: AdvanceRenderFeedAdWrapper,clickViewIds: string[]) {
     if (wrapper.getImageUrlList().length > 1) {
       Row({ space: 10 }) {
         ForEach((wrapper.getImageUrlList() ?? new Array<string>()), (url: string) => {

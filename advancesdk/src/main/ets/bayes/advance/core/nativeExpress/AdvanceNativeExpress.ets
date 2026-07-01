@@ -1,11 +1,10 @@
 import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceNativeExpressListener } from '../AdvanceAdOpenListener';
 import { NodeController } from '@kit.ArkUI';
-import { AdvanceNativeExpressCommonAdapter } from '../adn/AdvanceNativeExpressCommonAdapter';
+import { AdvanceCommonNativeExpressAdapter } from '../adn/AdvanceCommonAdapter';
 import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdInfo, AdvanceError, AdvanceAdLoadConfig, BYApp, BYLog } from '../../../../../../../Index';
-import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
-import { AdvanceNativeExpressAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
+import { AdvanceCommonNativeExpressAdapterBridge } from '../adn/AdvanceCommonNativeExpressAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
 
 export class AdvanceNativeExpress extends AdvanceAdBase {
@@ -23,10 +22,10 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
   }
 
   // 加载某一个渠道对象
-  protected override loadAnyAdnAdapter(adapter: AdvanceNativeExpressCommonAdapter): void {
-    adapter.setNativeExpressAdapterBridge(this.adapterBridge)
+  protected override loadAnyAdnAdapter(adapter: AdvanceCommonNativeExpressAdapter): void {
+    adapter.adapter_setNativeExpressBridge(this.bridge)
     if (adapter.isFromCache) {
-      this.adapterBridge.bridge_didAdLoaded(adapter.unitData.supplier, adapter.price)
+      this.bridge.nativeExpress_didAdLoaded(adapter, adapter.price)
     } else {
       adapter.adapter_loadAd()
     }
@@ -43,7 +42,8 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
   protected override adnBidWin(adInfo: AdvanceAdInfo): void {
     this.mListener?.onAdLoaded(adInfo)
     // 竞胜的广告源渲染广告
-    this.winAdapter?.adapter_render(BYApp.getUIContext())
+    let adapter = this.winAdapter as AdvanceCommonNativeExpressAdapter
+    adapter.adapter_render(BYApp.getUIContext())
   }
 
   setAdListener(listener: AdvanceNativeExpressListener) {
@@ -55,59 +55,69 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
   }
 
   getAdComponent(): NodeController | undefined {
-    return this.winAdapter?.adapter_getAdComponent()
+    let adapter = this.winAdapter as AdvanceCommonNativeExpressAdapter
+    return adapter.adapter_getAdComponent()
   }
 
-  protected adapterBridge: AdvanceNativeExpressAdapterBridge = {
-    bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => {
-      if (supplier.enable_cache) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "", supplier.sdk_id)
+  protected bridge: AdvanceCommonNativeExpressAdapterBridge = {
+    nativeExpress_didAdLoaded: (adapter: AdvanceCommonNativeExpressAdapter, price: number) => {
+      let supplier = this.matchSupplier(adapter)
+      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
+        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
+          supplier.sdk_id)
       }
-    },
-    bridge_didAdLoaded: (supplier: AdvanceSupplierModel, price: number) => {
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
     },
-    bridge_didAdLoadFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
+    nativeExpress_didAdLoadFailed: (adapter: AdvanceCommonNativeExpressAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
     },
-    bridge_didAdRenderSuccess: (supplier: AdvanceSupplierModel) => {
+    nativeExpress_didAdRenderSuccess: (adapter: AdvanceCommonNativeExpressAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.mListener?.onRenderSuccess()
-    },
-    bridge_didAdRenderFail: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
-      this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
-      this.mListener?.onRenderFail(error)
-      // 销毁各渠道Adapter对象
-      this.destroyAdapters()
-    },
-    bridge_didAdShow: (supplier: AdvanceSupplierModel) => {
-      this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
-      this.mListener?.onAdShow()
       // 删除缓存Adapter
       if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
         AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
       }
     },
-    bridge_didAdClick: (supplier: AdvanceSupplierModel) => {
+    nativeExpress_didAdRenderFail: (adapter: AdvanceCommonNativeExpressAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
+      this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
+      this.mListener?.onRenderFail(error)
+      // 销毁各渠道Adapter对象
+      this.destroyAdapters()
+      // 删除缓存Adapter
+      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
+        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
+      }
+    },
+    nativeExpress_didAdShow: (adapter: AdvanceCommonNativeExpressAdapter) => {
+      let supplier = this.matchSupplier(adapter)
+      this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
+      this.mListener?.onAdShow()
+    },
+    nativeExpress_didAdClick: (adapter: AdvanceCommonNativeExpressAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.clicked, supplier)
       this.mListener?.onAdClick()
     },
-    bridge_didAdClose: () => {
+    nativeExpress_didAdClose: (adapter: AdvanceCommonNativeExpressAdapter) => {
       this.mListener?.onAdClose()
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
     },
-    bridge_didAdVideoPlayStart: () => {
+    nativeExpress_didAdVideoPlayStart: (adapter: AdvanceCommonNativeExpressAdapter) => {
       if (this.mListener?.onVideoPlayStart) {
         this.mListener?.onVideoPlayStart()
       }
     },
-    bridge_didAdVideoPlayEnd: () => {
+    nativeExpress_didAdVideoPlayEnd: (adapter: AdvanceCommonNativeExpressAdapter) => {
       if (this.mListener?.onVideoPlayEnd) {
         this.mListener?.onVideoPlayEnd()
       }
     },
-    bridge_didAdVideoPlayFailed: (error: AdvanceError) => {
+    nativeExpress_didAdVideoPlayFailed: (adapter: AdvanceCommonNativeExpressAdapter, error: AdvanceError) => {
       if (this.mListener?.onVideoPlayFailed) {
         this.mListener?.onVideoPlayFailed(error)
       }

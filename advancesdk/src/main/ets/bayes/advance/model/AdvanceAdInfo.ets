@@ -25,3 +25,15 @@ export interface AdvRewardCallbackInfo {
   rewardName: string // 激励名称
   rewardAmount: number // 激励数量
 }
+
+
+export enum AdvBidWinLossResultType {
+  win,
+  loss
+}
+
+export interface AdvBidWinLossResult {
+  bidResultType: AdvBidWinLossResultType
+  winPrice: number
+  secondPrice: number
+}

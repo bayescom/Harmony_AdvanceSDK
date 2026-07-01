@@ -1,5 +1,8 @@
-import { AdvanceNativeExpressCommonAdapter, BYLog, BYDisplay,
-  ADV_ERR_DATA_NULL, AdvanceError} from 'advancesdk';
+import { BYLog, BYDisplay,
+  ADV_ERR_DATA_NULL, AdvanceError,
+  AdvanceCommonNativeExpressAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType} from 'advancesdk';
 import { NodeController, UIContext } from '@kit.ArkUI';
 import { AdSlotBuilder, CSJAdCreator, CSJAdSdk,
   CSJDislikeInteractionCallback,
@@ -10,12 +13,12 @@ import { ArrayList } from '@kit.ArkTS';
 
 const TAG = `[AdvCSJNativeExpressAdapter] `
 
-export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter {
+export class AdvCSJNativeExpressAdapter extends AdvanceCommonNativeExpressAdapter {
   protected csj_ad?: CSJNativeExpressAd
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let width = this.unitData.vpWidth ?? 0
     let height = this.unitData.vpHeight ?? 0
     //未配置的话取屏幕宽
@@ -38,15 +41,14 @@ export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
           BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
           this.csj_ad = ads[0]
           // 穿山甲变现SDK不提供ecpm获取
-          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
+          this.bridge?.nativeExpress_didAdLoaded(this, 0)
         } else {
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          this.bridge?.nativeExpress_didAdLoadFailed(this, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
         };
       },
       onError: (code: number, message: string) => {
         BYLog.debug(TAG + `模板信息流回调 - onAdLoadFailed code: ${code} message: ${message}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
+        this.bridge?.nativeExpress_didAdLoadFailed(this, new AdvanceError(code, message))
       }
     })
   }
@@ -62,45 +64,45 @@ export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
     return this.csj_ad?.getAdComponent()
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.csj_ad?.win(secondPrice)
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.csj_ad?.loss(firstPrice)
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.csj_ad?.win(result.secondPrice)
+    } else {
+      this.csj_ad?.loss(result.winPrice)
+    }
   }
 
   protected interactionListener: ExpressAdInteractionListener = {
     onRenderSuccess: (width: number, height: number) => {
       BYLog.debug(TAG + "模板信息流回调 - onAdRenderSuccess")
-      this.bridge?.bridge_didAdRenderSuccess(this.unitData.supplier)
+      this.bridge?.nativeExpress_didAdRenderSuccess(this)
     },
     onRenderFail: (code: number, msg: string) => {
       BYLog.debug(TAG + "模板信息流回调 - onAdRenderFail")
-      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(code, msg))
+      this.bridge?.nativeExpress_didAdRenderFail(this, new AdvanceError(code, msg))
     },
     onAdShow: (type: number) => {
       BYLog.debug(TAG + "模板信息流回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.nativeExpress_didAdShow(this)
     },
     onAdClicked: (type: number) => {
       BYLog.debug(TAG + "模板信息流回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.nativeExpress_didAdClick(this)
     }
   }
 
   protected videoStateListener: ExpressVideoAdListener = {
     onVideoAdStartPlay: () => {
       BYLog.debug(TAG + "模板信息流回调 - onVideoStart")
-      this.bridge?.bridge_didAdVideoPlayStart()
+      this.bridge?.nativeExpress_didAdVideoPlayStart(this)
     },
     onVideoAdComplete: () => {
       BYLog.debug(TAG + "模板信息流回调 - onVideoEnd")
-      this.bridge?.bridge_didAdVideoPlayEnd()
+      this.bridge?.nativeExpress_didAdVideoPlayEnd(this)
     },
     onVideoError: (errorCode: number, msg: string) =>  {
       BYLog.debug(TAG + `模板信息流回调 - onVideoFailed`)
-      this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(errorCode, msg))
+      this.bridge?.nativeExpress_didAdVideoPlayFailed(this, new AdvanceError(errorCode, msg))
     },
     onVideoLoad: () =>  {},
     onVideoAdPaused: () =>  {},
@@ -119,7 +121,7 @@ export class AdvCSJNativeExpressAdapter extends AdvanceNativeExpressCommonAdapte
      */
     onSelected: (position: number, value: string, enforceRemove: boolean) => {
       BYLog.debug(TAG + `模板信息流回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.nativeExpress_didAdClose(this)
     },
     onCancel: () => {
 

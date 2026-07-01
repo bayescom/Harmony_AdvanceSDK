@@ -2,7 +2,7 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  AdvanceInterstitialCommonAdapter,
+  AdvanceCommonInterstitialAdapter, AdvBidWinLossResult,
 } from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr,
   MercuryInterstitial,
@@ -11,7 +11,7 @@ import { MercuryCloseType, MercuryEntry, MercuryErr,
 
 const TAG = `[AdvMercuryInterstitialAdapter]`
 
-export class AdvMercuryInterstitialAdapter extends AdvanceInterstitialCommonAdapter {
+export class AdvMercuryInterstitialAdapter extends AdvanceCommonInterstitialAdapter {
   protected mercury_ad?: MercuryInterstitial
 
   adapter_isAdValid(): boolean {
@@ -20,18 +20,17 @@ export class AdvMercuryInterstitialAdapter extends AdvanceInterstitialCommonAdap
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let opt = new MercuryEntry().setCodeId(spotId)
     this.mercury_ad = new MercuryInterstitial(opt)
     this.mercury_ad.loadAd({
       onAdLoaded: () => {
         BYLog.debug(TAG + "插屏回调 - onAdLoaded")
-        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
+        this.bridge?.interstitial_didAdLoaded(this, this.mercury_ad?.getPrice() ?? 0)
       },
       onAdError: (err: MercuryErr): void => {
         BYLog.debug(TAG + `插屏回调 - onAdLoadFailed code: ${err.code} message: ${err.msg}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.msg))
+        this.bridge?.interstitial_didAdLoadFailed(this, new AdvanceError(err.code, err.msg))
       },
       onMaterialCached: (isFromCache: boolean) => {},
     })
@@ -45,26 +44,26 @@ export class AdvMercuryInterstitialAdapter extends AdvanceInterstitialCommonAdap
     this.mercury_ad?.showAd(renOp)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
 
-  adapter_sendLossNotification(firstPrice: number): void {}
+  }
 
   protected interactionListener: MercuryInterstitialRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "插屏回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.interstitial_didAdShow(this)
     },
     onClick: (): void => {
       BYLog.debug(TAG + "插屏回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.interstitial_didAdClick(this)
     },
     onRenderErr: (err: MercuryErr): void => {
       BYLog.debug(TAG + "插屏回调 - onShowError")
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.msg))
+      this.bridge?.interstitial_didAdShowFailed(this, new AdvanceError(err.code, err.msg))
     },
     onClose: (type: MercuryCloseType): void => {
       BYLog.debug(TAG + `插屏回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.interstitial_didAdClose(this)
     }
   }
 

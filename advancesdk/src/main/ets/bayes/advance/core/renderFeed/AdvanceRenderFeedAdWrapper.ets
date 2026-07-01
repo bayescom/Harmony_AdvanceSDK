@@ -1,6 +1,6 @@
 import { NodeController } from '@kit.ArkUI';
 
-export interface AdvanceRenderFeedWrapper {
+export interface AdvanceRenderFeedAdWrapper {
 
   getTitle(): string;
 
@@ -12,7 +12,7 @@ export interface AdvanceRenderFeedWrapper {
 
   getImageUrlList(): string[] ;
 
-  isVideoAd():boolean;
+  isVideoAd(): boolean;
 
   getAdLogoView(): NodeController | undefined;
 

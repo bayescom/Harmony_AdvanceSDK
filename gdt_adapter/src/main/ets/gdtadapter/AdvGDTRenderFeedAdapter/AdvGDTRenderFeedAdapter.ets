@@ -8,23 +8,24 @@ import {
   AdvanceError,
   ADV_ERR_DATA_NULL,
   ADV_ERR_AD_Invalid_Expired,
-  AdvanceRenderFeedCommonAdapter,
   BYConstant,
-  AdvanceRenderFeedWrapper,
+  AdvanceRenderFeedAdWrapper,
+  AdvanceCommonRenderFeedAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
-import { AdvGDTUtil } from '../AdvGDTUtil';
 import { AdvGDTRenderFeedAdWrapper } from './AdvGDTRenderFeedAdWrapper';
 
 
 const TAG = `[AdvGDTRenderFeedAdapter]`
 
-export class AdvGDTRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
+export class AdvGDTRenderFeedAdapter extends AdvanceCommonRenderFeedAdapter {
   protected gdt_ad?: GDTManualAd
-  protected wrapper?: AdvanceRenderFeedWrapper | undefined
+  protected wrapper?: AdvanceRenderFeedAdWrapper | undefined
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const config: GDTAdLoadConfig = {
       posId: spotId,
       count: 1,
@@ -35,15 +36,14 @@ export class AdvGDTRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
           BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
           this.gdt_ad = ads[0]
           this.wrapper = new AdvGDTRenderFeedAdWrapper(this.gdt_ad)
-          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.gdt_ad.getEcpm())
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.gdt_ad.getEcpm())
+          this.bridge?.renderFeed_didAdLoaded(this, this.gdt_ad.getEcpm())
         } else {
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          this.bridge?.renderFeed_didAdLoadFailed(this, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
         };
       },
       onError: (err: GDTError): void => {
         BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+        this.bridge?.renderFeed_didAdLoadFailed(this, new AdvanceError(err.code, err.message))
       }
     })
   }
@@ -55,65 +55,65 @@ export class AdvGDTRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
     if (this.gdt_ad?.isValid()) {
       this.gdt_ad?.render(BYConstant.windowStage, context);
     } else {
-      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+      this.bridge?.renderFeed_didAdRenderFail(this, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
     }
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.gdt_ad?.sendWinNotification(new Map([
-      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
-      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
-    ]))
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.gdt_ad?.sendLossNotification(new Map([
-      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
-    ]))
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.gdt_ad?.sendWinNotification(new Map([
+        [GDTBiddingConstants.EXPECT_COST_PRICE, result.winPrice.toString()],
+        [GDTBiddingConstants.HIGHEST_LOSS_PRICE, result.secondPrice.toString()]
+      ]))
+    } else {
+      this.gdt_ad?.sendLossNotification(new Map([
+        [GDTBiddingConstants.WIN_PRICE, result.winPrice.toString()]
+      ]))
+    }
   }
 
   protected renderListener: GDTRenderListener = {
     onRenderSuccess: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderSuccess")
-      this.bridge?.bridge_didAdRenderSuccess(this.unitData.supplier, this.wrapper!)
+      this.bridge?.renderFeed_didAdRenderSuccess(this, this.wrapper!)
     },
     onRenderFail: (err: GDTError): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderFail")
-      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      this.bridge?.renderFeed_didAdRenderFail(this, new AdvanceError(err.code, err.message))
     }
   };
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.renderFeed_didAdShow(this)
     },
     onAdClick: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.renderFeed_didAdClick(this)
     },
     onAdClose: (): void => {
       BYLog.debug(TAG + `自渲染信息流回调 - onAdClose`)
-      // this.bridge?.bridge_didAdClose()
+      // this.bridge?.renderFeed_didAdClose()
     },
     onError: (err: GDTError): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onShowError")
-      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      this.bridge?.renderFeed_didAdRenderFail(this, new AdvanceError(err.code, err.message))
     }
   }
 
   protected videoStateListener: GDTVideoStateListener = {
     onVideoStart: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onVideoStart")
-      this.bridge?.bridge_didAdVideoPlayStart()
+      this.bridge?.renderFeed_didAdVideoPlayStart(this)
     },
     onVideoComplete: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onVideoEnd")
-      this.bridge?.bridge_didAdVideoPlayEnd()
+      this.bridge?.renderFeed_didAdVideoPlayEnd(this)
     },
     onVideoError: (err: GDTError): void => {
       BYLog.debug(TAG + `自渲染信息流回调 - onVideoFailed`)
-      this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(err.code, err.message))
+      this.bridge?.renderFeed_didAdVideoPlayFailed(this, new AdvanceError(err.code, err.message))
     }
   }
 

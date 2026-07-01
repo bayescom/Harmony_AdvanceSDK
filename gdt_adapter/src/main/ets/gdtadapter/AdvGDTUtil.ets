@@ -1,45 +1,18 @@
 import { GDTAdSDK } from '@gdt/gdt-union-sdk'
 import {
   BYLog,
-  AdvanceCommonAdapter,
   AdvanceSetting,
   AdvanceAdnInitResult,
-  AdvanceADNUnitData,
-  AdvanceAdType,
   BYConstant,
   AdvanceAdnInitState
 } from 'advancesdk'
 
 import { BusinessError } from '@kit.BasicServicesKit'
-import { AdvGDTSplashAdapter } from './AdvGDTSplashAdapter'
-import { AdvGDTInterstitialAdapter } from './AdvGDTInterstitialAdapter'
-import { AdvGDTRewardVideoAdapter } from './AdvGDTRewardVideoAdapter'
-import { AdvGDTBannerAdapter } from './AdvGDTBannerAdapter'
-import { AdvGDTNativeExpressAdapter } from './AdvGDTNativeExpressAdapter'
-import { AdvGDTRenderFeedAdapter } from './AdvGDTRenderFeedAdapter/AdvGDTRenderFeedAdapter'
 import { AdvanceSupplierModel } from 'advancesdk/src/main/ets/bayes/advance/model/AdvanceNetModel'
 
 const TAG = `[AdvGDTUtil] `
 
 export class AdvGDTUtil {
-  static getGDTAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (data.adType) {
-      case AdvanceAdType.splash:
-        return new AdvGDTSplashAdapter(data)
-      case AdvanceAdType.banner:
-        return new AdvGDTBannerAdapter(data)
-      case AdvanceAdType.interstitial:
-        return new AdvGDTInterstitialAdapter(data)
-      case AdvanceAdType.rewardVideo:
-        return new AdvGDTRewardVideoAdapter(data)
-      case AdvanceAdType.nativeExpress:
-        return new AdvGDTNativeExpressAdapter(data)
-      case AdvanceAdType.renderFeed:
-        return new AdvGDTRenderFeedAdapter(data)
-      default:
-        return undefined
-    }
-  }
 
   static getGDTSDKVersion(): string {
     let version = GDTAdSDK.getSDKVersion()

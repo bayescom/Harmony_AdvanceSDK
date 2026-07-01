@@ -1,5 +1,8 @@
 import {
-  BYLog, ADV_ERR_DATA_NULL, AdvanceBannerCommonAdapter, AdvanceError,
+  BYLog, ADV_ERR_DATA_NULL, AdvanceError,
+  AdvanceCommonBannerAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 import {
   AdSlotBuilder,
@@ -14,7 +17,7 @@ import { NodeController } from '@kit.ArkUI';
 
 const TAG = `[AdvCSJBannerAdapter]`
 
-export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
+export class AdvCSJBannerAdapter extends AdvanceCommonBannerAdapter {
   protected csj_ad?: CSJNativeExpressAd
 
   adapter_isAdValid(): boolean {
@@ -23,7 +26,7 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let width = this.unitData.vpWidth ?? 0
     let height = this.unitData.vpHeight ?? 0
     let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
@@ -38,17 +41,15 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
           BYLog.debug(TAG + "横幅回调 - onAdLoaded")
           this.csj_ad = ads[0]
           // 穿山甲变现SDK不提供ecpm获取
-          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, 0)
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, 0)
+          this.bridge?.banner_didAdLoaded(this, 0)
         } else {
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier,
-            new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          this.bridge?.banner_didAdLoadFailed(this, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
         }
         ;
       },
       onError: (code: number, message: string) => {
         BYLog.debug(TAG + `横幅回调 - onAdLoadFailed code: ${code} message: ${message}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(code, message))
+        this.bridge?.banner_didAdLoadFailed(this, new AdvanceError(code, message))
       }
     })
   }
@@ -63,12 +64,12 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
     return this.csj_ad?.getAdComponent()
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.csj_ad?.win(secondPrice)
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.csj_ad?.loss(firstPrice)
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.csj_ad?.win(result.secondPrice)
+    } else {
+      this.csj_ad?.loss(result.winPrice)
+    }
   }
 
   protected interactionListener: ExpressAdInteractionListener = {
@@ -77,15 +78,15 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
     },
     onRenderFail: (code: number, msg: string) => {
       BYLog.debug(TAG + "横幅回调 - onAdRenderFail")
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(code, msg))
+      this.bridge?.banner_didAdShowFailed(this, new AdvanceError(code, msg))
     },
     onAdShow: (type: number) => {
       BYLog.debug(TAG + "横幅回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.banner_didAdShow(this)
     },
     onAdClicked: (type: number) => {
       BYLog.debug(TAG + "横幅回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.banner_didAdClick(this)
     }
   }
   protected dislikeCallback: CSJDislikeInteractionCallback = {
@@ -98,7 +99,7 @@ export class AdvCSJBannerAdapter extends AdvanceBannerCommonAdapter {
      */
     onSelected: (position: number, value: string, enforceRemove: boolean) => {
       BYLog.debug(TAG + `横幅回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.banner_didAdClose(this)
     },
     onCancel: () => {
 

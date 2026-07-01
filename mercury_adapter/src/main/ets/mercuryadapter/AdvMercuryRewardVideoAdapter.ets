@@ -2,7 +2,7 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  AdvanceRewardVideoCommonAdapter,
+  AdvanceCommonRewardVideoAdapter, AdvBidWinLossResult,
 } from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr,
   MercuryReward,
@@ -11,7 +11,7 @@ import { MercuryCloseType, MercuryEntry, MercuryErr,
 
 const TAG = `[AdvMercuryRewardVideoAdapter]`
 
-export class AdvMercuryRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
+export class AdvMercuryRewardVideoAdapter extends AdvanceCommonRewardVideoAdapter {
   protected mercury_ad?: MercuryReward
 
   adapter_isAdValid(): boolean {
@@ -20,7 +20,7 @@ export class AdvMercuryRewardVideoAdapter extends AdvanceRewardVideoCommonAdapte
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let opt = new MercuryEntry().setCodeId(spotId)
     // let rewardName = this.unitData.rewardVideoModel?.rewardName ?? (this.unitData.serverReward?.name ?? "")
     // let rewardAmount = this.unitData.rewardVideoModel?.rewardAmount ?? (this.unitData.serverReward?.count ?? 0)
@@ -28,12 +28,11 @@ export class AdvMercuryRewardVideoAdapter extends AdvanceRewardVideoCommonAdapte
     this.mercury_ad.loadAd({
       onAdLoaded: () => {
         BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
-        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
+        this.bridge?.rewardVideo_didAdLoaded(this, this.mercury_ad?.getPrice() ?? 0)
       },
       onAdError: (err: MercuryErr): void => {
         BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${err.code} message: ${err.msg}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.msg))
+        this.bridge?.rewardVideo_didAdLoadFailed(this, new AdvanceError(err.code, err.msg))
       },
       onMaterialCached: (isFromCache: boolean) => {},
     })
@@ -47,34 +46,34 @@ export class AdvMercuryRewardVideoAdapter extends AdvanceRewardVideoCommonAdapte
     this.mercury_ad?.showAd(renOp)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
 
-  adapter_sendLossNotification(firstPrice: number): void {}
+  }
 
   protected interactionListener: MercuryRewardRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "激励视频回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdShow(this)
     },
     onClick: (): void => {
       BYLog.debug(TAG + "激励视频回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdClick(this)
     },
     onRenderErr: (err: MercuryErr): void => {
       BYLog.debug(TAG + "激励视频回调 - onShowError")
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.msg))
+      this.bridge?.rewardVideo_didAdShowFailed(this, new AdvanceError(err.code, err.msg))
     },
     onClose: (type: MercuryCloseType): void => {
       BYLog.debug(TAG + `激励视频回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.rewardVideo_didAdClose(this)
     },
     onReward: () => {
       BYLog.debug(TAG + `激励视频回调 - onAdReward`)
-      this.bridge?.bridge_didAdReward(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdReward(this)
     },
     onComplete: () => {
       BYLog.debug(TAG + "激励视频回调 - onVideoComplete")
-      this.bridge?.bridge_didAdVideoPlayEnd()
+      this.bridge?.rewardVideo_didAdVideoPlayEnd(this)
     }
   }
 

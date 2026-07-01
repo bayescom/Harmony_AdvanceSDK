@@ -4,10 +4,12 @@ import {
   AdvanceError,
   ADV_ERR_DATA_NULL,
   ADV_ERR_HUAWEI_SHOW_FAILED,
-  AdvanceNativeExpressCommonAdapter,
   BYConstant,
   BYDisplay,
   BYCustomNodeController,
+  AdvanceCommonNativeExpressAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 import { advertising, AdComponent } from '@kit.AdsKit';
 import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
@@ -17,14 +19,14 @@ import { BusinessError } from '@kit.BasicServicesKit';
 
 const TAG = `[AdvHuaweiNativeExpressAdapter]`
 
-export class AdvHuaweiNativeExpressAdapter extends AdvanceNativeExpressCommonAdapter {
+export class AdvHuaweiNativeExpressAdapter extends AdvanceCommonNativeExpressAdapter {
   protected huawei_ad?: advertising.Advertisement
   protected width = 0
   protected height = 0
 
   async adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let width = this.unitData.vpWidth ?? 0
     let height = this.unitData.vpHeight ?? 0
     //未配置的话取屏幕宽
@@ -61,15 +63,14 @@ export class AdvHuaweiNativeExpressAdapter extends AdvanceNativeExpressCommonAda
           BYLog.debug(TAG + "模板信息流回调 - onAdLoaded")
           this.huawei_ad = ads[0]
           const biddingInfo = this.huawei_ad.biddingInfo as BiddingInfo
-          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, biddingInfo.price)
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, biddingInfo.price)
+          this.bridge?.nativeExpress_didAdLoaded(this, biddingInfo.price)
         } else {
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          this.bridge?.nativeExpress_didAdLoadFailed(this, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
         }
       },
       onAdLoadFailure: (errorCode: number, errorMsg: string) => {
         BYLog.debug(TAG + `模板信息流回调 - onAdLoadFailed code: ${errorCode} message: ${errorMsg}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(errorCode, errorMsg))
+        this.bridge?.nativeExpress_didAdLoadFailed(this, new AdvanceError(errorCode, errorMsg))
       },
     })
   }
@@ -77,7 +78,7 @@ export class AdvHuaweiNativeExpressAdapter extends AdvanceNativeExpressCommonAda
   adapter_render(context: UIContext): void {
     //Huawei广告没有渲染成功回调，load成功即认为渲染成功
     BYLog.debug(TAG + "模板信息流回调 - onAdRenderSuccess")
-    this.bridge?.bridge_didAdRenderSuccess(this.unitData.supplier)
+    this.bridge?.nativeExpress_didAdRenderSuccess(this)
   }
 
   adapter_getAdComponent(): NodeController | undefined {
@@ -85,30 +86,21 @@ export class AdvHuaweiNativeExpressAdapter extends AdvanceNativeExpressCommonAda
     return new BYCustomNodeController(wrapBuilder(AdvHuaweiNativeViewBuilder), data)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
-    if (biddingInfo.nurl) {
-      const url: string = biddingInfo.nurl
-      // 竞胜时，其他DSP最高出价
-        .replace('SECOND_PRICE', secondPrice.toString())
-        // 价格币种
-        .replace('AUCTION_CURRENCY', 'CNY');
-      sendBiddingResult(url).catch((error: BusinessError) => {
-        BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
-      });
-    }
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
     const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
     if (biddingInfo.lurl) {
-      const url: string = biddingInfo.lurl
-      // 竞败时，其他DSP最高出价
-        .replace('AUCTION_PRICE', firstPrice.toString())
-        // 竞价结果
-        .replace('AUCTION_LOSS', '102')
-        // 价格币种
-        .replace('AUCTION_CURRENCY', 'CNY')
+      let url: string = biddingInfo.lurl
+      if (result.bidResultType === AdvBidWinLossResultType.win) {
+        // 竞胜时，其他DSP最高出价
+        url = url.replace('SECOND_PRICE', result.secondPrice.toString())
+      } else {
+        // 竞败时，其他DSP最高出价
+        url = url.replace('AUCTION_PRICE', result.winPrice.toString())
+        // 102：竞价失败
+          .replace('AUCTION_LOSS', '102')
+      }
+      // 价格币种
+      url = url.replace('AUCTION_CURRENCY', 'CNY')
       sendBiddingResult(url).catch((error: BusinessError) => {
         BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
       });
@@ -120,31 +112,31 @@ export class AdvHuaweiNativeExpressAdapter extends AdvanceNativeExpressCommonAda
       switch (status) {
         case 'onAdOpen':
           BYLog.debug(TAG + "模板信息流回调 - onAdExposure")
-          this.bridge?.bridge_didAdShow(this.unitData.supplier)
+          this.bridge?.nativeExpress_didAdShow(this)
           break;
         case 'onAdClick':
           BYLog.debug(TAG + "模板信息流回调 - onAdClick")
-          this.bridge?.bridge_didAdClick(this.unitData.supplier)
+          this.bridge?.nativeExpress_didAdClick(this)
           break;
         case 'onAdClose':
           BYLog.debug(TAG + `模板信息流回调 - onAdClose`)
-          this.bridge?.bridge_didAdClose()
+          this.bridge?.nativeExpress_didAdClose(this)
           break;
         case 'onAdFail':
           BYLog.debug(TAG + "模板信息流回调 - onShowError")
-          this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, data.length ? data : '华为广告展示失败'))
+          this.bridge?.nativeExpress_didAdRenderFail(this, new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, data.length ? data : '华为广告展示失败'))
           break;
         case 'onMediaStart':
           BYLog.debug(TAG + "模板信息流回调 - onVideoStart")
-          this.bridge?.bridge_didAdVideoPlayStart()
+          this.bridge?.nativeExpress_didAdVideoPlayStart(this)
           break;
         case 'onMediaComplete':
           BYLog.debug(TAG + "模板信息流回调 - onVideoEnd")
-          this.bridge?.bridge_didAdVideoPlayEnd()
+          this.bridge?.nativeExpress_didAdVideoPlayEnd(this)
           break;
         case 'onMediaError':
           BYLog.debug(TAG + `模板信息流回调 - onVideoFailed`)
-          this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, data.length ? data : '华为广告播放失败'))
+          this.bridge?.nativeExpress_didAdVideoPlayFailed(this, new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, data.length ? data : '华为广告播放失败'))
           break;
         default:
           break;

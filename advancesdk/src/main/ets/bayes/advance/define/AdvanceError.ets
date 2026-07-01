@@ -16,14 +16,18 @@ export const ADV_ERR_DATA_NULL = 9902;
 export const ADV_ERR_ADN_TIMEOUT = 9903;
 // advance未初始化
 export const ADV_ERR_SDK_INIT_MISS = 9904;
-// adn渠道初始化失败
-export const ADV_ERR_ADN_INIT_FAILED = 9905;
 // 广告展示前广告已失效过期
-export const ADV_ERR_AD_Invalid_Expired = 9906;
+export const ADV_ERR_AD_Invalid_Expired = 9905;
 // 全部渠道加载失败
-export const ADV_ERR_ALL_ADN_FAILED = 9907;
+export const ADV_ERR_ALL_ADN_FAILED = 9906;
 // 华为渠道广告展示失败
-export const ADV_ERR_HUAWEI_SHOW_FAILED = 9908;
+export const ADV_ERR_HUAWEI_SHOW_FAILED = 9907;
+// 渠道SDK初始化失败
+export const ADV_ERR_ADN_INIT_FAILED = 9908;
+// 渠道SDK未被安装
+export const ADV_ERR_ADN_UNINSTALLED = 9909;
+// 自定义Adn配置类获取失败
+export const ADV_ERR_CUSTOM_ADN_LOAD_FAILED = 9910;
 
 
 export class AdvanceError {

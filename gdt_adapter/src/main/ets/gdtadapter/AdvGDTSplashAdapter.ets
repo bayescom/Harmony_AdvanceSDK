@@ -5,41 +5,37 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  AdvanceSplashCommonAdapter,
-  ADV_ERR_AD_Invalid_Expired,
+  AdvanceCommonSplashAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 
 
 const TAG = `[AdvGDTSplashAdapter]`
 
-export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
+export class AdvGDTSplashAdapter extends AdvanceCommonSplashAdapter {
   protected gdt_ad?: GDTSplashAd
 
   adapter_isAdValid(): boolean {
-    const isAdValid = this.gdt_ad?.isValid() ?? false
-    if (!isAdValid) {
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
-    }
-    return isAdValid
+    return this.gdt_ad?.isValid() ?? false
   }
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const config: GDTAdLoadConfig = {
       posId: spotId,
-      timeoutMillis: this.unitData.supplier.timeout
+      timeoutMillis: this.unitData.timeout
     };
     GDTAdSDK.getAdLoader().loadSplashAd(config, {
       onAdLoad: (ad: GDTSplashAd): void => {
         BYLog.debug(TAG + "开屏回调 - onAdLoaded")
         this.gdt_ad = ad
-        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, ad.getEcpm())
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
+        this.bridge?.splash_didAdLoaded(this, ad.getEcpm())
       },
       onError: (err: GDTError): void => {
         BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+        this.bridge?.splash_didAdLoadFailed(this, new AdvanceError(err.code, err.message))
       }
     })
   }
@@ -49,35 +45,35 @@ export class AdvGDTSplashAdapter extends AdvanceSplashCommonAdapter {
     this.gdt_ad?.show(windowStage)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.gdt_ad?.sendWinNotification(new Map([
-      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
-      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
-    ]))
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.gdt_ad?.sendLossNotification(new Map([
-      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
-    ]))
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.gdt_ad?.sendWinNotification(new Map([
+        [GDTBiddingConstants.EXPECT_COST_PRICE, result.winPrice.toString()],
+        [GDTBiddingConstants.HIGHEST_LOSS_PRICE, result.secondPrice.toString()]
+      ]))
+    } else {
+      this.gdt_ad?.sendLossNotification(new Map([
+        [GDTBiddingConstants.WIN_PRICE, result.winPrice.toString()]
+      ]))
+    }
   }
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
       BYLog.debug(TAG + "开屏回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.splash_didAdShow(this)
     },
     onAdClick: (): void => {
       BYLog.debug(TAG + "开屏回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.splash_didAdClick(this)
     },
     onAdClose: (): void => {
       BYLog.debug(TAG + `开屏回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.splash_didAdClose(this)
     },
     onError: (err: GDTError): void => {
       BYLog.debug(TAG + "开屏回调 - onShowError")
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      this.bridge?.splash_didAdShowFailed(this, new AdvanceError(err.code, err.message))
     }
   }
 

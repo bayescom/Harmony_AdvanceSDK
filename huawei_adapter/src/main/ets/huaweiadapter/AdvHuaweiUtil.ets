@@ -1,14 +1,7 @@
 import {
-  AdvanceCommonAdapter,
-  AdvanceADNUnitData,
-  AdvanceAdType, BYLog,
+  BYLog,
 } from 'advancesdk'
-import { AdvHuaweiSplashAdapter } from './AdvHuaweiSplashAdapter'
-import { AdvHuaweiInterstitialAdapter } from './AdvHuaweiInterstitialAdapter'
-import { AdvHuaweiRewardVideoAdapter } from './AdvHuaweiRewardVideoAdapter'
-import { AdvHuaweiNativeExpressAdapter } from './AdvHuaweiNativeExpressAdapter'
 import { rcp } from '@kit.RemoteCommunicationKit'
-
 
 export interface BiddingInfo {
   // 本条广告的eCPM（每一千次展示可以获得的广告收入）
@@ -24,20 +17,6 @@ export interface BiddingInfo {
 const TAG = `[AdvHuaweiUtil] `
 
 export class AdvHuaweiUtil {
-  static getHuaweiAdAdapter(data: AdvanceADNUnitData): AdvanceCommonAdapter | undefined {
-    switch (data.adType) {
-      case AdvanceAdType.splash:
-        return new AdvHuaweiSplashAdapter(data)
-      case AdvanceAdType.interstitial:
-        return new AdvHuaweiInterstitialAdapter(data)
-      case AdvanceAdType.rewardVideo:
-        return new AdvHuaweiRewardVideoAdapter(data)
-      case AdvanceAdType.nativeExpress:
-        return new AdvHuaweiNativeExpressAdapter(data)
-      default:
-        return undefined
-    }
-  }
   
 }
 

@@ -7,27 +7,24 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  ADV_ERR_AD_Invalid_Expired,
-  AdvanceRewardVideoCommonAdapter,
+  AdvanceCommonRewardVideoAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 
 
 const TAG = `[AdvGDTRewardVideoAdapter]`
 
-export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
+export class AdvGDTRewardVideoAdapter extends AdvanceCommonRewardVideoAdapter {
   protected gdt_ad?: GDTRewardAd
 
   adapter_isAdValid(): boolean {
-    const isAdValid = this.gdt_ad?.isValid() ?? false
-    if (!isAdValid) {
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
-    }
-    return isAdValid
+    return this.gdt_ad?.isValid() ?? false
   }
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const config: GDTAdLoadConfig = {
       posId: spotId
     };
@@ -35,12 +32,11 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
       onAdLoad: (ad: GDTRewardAd): void => {
         BYLog.debug(TAG + "激励视频回调 - onAdLoaded")
         this.gdt_ad = ad
-        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, ad.getEcpm())
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
+        this.bridge?.rewardVideo_didAdLoaded(this, ad.getEcpm())
       },
       onError: (err: GDTError): void => {
         BYLog.debug(TAG + `激励视频回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+        this.bridge?.rewardVideo_didAdLoadFailed(this, new AdvanceError(err.code, err.message))
       }
     })
   }
@@ -51,46 +47,46 @@ export class AdvGDTRewardVideoAdapter extends AdvanceRewardVideoCommonAdapter {
     this.gdt_ad?.show(windowStage)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.gdt_ad?.sendWinNotification(new Map([
-      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
-      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
-    ]))
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.gdt_ad?.sendLossNotification(new Map([
-      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
-    ]))
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.gdt_ad?.sendWinNotification(new Map([
+        [GDTBiddingConstants.EXPECT_COST_PRICE, result.winPrice.toString()],
+        [GDTBiddingConstants.HIGHEST_LOSS_PRICE, result.secondPrice.toString()]
+      ]))
+    } else {
+      this.gdt_ad?.sendLossNotification(new Map([
+        [GDTBiddingConstants.WIN_PRICE, result.winPrice.toString()]
+      ]))
+    }
   }
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
       BYLog.debug(TAG + "激励视频回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdShow(this)
     },
     onAdClick: (): void => {
       BYLog.debug(TAG + "激励视频回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdClick(this)
     },
     onAdClose: (): void => {
       BYLog.debug(TAG + `激励视频回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.rewardVideo_didAdClose(this)
     },
     onError: (err: GDTError): void => {
       BYLog.debug(TAG + "激励视频回调 - onShowError")
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      this.bridge?.rewardVideo_didAdShowFailed(this, new AdvanceError(err.code, err.message))
     },
     onReward: (map: Map<string, string>): void => {
       BYLog.debug(TAG + "激励视频回调 - onReward")
-      this.bridge?.bridge_didAdReward(this.unitData.supplier)
+      this.bridge?.rewardVideo_didAdReward(this)
     },
   }
 
   videoStateListener: GDTVideoStateListener = {
     onVideoComplete: (): void => {
       BYLog.debug(TAG + "激励视频回调 - onVideoComplete")
-      this.bridge?.bridge_didAdVideoPlayEnd()
+      this.bridge?.rewardVideo_didAdVideoPlayEnd(this)
     }
   }
 

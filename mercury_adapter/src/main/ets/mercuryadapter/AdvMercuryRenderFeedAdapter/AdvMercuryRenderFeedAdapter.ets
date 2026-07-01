@@ -1,8 +1,9 @@
 import {
   BYLog,
   AdvanceError,
-  AdvanceRenderFeedCommonAdapter,
-  AdvanceRenderFeedWrapper,
+  AdvanceRenderFeedAdWrapper,
+  AdvanceCommonRenderFeedAdapter,
+  AdvBidWinLossResult,
 } from 'advancesdk';
 import { MercuryCloseType, MercuryEntry, MercuryErr, MercuryNative, MercuryNativeRenderListener, MercuryVideoPlayListener } from 'mercury_ad';
 import { AdvMercuryRenderFeedAdWrapper } from './AdvMercuryRenderFeedAdWrapper';
@@ -10,13 +11,13 @@ import { AdvMercuryRenderFeedAdWrapper } from './AdvMercuryRenderFeedAdWrapper';
 
 const TAG = `[AdvMercuryRenderFeedAdapter]`
 
-export class AdvMercuryRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter {
+export class AdvMercuryRenderFeedAdapter extends AdvanceCommonRenderFeedAdapter {
   protected mercury_ad?: MercuryNative
-  protected wrapper?: AdvanceRenderFeedWrapper | undefined
+  protected wrapper?: AdvanceRenderFeedAdWrapper | undefined
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let opt = new MercuryEntry()
       .setCodeId(spotId)
     this.mercury_ad = new MercuryNative(opt)
@@ -24,12 +25,11 @@ export class AdvMercuryRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter 
       onAdLoaded: () => {
         BYLog.debug(TAG + "自渲染信息流回调 - onAdLoaded")
         this.wrapper = new AdvMercuryRenderFeedAdWrapper(this.mercury_ad)
-        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, this.mercury_ad?.getPrice() ?? 0)
+        this.bridge?.renderFeed_didAdLoaded(this, this.mercury_ad?.getPrice() ?? 0)
       },
       onAdError: (err: MercuryErr): void => {
         BYLog.debug(TAG + `自渲染信息流回调 - onAdLoadFailed code: ${err.code} message: ${err.msg}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.msg))
+        this.bridge?.renderFeed_didAdLoadFailed(this, new AdvanceError(err.code, err.msg))
       },
       onMaterialCached: (isFromCache: boolean) => {},
     })
@@ -38,46 +38,46 @@ export class AdvMercuryRenderFeedAdapter extends AdvanceRenderFeedCommonAdapter 
   adapter_render(context: UIContext): void {
     //Mercury广告没有渲染成功回调，load成功即认为渲染成功
     BYLog.debug(TAG + "自渲染信息流回调 - onAdRenderSuccess")
-    this.bridge?.bridge_didAdRenderSuccess(this.unitData.supplier, this.wrapper!)
+    this.bridge?.renderFeed_didAdRenderSuccess(this, this.wrapper!)
     this.mercury_ad?.setRenderListener(this.interactionListener)
     this.mercury_ad?.setVideoPlayListener(this.videoStateListener)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {}
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
 
-  adapter_sendLossNotification(firstPrice: number): void {}
+  }
 
   protected interactionListener: MercuryNativeRenderListener = {
     onShow: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.renderFeed_didAdShow(this)
     },
     onClick: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.renderFeed_didAdClick(this)
     },
     onRenderErr: (err: MercuryErr): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onShowError")
-      this.bridge?.bridge_didAdRenderFail(this.unitData.supplier, new AdvanceError(err.code, err.msg))
+      this.bridge?.renderFeed_didAdRenderFail(this, new AdvanceError(err.code, err.msg))
     },
     onClose: (type: MercuryCloseType): void => {
       BYLog.debug(TAG + `自渲染信息流回调 - onAdClose`)
-      // this.bridge?.bridge_didAdClose()
+      // this.bridge?.renderFeed_didAdClose()
     }
   }
 
   protected videoStateListener: MercuryVideoPlayListener = {
     onStart: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onVideoStart")
-      this.bridge?.bridge_didAdVideoPlayStart()
+      this.bridge?.renderFeed_didAdVideoPlayStart(this)
     },
     onEnd: (): void => {
       BYLog.debug(TAG + "自渲染信息流回调 - onVideoEnd")
-      this.bridge?.bridge_didAdVideoPlayEnd()
+      this.bridge?.renderFeed_didAdVideoPlayEnd(this)
     },
     onError: (err: MercuryErr): void => {
       BYLog.debug(TAG + `自渲染信息流回调 - onVideoFailed`)
-      this.bridge?.bridge_didAdVideoPlayFailed(new AdvanceError(err.code, err.msg))
+      this.bridge?.renderFeed_didAdVideoPlayFailed(this, new AdvanceError(err.code, err.msg))
     },
     onPause: (): void => {}
   }

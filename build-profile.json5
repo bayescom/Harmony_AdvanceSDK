@@ -7,11 +7,11 @@
         "material": {
           "certpath": "/Users/guangyao/.ohos/config/default_harmony_advancesdk_6dOT_evF_rDPKHeLdHMc5ZM2i2kRh3FNKTHKl5UV2oo=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001BCED92E79E640FC9B2AEB70D00A822BEDDAF9D072C53585A97364144C0B62B9E0B50AB433F6CF1F",
+          "keyPassword": "0000001B58266497E929DADE34BFD219C7E683B857F6828954C7E1BEFFB39B7D9E994CCFD8837EB9611ADA",
           "profile": "/Users/guangyao/.ohos/config/default_harmony_advancesdk_6dOT_evF_rDPKHeLdHMc5ZM2i2kRh3FNKTHKl5UV2oo=.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "/Users/guangyao/.ohos/config/default_harmony_advancesdk_6dOT_evF_rDPKHeLdHMc5ZM2i2kRh3FNKTHKl5UV2oo=.p12",
-          "storePassword": "0000001BE519D35EEEC2226FE9DDF8D1F7D86F41ACF22514D2665D340C69AA5BEAC65CA26F01F3D6514D94"
+          "storePassword": "0000001B8AD996904034AD34AEA58ADC3F2C550D5887C0D6E531B2394BFC93645052F8A736874E4B663EBC"
         }
       }
     ],

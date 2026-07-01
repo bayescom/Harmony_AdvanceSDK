@@ -2,11 +2,13 @@ import { window } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  AdvanceSplashCommonAdapter,
   BYConstant,
   ADV_ERR_DATA_NULL,
   ADV_ERR_HUAWEI_SHOW_FAILED,
-  BYWindowUtil
+  BYWindowUtil,
+  AdvanceCommonSplashAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType
 } from 'advancesdk';
 import { advertising } from '@kit.AdsKit';
 import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
@@ -21,7 +23,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 
 const TAG = `[AdvHuaweiSplashAdapter]`
 
-export class AdvHuaweiSplashAdapter extends AdvanceSplashCommonAdapter {
+export class AdvHuaweiSplashAdapter extends AdvanceCommonSplashAdapter {
   protected huawei_ad?: advertising.Advertisement
 
   adapter_isAdValid(): boolean {
@@ -30,7 +32,7 @@ export class AdvHuaweiSplashAdapter extends AdvanceSplashCommonAdapter {
 
   async adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const adRequestParams: advertising.AdRequestParams = {
       // 广告位ID
       adId: spotId,
@@ -50,16 +52,14 @@ export class AdvHuaweiSplashAdapter extends AdvanceSplashCommonAdapter {
           BYLog.debug(TAG + "开屏回调 - onAdLoaded")
           this.huawei_ad = ads[0]
           const biddingInfo = this.huawei_ad.biddingInfo as BiddingInfo
-          this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, biddingInfo.price)
-          this.bridge?.bridge_didAdLoaded(this.unitData.supplier, biddingInfo.price)
+          this.bridge?.splash_didAdLoaded(this, biddingInfo.price)
         } else {
-          this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier,
-            new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
+          this.bridge?.splash_didAdLoadFailed(this, new AdvanceError(ADV_ERR_DATA_NULL, '广告返回内容为空'))
         }
       },
       onAdLoadFailure: (errorCode: number, errorMsg: string) => {
         BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${errorCode} message: ${errorMsg}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(errorCode, errorMsg))
+        this.bridge?.splash_didAdLoadFailed(this, new AdvanceError(errorCode, errorMsg))
       },
     })
   }
@@ -70,30 +70,21 @@ export class AdvHuaweiSplashAdapter extends AdvanceSplashCommonAdapter {
     BYWindowUtil.createWindow(HUAWEI_DISPLAY_PAGE_TAG, HUAWEI_STORAGE_AD_KEY, data)
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
-    if (biddingInfo.nurl) {
-      const url: string = biddingInfo.nurl
-      // 竞胜时，其他DSP最高出价
-        .replace('SECOND_PRICE', secondPrice.toString())
-        // 价格币种
-        .replace('AUCTION_CURRENCY', 'CNY');
-      sendBiddingResult(url).catch((error: BusinessError) => {
-        BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
-      });
-    }
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
     const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
     if (biddingInfo.lurl) {
-      const url: string = biddingInfo.lurl
-      // 竞败时，其他DSP最高出价
-        .replace('AUCTION_PRICE', firstPrice.toString())
-        // 竞价结果
-        .replace('AUCTION_LOSS', '102')
-        // 价格币种
-        .replace('AUCTION_CURRENCY', 'CNY')
+      let url: string = biddingInfo.lurl
+      if (result.bidResultType === AdvBidWinLossResultType.win) {
+        // 竞胜时，其他DSP最高出价
+        url = url.replace('SECOND_PRICE', result.secondPrice.toString())
+      } else {
+        // 竞败时，其他DSP最高出价
+        url = url.replace('AUCTION_PRICE', result.winPrice.toString())
+        // 102：竞价失败
+          .replace('AUCTION_LOSS', '102')
+      }
+      // 价格币种
+      url = url.replace('AUCTION_CURRENCY', 'CNY')
       sendBiddingResult(url).catch((error: BusinessError) => {
         BYLog.debug(`Failed to sendBiddingResult. Code is ${error.code}, message is ${error.message}`);
       });
@@ -105,23 +96,22 @@ export class AdvHuaweiSplashAdapter extends AdvanceSplashCommonAdapter {
       switch (status) {
         case 'onAdOpen':
           BYLog.debug(TAG + "开屏回调 - onAdExposure")
-          this.bridge?.bridge_didAdShow(this.unitData.supplier)
+          this.bridge?.splash_didAdShow(this)
           break;
         case 'onAdClick':
           BYLog.debug(TAG + "开屏回调 - onAdClick")
           BYWindowUtil.destroySubWindow()
-          this.bridge?.bridge_didAdClick(this.unitData.supplier)
+          this.bridge?.splash_didAdClick(this)
           break;
         case 'onAdClose':
           BYLog.debug(TAG + `开屏回调 - onAdClose`)
           BYWindowUtil.destroySubWindow()
-          this.bridge?.bridge_didAdClose()
+          this.bridge?.splash_didAdClose(this)
           break;
         case 'onAdFail':
           BYLog.debug(TAG + "开屏回调 - onShowError")
           BYWindowUtil.destroySubWindow()
-          this.bridge?.bridge_didAdShowFailed(this.unitData.supplier,
-            new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, data.length ? data : '华为广告展示失败'))
+          this.bridge?.splash_didAdShowFailed(this, new AdvanceError(ADV_ERR_HUAWEI_SHOW_FAILED, data.length ? data : '华为广告展示失败'))
           break;
         default:
           break;

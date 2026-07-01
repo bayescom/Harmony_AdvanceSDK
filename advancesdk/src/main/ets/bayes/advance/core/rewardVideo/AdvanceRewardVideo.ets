@@ -4,10 +4,9 @@ import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
 import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
-import { AdvanceAdInfo, AdvRewardCallbackInfo, AdvanceError, BYLog } from '../../../../../../../Index';
-import { AdvanceRewardVideoCommonAdapter } from '../adn/AdvanceRewardVideoCommonAdapter';
-import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
-import { AdvanceRewardVideoAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
+import { AdvanceAdInfo, AdvRewardCallbackInfo, AdvanceError, BYLog, ADV_ERR_AD_Invalid_Expired } from '../../../../../../../Index';
+import { AdvanceCommonRewardVideoAdapter } from '../adn/AdvanceCommonAdapter';
+import { AdvanceCommonRewardVideoAdapterBridge } from '../adn/AdvanceCommonRewardVideoAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
 
 export class AdvanceRewardVideo extends AdvanceAdBase {
@@ -25,10 +24,10 @@ export class AdvanceRewardVideo extends AdvanceAdBase {
   }
 
   // 加载某一个渠道对象
-  protected override loadAnyAdnAdapter(adapter: AdvanceRewardVideoCommonAdapter): void {
-    adapter.setRewardVideoAdapterBridge(this.adapterBridge)
+  protected override loadAnyAdnAdapter(adapter: AdvanceCommonRewardVideoAdapter): void {
+    adapter.adapter_setRewardVideoBridge(this.bridge)
     if (adapter.isFromCache) {
-      this.adapterBridge.bridge_didAdLoaded(adapter.unitData.supplier, adapter.price)
+      this.bridge.rewardVideo_didAdLoaded(adapter, adapter.price)
     } else {
       adapter.adapter_loadAd()
     }
@@ -51,7 +50,11 @@ export class AdvanceRewardVideo extends AdvanceAdBase {
   }
 
   isAdValid(): boolean {
-    return this.winAdapter?.adapter_isAdValid() ?? false
+    const valid = this.winAdapter?.adapter_isAdValid() ?? false
+    if (!valid) {
+      this.bridge.rewardVideo_didAdShowFailed(this.winAdapter as AdvanceCommonRewardVideoAdapter, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+    }
+    return valid
   }
 
   loadAd() {
@@ -65,23 +68,26 @@ export class AdvanceRewardVideo extends AdvanceAdBase {
     if (!windowStage) {
       windowStage = BYApp.getWindowStage()
     }
-    this.winAdapter?.adapter_showAd(windowStage)
+    let adapter = this.winAdapter as AdvanceCommonRewardVideoAdapter
+    adapter.adapter_showAd(windowStage)
   }
 
-  protected adapterBridge: AdvanceRewardVideoAdapterBridge = {
-    bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => {
-      if (supplier.enable_cache) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "", supplier.sdk_id)
+  protected bridge: AdvanceCommonRewardVideoAdapterBridge = {
+    rewardVideo_didAdLoaded: (adapter: AdvanceCommonRewardVideoAdapter, price: number) => {
+      let supplier = this.matchSupplier(adapter)
+      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
+        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
+          supplier.sdk_id)
       }
-    },
-    bridge_didAdLoaded: (supplier: AdvanceSupplierModel, price: number) => {
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
     },
-    bridge_didAdLoadFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
+    rewardVideo_didAdLoadFailed: (adapter: AdvanceCommonRewardVideoAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
     },
-    bridge_didAdShow: (supplier: AdvanceSupplierModel) => {
+    rewardVideo_didAdShow: (adapter: AdvanceCommonRewardVideoAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
       this.mListener?.onAdShow()
       // 删除缓存Adapter
@@ -89,22 +95,29 @@ export class AdvanceRewardVideo extends AdvanceAdBase {
         AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
       }
     },
-    bridge_didAdShowFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
+    rewardVideo_didAdShowFailed: (adapter: AdvanceCommonRewardVideoAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
       this.mListener?.onAdShowFailed(error)
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
+      // 删除缓存Adapter
+      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
+        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
+      }
     },
-    bridge_didAdClick: (supplier: AdvanceSupplierModel) => {
+    rewardVideo_didAdClick: (adapter: AdvanceCommonRewardVideoAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.clicked, supplier)
       this.mListener?.onAdClick()
     },
-    bridge_didAdClose: () => {
+    rewardVideo_didAdClose: (adapter: AdvanceCommonRewardVideoAdapter) => {
       this.mListener?.onAdClose()
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
     },
-    bridge_didAdReward: (supplier: AdvanceSupplierModel) => {
+    rewardVideo_didAdReward: (adapter: AdvanceCommonRewardVideoAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.verifyRewardVideo(this.adConfig.rewardVideoModel, supplier, this.adConfig.placementId, (rewardInfo?: AdvRewardCallbackInfo, error?: AdvanceError) => {
         if (error === undefined) {
           this.mListener?.onAdRewardSuccess(rewardInfo!)
@@ -113,7 +126,7 @@ export class AdvanceRewardVideo extends AdvanceAdBase {
         }
       })
     },
-    bridge_didAdVideoPlayEnd: () => {
+    rewardVideo_didAdVideoPlayEnd: (adapter: AdvanceCommonRewardVideoAdapter) => {
       if (this.mListener?.onVideoPlayEnd) {
         this.mListener?.onVideoPlayEnd()
       }

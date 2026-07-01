@@ -1,6 +1,6 @@
 import { AdvanceError } from '../define/AdvanceError'
 import { AdvanceAdInfo, AdvRewardCallbackInfo } from '../model/AdvanceAdInfo'
-import { AdvanceRenderFeedWrapper } from './renderFeed/AdvanceRenderFeedWrapper'
+import { AdvanceRenderFeedAdWrapper } from './renderFeed/AdvanceRenderFeedAdWrapper'
 
 // 各广告位通用的加载接口
 export interface AdvanceAdLoadListener {
@@ -56,7 +56,7 @@ export interface AdvanceNativeExpressListener extends AdvanceAdInteractionListen
 }
 
 export interface AdvanceRenderFeedListener extends AdvanceAdInteractionListener {
-  onRenderSuccess: (wrapper: AdvanceRenderFeedWrapper) => void // 广告渲染成功
+  onRenderSuccess: (wrapper: AdvanceRenderFeedAdWrapper) => void // 广告渲染成功
   onRenderFail: (error: AdvanceError) => void // 广告渲染失败
   onVideoPlayStart?: () => void
   onVideoPlayEnd?: () => void

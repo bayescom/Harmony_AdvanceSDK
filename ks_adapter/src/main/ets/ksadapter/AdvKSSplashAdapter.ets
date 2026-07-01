@@ -1,9 +1,11 @@
 import { window } from '@kit.ArkUI';
 import {
   BYLog,
-  AdvanceSplashCommonAdapter,
   BYWindowUtil,
   AdvanceError,
+  AdvanceCommonSplashAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 import { KSAdScene, KSAdSDK, KSSplashAd, KSAdInteractionType, KSAdExposureFailCode} from 'ksadsdk';
 import { KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY } from './Component/AdvKSDisplayPageView';
@@ -11,7 +13,7 @@ import { KS_DISPLAY_PAGE_TAG, KS_STORAGE_AD_KEY } from './Component/AdvKSDisplay
 
 const TAG = `[AdvKSSplashAdapter]`
 
-export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
+export class AdvKSSplashAdapter extends AdvanceCommonSplashAdapter {
   protected ks_ad?: KSSplashAd
 
   adapter_isAdValid(): boolean {
@@ -20,7 +22,7 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     const scene: KSAdScene = new KSAdScene()
       .setPosId(spotId)
       .setAdNum(1);
@@ -32,14 +34,13 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
       onError(code: number, msg: string) {
         // 广告请求失败
         BYLog.debug(TAG + `开屏回调 - onAdLoadFailed code: ${code} message: ${msg}`)
-        that.bridge?.bridge_didAdLoadFailed(that.unitData.supplier, new AdvanceError(code, msg))
+        that.bridge?.splash_didAdLoadFailed(that, new AdvanceError(code, msg))
       },
       onAdLoad(splashAd: KSSplashAd) {
         // 广告成功加载，可以展示
         BYLog.debug(TAG + "开屏回调 - onAdLoaded")
         that.ks_ad = splashAd
-        that.bridge?.bridge_cacheAdapterIfNeeded(that, that.unitData.supplier, splashAd.getEcpm())
-        that.bridge?.bridge_didAdLoaded(that.unitData.supplier, splashAd.getEcpm())
+        that.bridge?.splash_didAdLoaded(that, splashAd.getEcpm())
       }
     })
   }
@@ -50,20 +51,21 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
       that.ks_ad?.setInteractListener({
         onAdShowStart() {
           BYLog.debug(TAG + "开屏回调 - onAdExposure")
-          that.bridge?.bridge_didAdShow(that.unitData.supplier)
+          that.bridge?.splash_didAdShow(that)
         },
         onAdShowEnd() {
+          BYLog.debug(TAG + "开屏回调 - onAdShowEnd")
           BYWindowUtil.destroySubWindow()
         },
         onAdClick(interactionType?: KSAdInteractionType) {
           BYLog.debug(TAG + "开屏回调 - onAdClick")
           BYWindowUtil.destroySubWindow()
-          that.bridge?.bridge_didAdClick(that.unitData.supplier)
+          that.bridge?.splash_didAdClick(that)
         },
         onAdSkip() {
           BYLog.debug(TAG + `开屏回调 - onAdClose`)
           BYWindowUtil.destroySubWindow()
-          that.bridge?.bridge_didAdClose()
+          that.bridge?.splash_didAdClose(that)
         },
         onCloseLandingPage() {}
       })
@@ -71,12 +73,12 @@ export class AdvKSSplashAdapter extends AdvanceSplashCommonAdapter {
     }
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.ks_ad?.setBidEcpmAndHighestLoss(winPrice, secondPrice)
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: firstPrice})
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.ks_ad?.setBidEcpmAndHighestLoss(result.winPrice, result.secondPrice)
+    } else {
+      this.ks_ad?.reportExposureFail(KSAdExposureFailCode.BID_FAILED, {winEcpm: result.winPrice})
+    }
   }
 
 }

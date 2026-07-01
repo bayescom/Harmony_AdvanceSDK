@@ -3,10 +3,9 @@ import { AdvanceBannerListener } from '../AdvanceAdOpenListener';
 import { NodeController } from '@kit.ArkUI';
 import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
-import { AdvanceBannerCommonAdapter } from '../adn/AdvanceBannerCommonAdapter';
-import { AdvanceAdInfo, AdvanceError, BYApp, BYLog } from '../../../../../../../Index';
-import { AdvanceSupplierModel } from '../../model/AdvanceNetModel';
-import { AdvanceBannerAdapterBridge } from '../adn/AdvanceCommonAdapterBridge';
+import { AdvanceCommonBannerAdapter } from '../adn/AdvanceCommonAdapter';
+import { AdvanceAdInfo, AdvanceError, BYApp, BYLog, ADV_ERR_AD_Invalid_Expired } from '../../../../../../../Index';
+import { AdvanceCommonBannerAdapterBridge } from '../adn/AdvanceCommonBannerAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
 
 export class AdvanceBanner extends AdvanceAdBase {
@@ -24,10 +23,10 @@ export class AdvanceBanner extends AdvanceAdBase {
   }
 
   // 加载某一个渠道对象
-  protected override loadAnyAdnAdapter(adapter: AdvanceBannerCommonAdapter): void {
-    adapter.setBannerAdapterBridge(this.adapterBridge)
+  protected override loadAnyAdnAdapter(adapter: AdvanceCommonBannerAdapter): void {
+    adapter.adapter_setBannerBridge(this.bridge)
     if (adapter.isFromCache) {
-      this.adapterBridge.bridge_didAdLoaded(adapter.unitData.supplier, adapter.price)
+      this.bridge.banner_didAdLoaded(adapter, adapter.price)
     } else {
       adapter.adapter_loadAd()
     }
@@ -44,7 +43,8 @@ export class AdvanceBanner extends AdvanceAdBase {
   protected override adnBidWin(adInfo: AdvanceAdInfo): void {
     this.mListener?.onAdLoaded(adInfo)
     // 竞胜的广告源渲染广告
-    this.winAdapter?.adapter_render(BYApp.getUIContext())
+    let adapter = this.winAdapter as AdvanceCommonBannerAdapter
+    adapter.adapter_render(BYApp.getUIContext())
   }
 
   setAdListener(listener: AdvanceBannerListener) {
@@ -52,7 +52,11 @@ export class AdvanceBanner extends AdvanceAdBase {
   }
 
   isAdValid(): boolean {
-    return this.winAdapter?.adapter_isAdValid() ?? false
+    const valid = this.winAdapter?.adapter_isAdValid() ?? false
+    if (!valid) {
+      this.bridge.banner_didAdShowFailed(this.winAdapter as AdvanceCommonBannerAdapter, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
+    }
+    return valid
   }
 
   loadAd() {
@@ -60,7 +64,8 @@ export class AdvanceBanner extends AdvanceAdBase {
   }
 
   getAdComponent(): NodeController | undefined {
-    return this.winAdapter?.adapter_getAdComponent()
+    let adapter = this.winAdapter as AdvanceCommonBannerAdapter
+    return adapter.adapter_getAdComponent()
   }
 
   getAcceptWidth(): number {
@@ -71,20 +76,22 @@ export class AdvanceBanner extends AdvanceAdBase {
     return this.adConfig.adHeight ?? 0
   }
 
-  protected adapterBridge: AdvanceBannerAdapterBridge = {
-    bridge_cacheAdapterIfNeeded: (adapter: object, supplier: AdvanceSupplierModel, price: number) => {
-      if (supplier.enable_cache) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "", supplier.sdk_id)
+  protected bridge: AdvanceCommonBannerAdapterBridge = {
+    banner_didAdLoaded: (adapter: AdvanceCommonBannerAdapter, price: number) => {
+      let supplier = this.matchSupplier(adapter)
+      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
+        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
+          supplier.sdk_id)
       }
-    },
-    bridge_didAdLoaded: (supplier: AdvanceSupplierModel, price: number) => {
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
     },
-    bridge_didAdLoadFailed: (supplier: AdvanceSupplierModel, error: AdvanceError) => {
+    banner_didAdLoadFailed: (adapter: AdvanceCommonBannerAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
     },
-    bridge_didAdShow: (supplier: AdvanceSupplierModel) => {
+    banner_didAdShow: (adapter: AdvanceCommonBannerAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
       this.mListener?.onAdShow()
       // 删除缓存Adapter
@@ -92,17 +99,23 @@ export class AdvanceBanner extends AdvanceAdBase {
         AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
       }
     },
-    bridge_didAdShowFailed: (supplier:AdvanceSupplierModel, error: AdvanceError) => {
+    banner_didAdShowFailed: (adapter: AdvanceCommonBannerAdapter, error: AdvanceError) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.failed, supplier, error)
       this.mListener?.onAdShowFailed(error)
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
+      // 删除缓存Adapter
+      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
+        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
+      }
     },
-    bridge_didAdClick: (supplier: AdvanceSupplierModel) => {
+    banner_didAdClick: (adapter: AdvanceCommonBannerAdapter) => {
+      let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.clicked, supplier)
       this.mListener?.onAdClick()
     },
-    bridge_didAdClose: () => {
+    banner_didAdClose: () => {
       this.mListener?.onAdClose()
       // 销毁各渠道Adapter对象
       this.destroyAdapters()

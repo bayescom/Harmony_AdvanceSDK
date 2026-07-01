@@ -7,28 +7,25 @@ import { NodeController } from '@kit.ArkUI';
 import {
   BYLog,
   AdvanceError,
-  ADV_ERR_AD_Invalid_Expired,
-  AdvanceBannerCommonAdapter,
   BYConstant,
+  AdvanceCommonBannerAdapter,
+  AdvBidWinLossResult,
+  AdvBidWinLossResultType,
 } from 'advancesdk';
 
 
 const TAG = `[AdvGDTBannerAdapter]`
 
-export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
+export class AdvGDTBannerAdapter extends AdvanceCommonBannerAdapter {
   protected gdt_ad?: GDTBannerAd
 
   adapter_isAdValid(): boolean {
-    const isAdValid = this.gdt_ad?.isValid() ?? false
-    if (!isAdValid) {
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(ADV_ERR_AD_Invalid_Expired, '广告展示前广告已失效过期'))
-    }
-    return isAdValid
+    return this.gdt_ad?.isValid() ?? false
   }
 
   adapter_loadAd() {
     //执行广告加载流程
-    let spotId = this.unitData.supplier.adspotid
+    let spotId = this.unitData.placementId
     let width = this.unitData.vpWidth ?? 0
     let height = this.unitData.vpHeight ?? 0
     const config: GDTAdLoadConfig = {
@@ -40,12 +37,11 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
         BYLog.debug(TAG + "横幅回调 - onAdLoaded")
         ad.setRefresh(0);
         this.gdt_ad = ad
-        this.bridge?.bridge_cacheAdapterIfNeeded(this, this.unitData.supplier, ad.getEcpm())
-        this.bridge?.bridge_didAdLoaded(this.unitData.supplier, ad.getEcpm())
+        this.bridge?.banner_didAdLoaded(this, ad.getEcpm())
       },
       onError: (err: GDTError): void => {
         BYLog.debug(TAG + `横幅回调 - onAdLoadFailed code: ${err.code} message: ${err.message}`)
-        this.bridge?.bridge_didAdLoadFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+        this.bridge?.banner_didAdLoadFailed(this, new AdvanceError(err.code, err.message))
       }
     })
   }
@@ -60,17 +56,17 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
     return this.gdt_ad?.getAdComponent()
   }
 
-  adapter_sendWinNotification(secondPrice: number, winPrice: number): void {
-    this.gdt_ad?.sendWinNotification(new Map([
-      [GDTBiddingConstants.EXPECT_COST_PRICE, winPrice.toString()],
-      [GDTBiddingConstants.HIGHEST_LOSS_PRICE, secondPrice.toString()]
-    ]))
-  }
-
-  adapter_sendLossNotification(firstPrice: number): void {
-    this.gdt_ad?.sendLossNotification(new Map([
-      [GDTBiddingConstants.WIN_PRICE, firstPrice.toString()]
-    ]))
+  adapter_sendNotification(result: AdvBidWinLossResult): void {
+    if (result.bidResultType === AdvBidWinLossResultType.win) {
+      this.gdt_ad?.sendWinNotification(new Map([
+        [GDTBiddingConstants.EXPECT_COST_PRICE, result.winPrice.toString()],
+        [GDTBiddingConstants.HIGHEST_LOSS_PRICE, result.secondPrice.toString()]
+      ]))
+    } else {
+      this.gdt_ad?.sendLossNotification(new Map([
+        [GDTBiddingConstants.WIN_PRICE, result.winPrice.toString()]
+      ]))
+    }
   }
 
   protected renderListener: GDTRenderListener = {
@@ -79,26 +75,26 @@ export class AdvGDTBannerAdapter extends AdvanceBannerCommonAdapter {
     },
     onRenderFail: (err: GDTError): void => {
       BYLog.debug(TAG + "横幅回调 - onAdRenderFail")
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      this.bridge?.banner_didAdShowFailed(this, new AdvanceError(err.code, err.message))
     }
   };
 
   protected interactionListener: GDTInteractionListener = {
     onAdExposure: (): void => {
       BYLog.debug(TAG + "横幅回调 - onAdExposure")
-      this.bridge?.bridge_didAdShow(this.unitData.supplier)
+      this.bridge?.banner_didAdShow(this)
     },
     onAdClick: (): void => {
       BYLog.debug(TAG + "横幅回调 - onAdClick")
-      this.bridge?.bridge_didAdClick(this.unitData.supplier)
+      this.bridge?.banner_didAdClick(this)
     },
     onAdClose: (): void => {
       BYLog.debug(TAG + `横幅回调 - onAdClose`)
-      this.bridge?.bridge_didAdClose()
+      this.bridge?.banner_didAdClose(this)
     },
     onError: (err: GDTError): void => {
       BYLog.debug(TAG + "横幅回调 - onShowError")
-      this.bridge?.bridge_didAdShowFailed(this.unitData.supplier, new AdvanceError(err.code, err.message))
+      this.bridge?.banner_didAdShowFailed(this, new AdvanceError(err.code, err.message))
     }
   }
 

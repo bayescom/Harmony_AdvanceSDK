@@ -1,8 +1,8 @@
-import { AdvanceRenderFeedWrapper, BYConstant, BYCustomNodeController } from 'advancesdk';
+import { AdvanceRenderFeedAdWrapper, BYConstant, BYCustomNodeController } from 'advancesdk';
 import { NodeController } from '@kit.ArkUI';
 import { MercuryNative, MercuryNativeData } from 'mercury_ad';
 
-export class AdvMercuryRenderFeedAdWrapper implements AdvanceRenderFeedWrapper {
+export class AdvMercuryRenderFeedAdWrapper implements AdvanceRenderFeedAdWrapper {
   data: MercuryNativeData | undefined
 
   constructor(ad?: MercuryNative) {

@@ -1,9 +1,9 @@
-import { AdvanceRenderFeedWrapper } from 'advancesdk';
+import { AdvanceRenderFeedAdWrapper } from 'advancesdk';
 import { NodeController } from '@kit.ArkUI';
 import { GDTAdPattern, GDTManualAd } from '@gdt/gdt-union-sdk';
 import { GDTAdData } from '@gdt/gdt-union-sdk/src/main/ets/e/g/l2';
 
-export class AdvGDTRenderFeedAdWrapper implements AdvanceRenderFeedWrapper {
+export class AdvGDTRenderFeedAdWrapper implements AdvanceRenderFeedAdWrapper {
   ad: GDTManualAd
   data: GDTAdData
 
