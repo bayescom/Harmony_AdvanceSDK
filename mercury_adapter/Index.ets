@@ -1,4 +1,4 @@
-export { AdvMercuryUtil } from './src/main/ets/mercuryadapter/AdvMercuryUtil';
+export { AdvMercuryConfigAdapter } from './src/main/ets/mercuryadapter/AdvMercuryConfigAdapter';
 export { AdvMercurySplashAdapter } from './src/main/ets/mercuryadapter/AdvMercurySplashAdapter';
 export { AdvMercuryBannerAdapter } from './src/main/ets/mercuryadapter/AdvMercuryBannerAdapter';
 export { AdvMercuryInterstitialAdapter } from './src/main/ets/mercuryadapter/AdvMercuryInterstitialAdapter';

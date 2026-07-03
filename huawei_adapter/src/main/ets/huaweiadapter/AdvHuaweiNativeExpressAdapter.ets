@@ -13,7 +13,7 @@ import {
 } from 'advancesdk';
 import { advertising, AdComponent } from '@kit.AdsKit';
 import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
-import { BiddingInfo, sendBiddingResult } from './AdvHuaweiUtil';
+import { BiddingInfo, sendBiddingResult } from './AdvHuaweiConfigAdapter';
 import { AdvHuaweiDisplayData } from './Component/AdvHuaweiDisplayPageView';
 import { BusinessError } from '@kit.BasicServicesKit';
 

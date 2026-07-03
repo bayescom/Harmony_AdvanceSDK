@@ -97,7 +97,6 @@ export struct RenderFeed {
 
   onAdClose() {
     this.listArray.splice(2, 1); // 从数组中移除数据
-    this.renderFeedAd?.destroyAdapters()
     this.renderFeedAd = undefined
   }
 

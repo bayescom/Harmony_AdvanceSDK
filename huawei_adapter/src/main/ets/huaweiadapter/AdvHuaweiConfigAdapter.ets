@@ -1,3 +1,4 @@
+import { AdvanceCommonConfigAdapter } from "advancesdk";
 import {
   BYLog,
 } from 'advancesdk'
@@ -14,12 +15,6 @@ export interface BiddingInfo {
   lurl: string;
 }
 
-const TAG = `[AdvHuaweiUtil] `
-
-export class AdvHuaweiUtil {
-  
-}
-
 export async function sendBiddingResult(url: string): Promise<void> {
   let session: rcp.Session | undefined = undefined;
   try {
@@ -32,3 +27,9 @@ export async function sendBiddingResult(url: string): Promise<void> {
   }
 }
 
+export class AdvHuaweiConfigAdapter extends AdvanceCommonConfigAdapter {
+  static initializeAdapter(appId: string, appKey: string, completion: (error: BusinessError<void> | undefined) => void): void {
+     completion(undefined)
+  }
+
+}

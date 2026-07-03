@@ -11,7 +11,7 @@ import {
 } from 'advancesdk';
 import { advertising } from '@kit.AdsKit';
 import { AdvanceDeviceManager } from 'advancesdk/src/main/ets/bayes/advance/core/AdvanceDeviceManager';
-import { BiddingInfo, sendBiddingResult } from './AdvHuaweiUtil';
+import { BiddingInfo, sendBiddingResult } from './AdvHuaweiConfigAdapter';
 import { BusinessError, commonEventManager } from '@kit.BasicServicesKit';
 
 

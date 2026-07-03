@@ -1,5 +1,4 @@
-
-export { AdvCSJUtil } from './src/main/ets/csjadapter/AdvCSJUtil';
+export { AdvCSJConfigAdapter } from './src/main/ets/csjadapter/AdvCSJConfigAdapter';
 export { AdvCSJSplashAdapter } from './src/main/ets/csjadapter/AdvCSJSplashAdapter';
 export { AdvCSJBannerAdapter } from './src/main/ets/csjadapter/AdvCSJBannerAdapter';
 export { AdvCSJInterstitialAdapter } from './src/main/ets/csjadapter/AdvCSJInterstitialAdapter';

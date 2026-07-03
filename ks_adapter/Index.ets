@@ -1,4 +1,4 @@
-export { AdvKSUtil } from './src/main/ets/ksadapter/AdvKSUtil';
+export { AdvKSConfigAdapter } from './src/main/ets/ksadapter/AdvKSConfigAdapter';
 export { AdvKSSplashAdapter } from './src/main/ets/ksadapter/AdvKSSplashAdapter';
 export { AdvKSInterstitialAdapter } from './src/main/ets/ksadapter/AdvKSInterstitialAdapter';
 export { AdvKSRewardVideoAdapter } from './src/main/ets/ksadapter/AdvKSRewardVideoAdapter';

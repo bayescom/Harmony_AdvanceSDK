@@ -5,8 +5,7 @@ import {
   ADV_ERR_SDK_INIT_MISS,
   ADV_ERR_ALL_ADN_FAILED,
   ADV_ERR_DATA_NULL,
-  ADV_ERR_ADN_TIMEOUT,
-  ADV_ERR_ADN_INIT_FAILED
+  ADV_ERR_ADN_TIMEOUT
 } from '../define/AdvanceError'
 import { AdvanceStrategyModel, AdvanceSupplierModel } from '../model/AdvanceNetModel'
 import { AdvanceRequestManager } from '../net/AdvanceRequestManager'
@@ -163,11 +162,10 @@ export abstract class AdvanceAdBase {
       //自定义ADN获取扩展信息
       // adnData.extra = ....
       // 初始化SDK
-      let initResult = await AdvanceADNManager.loadADN(supplier)
-      if (!initResult.success) {
+      let error = await AdvanceADNManager.loadADN(supplier)
+      if (error) {
         BYLog.debug(`${supplier.name}渠道SDK执行初始化失败`)
-        this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, new AdvanceError(ADV_ERR_ADN_INIT_FAILED,
-          `${supplier.name}初始化失败：code: ${initResult.code}, msg: ${initResult.msg}`))
+        this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
         return // 在 forEach 中相当于 continue
       }
       BYLog.debug(`${supplier.name}渠道SDK执行初始化成功`)
@@ -397,8 +395,13 @@ export abstract class AdvanceAdBase {
   }
 
   // 销毁各渠道Adapter对象
-  public destroyAdapters(): void {
-    this.adapterMap = undefined
+  protected destroyAdapters(): void {
+    /**
+     * 将一个对象变量赋值为 null 或 undefined 不会立刻让该对象在内存中被销毁，而是解除了该变量对对象的引用。
+     * 真正的销毁（内存释放）是由底层的 GC（Garbage Collection，垃圾回收器） 自动完成的。
+     * 所以，此处跟 OC 不同，不要置空adapterMap，否则会对后续逻辑产生影响
+     */
+    // this.adapterMap = undefined
   }
 
   /**

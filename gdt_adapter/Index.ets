@@ -1,4 +1,4 @@
-export { AdvGDTUtil } from './src/main/ets/gdtadapter/AdvGDTUtil';
+export { AdvGDTConfigAdapter } from './src/main/ets/gdtadapter/AdvGDTConfigAdapter';
 export { AdvGDTSplashAdapter } from './src/main/ets/gdtadapter/AdvGDTSplashAdapter';
 export { AdvGDTBannerAdapter } from './src/main/ets/gdtadapter/AdvGDTBannerAdapter';
 export { AdvGDTInterstitialAdapter } from './src/main/ets/gdtadapter/AdvGDTInterstitialAdapter';

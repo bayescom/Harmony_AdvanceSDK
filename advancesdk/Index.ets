@@ -12,7 +12,8 @@ export * from './src/main/ets/bayes/advance/model/AdvanceAdInfo';
 export { AdvanceAdLoadConfig } from './src/main/ets/bayes/advance/config/AdvanceAdConfig';
 export * from './src/main/ets/bayes/advance/core/AdvanceAdOpenListener';
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonAdapter'
-export { AdvanceAdnInitResult, AdvanceADNUnitData} from './src/main/ets/bayes/advance/core/adn/AdvanceADNManager'
+export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonConfigAdapter'
+export { AdvanceADNUnitData} from './src/main/ets/bayes/advance/core/adn/AdvanceADNManager'
 export { AdvanceConstant } from './src/main/ets/bayes/advance/define/AdvanceConstant'
 export * from './src/main/ets/bayes/advance/define/AdvanceError'
 export * from './src/main/ets/bayes/advance/core/AdvanceUtil'
