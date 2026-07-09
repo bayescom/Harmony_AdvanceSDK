@@ -11,6 +11,7 @@ import { logToast, toast } from '../util/Toast'
 struct Interstitial {
   @State placementId: string = '10014795' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10015564', '插屏-自定义ADN'],
     ['10014795', '插屏-Bidding'],
     ['10014593', '插屏-倍业'],
     ['10014592', '插屏-穿山甲'],

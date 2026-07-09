@@ -12,6 +12,7 @@ import { AdvanceError,
 import { AdvanceConstant } from '../define/AdvanceConstant';
 import { AdvanceSetting } from '../config/AdvanceSetting';
 import { AdvanceADNManager } from '../core/adn/AdvanceADNManager';
+import { AdvCustomAdnCacheManager, AdvCustomAdnModel } from '../cache/AdvCustomAdnCacheManager';
 
 export class AdvanceRequestManager {
   static async prepareRequestAdData(adConfig: AdvanceAdLoadConfig): Promise<AdvanceReqModel> {
@@ -57,6 +58,17 @@ export class AdvanceRequestManager {
     const ks_v = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_KS)
     if (ks_v) {
       extra['ks_v'] = ks_v
+    }
+    //添加自定义ADN版本号
+    const cacheInfo = AdvCustomAdnCacheManager.customAdnListInfo()
+    if (cacheInfo?.custom_adn_list && cacheInfo.custom_adn_list.length) {
+      // 🌟 等待网络并发池里的所有任务全部执行完毕！
+      await Promise.all(cacheInfo.custom_adn_list.map(async (adn: AdvCustomAdnModel) => {
+        const adn_v = await AdvanceADNManager.getSDKVersion(adn.id.toString())
+        if (adn_v) {
+          extra[`custom_${adn.id}_v`] = adn_v
+        }
+      }))
     }
     return extra
   }

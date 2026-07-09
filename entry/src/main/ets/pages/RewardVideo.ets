@@ -13,6 +13,7 @@ struct Interstitial {
   // 10012265: 服务端激励验证
   @State placementId: string = '10014806' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10015565', '激励视频-自定义ADN'],
     ['10014806', '激励视频-Bidding'],
     ['10014606', '激励视频-倍业'],
     ['10014605', '激励视频-穿山甲'],

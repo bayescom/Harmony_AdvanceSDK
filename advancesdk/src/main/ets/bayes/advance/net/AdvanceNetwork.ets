@@ -40,6 +40,14 @@ export default class AdvanceNetwork {
     parameters: Record<string, string | number>): Promise<AdvanceStrategyModel> {
     return requestSync(oriUrl, http.RequestMethod.POST, parameters, http.HttpDataType.OBJECT, true)
   }
+
+  // 获取自定义AdnList信息
+  async getCustomAdnListInfo(version?: string): Promise<AdvanceStrategyModel> {
+    const reqUrl = `${getBaseUrl()}custom_adn`
+    const parameters: Record<string, string | number> = {"appid": AdvanceSetting.get().appId, "version": version ?? ""}
+    return requestSync(reqUrl, http.RequestMethod.GET, parameters)
+  }
+
 }
 
 /**

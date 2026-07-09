@@ -13,7 +13,6 @@ export { AdvanceAdLoadConfig } from './src/main/ets/bayes/advance/config/Advance
 export * from './src/main/ets/bayes/advance/core/AdvanceAdOpenListener';
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonAdapter'
 export * from './src/main/ets/bayes/advance/core/adn/AdvanceCommonConfigAdapter'
-export { AdvanceADNUnitData} from './src/main/ets/bayes/advance/core/adn/AdvanceADNManager'
 export { AdvanceConstant } from './src/main/ets/bayes/advance/define/AdvanceConstant'
 export * from './src/main/ets/bayes/advance/define/AdvanceError'
 export * from './src/main/ets/bayes/advance/core/AdvanceUtil'

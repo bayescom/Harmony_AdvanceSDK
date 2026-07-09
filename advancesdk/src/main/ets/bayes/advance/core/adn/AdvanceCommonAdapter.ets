@@ -1,12 +1,35 @@
 import { NodeController, window } from '@kit.ArkUI';
-import { AdvanceADNUnitData } from '../../../../../../../Index';
-import { AdvBidWinLossResult } from '../../model/AdvanceAdInfo';
+import { AdvanceAdType, AdvBidWinLossResult, AdvRewardVideoModel } from '../../model/AdvanceAdInfo';
 import { AdvanceCommonBannerAdapterBridge } from './AdvanceCommonBannerAdapterBridge';
 import { AdvanceCommonInterstitialAdapterBridge } from './AdvanceCommonInterstitialAdapterBridge';
 import { AdvanceCommonNativeExpressAdapterBridge } from './AdvanceCommonNativeExpressAdapterBridge';
 import { AdvanceCommonRenderFeedAdapterBridge } from './AdvanceCommonRenderFeedAdapterBridge';
 import { AdvanceCommonRewardVideoAdapterBridge } from './AdvanceCommonRewardVideoAdapterBridge';
 import { AdvanceCommonSplashAdapterBridge } from './AdvanceCommonSplashAdapterBridge';
+
+// 传递给 adapter 的参数信息
+export class AdvanceADNUnitData {
+  // 渠道id
+  adnId: string = ''
+  // 广告位类型
+  adType: AdvanceAdType = AdvanceAdType.unknown
+  // 广告位id
+  placementId: string = ''
+  // 超时时间
+  timeout: number = 0
+  // 广告位宽度
+  vpWidth?: number
+  // 广告位高度
+  vpHeight?: number
+  // 激励视频奖励信息（外部传入）
+  rewardVideoModel?: AdvRewardVideoModel
+  // 激励视频服务端下发的奖励名称
+  serverRewardName?: string
+  // 激励视频服务端下发的奖励数量
+  serverRewardCount?: number
+  // 自定义adn扩展信息
+  custom_adn_extra?: Record<string, string | number>
+}
 
 export abstract class AdvanceCommonAdapter {
   //渠道参数

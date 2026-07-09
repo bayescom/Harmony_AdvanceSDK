@@ -11,7 +11,8 @@
     "gdt_adapter": "file:../gdt_adapter",
     "ks_adapter": "file:../ks_adapter",
     "mercury_adapter": "file:../mercury_adapter",
-    "huawei_adapter": "file:../huawei_adapter"
+    "huawei_adapter": "file:../huawei_adapter",
+    "custom_adapter": "file:../custom_adapter"
   }
 }
 

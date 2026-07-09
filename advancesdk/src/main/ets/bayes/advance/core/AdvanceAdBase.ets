@@ -5,7 +5,8 @@ import {
   ADV_ERR_SDK_INIT_MISS,
   ADV_ERR_ALL_ADN_FAILED,
   ADV_ERR_DATA_NULL,
-  ADV_ERR_ADN_TIMEOUT
+  ADV_ERR_ADN_TIMEOUT,
+  ADV_ERR_CUSTOM_ADN_LOAD_FAILED
 } from '../define/AdvanceError'
 import { AdvanceStrategyModel, AdvanceSupplierModel } from '../model/AdvanceNetModel'
 import { AdvanceRequestManager } from '../net/AdvanceRequestManager'
@@ -21,10 +22,11 @@ import { AdvanceAdInfo,
   AdvBidWinLossResult,
   AdvBidWinLossResultType,
   AdvRewardCallbackInfo, AdvRewardVideoModel } from '../model/AdvanceAdInfo'
-import { AdvanceADNManager, AdvanceADNUnitData } from './adn/AdvanceADNManager'
+import { AdvanceADNManager } from './adn/AdvanceADNManager'
 import { systemDateTime } from '@kit.BasicServicesKit'
 import { BYUtil } from '../../basic/BYUtil'
 import { AdvanceAdCacheManager } from '../cache/AdvanceAdCacheManager'
+import { AdvanceADNUnitData } from '../../../../../../Index'
 
 
 const TAG = `[AdvanceAdBase] `
@@ -158,9 +160,12 @@ export abstract class AdvanceAdBase {
       adnData.vpHeight = this.adConfig.adHeight ?? 0
       //激励相关设置
       adnData.rewardVideoModel = this.adConfig.rewardVideoModel
-      adnData.serverReward = this.strategyModel.server_reward
-      //自定义ADN获取扩展信息
-      // adnData.extra = ....
+      adnData.serverRewardName = this.strategyModel.server_reward?.name
+      adnData.serverRewardCount = this.strategyModel.server_reward?.count
+      //自定义ADN扩展信息
+      if (supplier.custom_params && supplier.custom_params.length) {
+        adnData.custom_adn_extra = JSON.parse(supplier.custom_params)
+      }
       // 初始化SDK
       let error = await AdvanceADNManager.loadADN(supplier)
       if (error) {
@@ -182,8 +187,12 @@ export abstract class AdvanceAdBase {
         adapter.isFromCache = true
         adapter.price = cacheModel.price
       } else {
-        // 生成用来加载广告adn的适配器，进行后续广告请求及展示操作
+        // 即时生成用来加载广告adn的适配器，进行后续广告请求及展示操作
         adapter = await AdvanceADNManager.generateAdnAdapter(adnData)
+        if (!adapter) {// 开发者自定义adapter类不存在
+          this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, new AdvanceError(ADV_ERR_CUSTOM_ADN_LOAD_FAILED, `自定义Adn配置类获取失败【请检查配置类是否在模块的Index文件中被导出】`))
+          return
+        }
       }
       // 添加元素
       if (adapter) {
@@ -203,6 +212,7 @@ export abstract class AdvanceAdBase {
     this.timeoutId = setTimeout(() => {
       this.observeLoadAdTimeout()
     }, this.strategyModel.setting.parallel_timeout)
+
   }
 
   // 超时监测

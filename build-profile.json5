@@ -74,6 +74,10 @@
     {
       "name": "huawei_adapter",
       "srcPath": "./huawei_adapter",
+    },
+    {
+      "name": "custom_adapter",
+      "srcPath": "./custom_adapter",
     }
   ]
 }

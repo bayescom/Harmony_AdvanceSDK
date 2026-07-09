@@ -2,12 +2,13 @@ import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceInterstitialListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
-import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
+import { AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceCommonInterstitialAdapter } from '../adn/AdvanceCommonAdapter';
 import { AdvanceAdInfo, AdvanceError, BYLog, ADV_ERR_AD_Invalid_Expired } from '../../../../../../../Index';
 import { AdvanceCommonInterstitialAdapterBridge } from '../adn/AdvanceCommonInterstitialAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
+import { AdvanceAdType } from '../../model/AdvanceAdInfo';
 
 export class AdvanceInterstitial extends AdvanceAdBase {
   constructor(option: AdvanceAdLoadConfig) {

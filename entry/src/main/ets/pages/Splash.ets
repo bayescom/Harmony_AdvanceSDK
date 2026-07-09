@@ -10,6 +10,7 @@ import { logToast, toast } from '../util/Toast'
 struct Splash {
   @State placementId: string = '10014760' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10015562', '开屏-自定义ADN'],
     ['10014760', '开屏-Bidding'],
     ['10014541', '开屏-倍业'],
     ['10014521', '开屏-穿山甲'],

@@ -2,10 +2,11 @@ import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceRenderFeedListener } from '../AdvanceAdOpenListener';
 import { AdvanceCommonRenderFeedAdapter } from '../adn/AdvanceCommonAdapter';
 import { AdvanceRenderFeedAdWrapper } from './AdvanceRenderFeedAdWrapper';
-import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
+import { AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdInfo, AdvanceError, AdvanceAdLoadConfig, BYApp, BYLog } from '../../../../../../../Index';
 import { AdvanceCommonRenderFeedAdapterBridge } from '../adn/AdvanceCommonRenderFeedAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
+import { AdvanceAdType } from '../../model/AdvanceAdInfo';
 
 export class AdvanceRenderFeed extends AdvanceAdBase {
   constructor(option: AdvanceAdLoadConfig) {

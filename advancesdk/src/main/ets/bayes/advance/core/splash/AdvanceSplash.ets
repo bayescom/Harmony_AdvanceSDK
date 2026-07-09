@@ -2,12 +2,13 @@ import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceSplashListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
-import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
+import { AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceCommonSplashAdapter } from '../adn/AdvanceCommonAdapter';
 import { AdvanceAdInfo, AdvanceError, BYLog, ADV_ERR_AD_Invalid_Expired } from '../../../../../../../Index';
 import { AdvanceCommonSplashAdapterBridge } from '../adn/AdvanceCommonSplashAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
+import { AdvanceAdType } from '../../model/AdvanceAdInfo';
 
 export class AdvanceSplash extends AdvanceAdBase {
   constructor(config: AdvanceAdLoadConfig) {

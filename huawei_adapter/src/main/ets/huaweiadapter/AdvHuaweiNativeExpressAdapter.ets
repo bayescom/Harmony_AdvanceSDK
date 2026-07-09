@@ -88,7 +88,7 @@ export class AdvHuaweiNativeExpressAdapter extends AdvanceCommonNativeExpressAda
 
   adapter_sendNotification(result: AdvBidWinLossResult): void {
     const biddingInfo = this.huawei_ad?.biddingInfo as BiddingInfo
-    if (biddingInfo.lurl) {
+    if (biddingInfo && biddingInfo.lurl) {
       let url: string = biddingInfo.lurl
       if (result.bidResultType === AdvBidWinLossResultType.win) {
         // 竞胜时，其他DSP最高出价

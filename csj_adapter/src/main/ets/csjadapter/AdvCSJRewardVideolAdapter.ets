@@ -24,8 +24,8 @@ export class AdvCSJRewardVideoAdapter extends AdvanceCommonRewardVideoAdapter {
     //执行广告加载流程
     let spotId = this.unitData.placementId
     let mAdCreator: CSJAdCreator = CSJAdSdk.getAdCreator()
-    let rewardName = this.unitData.rewardVideoModel?.rewardName ?? (this.unitData.serverReward?.name ?? "")
-    let rewardAmount = this.unitData.rewardVideoModel?.rewardAmount ?? (this.unitData.serverReward?.count ?? 0)
+    let rewardName = this.unitData.rewardVideoModel?.rewardName ?? (this.unitData.serverRewardName ?? "")
+    let rewardAmount = this.unitData.rewardVideoModel?.rewardAmount ?? (this.unitData.serverRewardCount ?? 0)
     let adSlot = new AdSlotBuilder()
       .setCodeId(spotId)
       .setUserData(this.unitData.rewardVideoModel?.userId ?? "")

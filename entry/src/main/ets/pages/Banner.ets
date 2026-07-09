@@ -10,6 +10,7 @@ import { logToast } from '../util/Toast'
 struct Banner {
   @State placementId: string = '10014782' // bidding
   private readonly placementIdArr: Array<[string, string]> = [
+    ['10015563', '横幅-自定义ADN'],
     ['10014782', '横幅-Bidding'],
     ['10014620', '横幅-倍业'],
     ['10014622', '横幅-穿山甲'],

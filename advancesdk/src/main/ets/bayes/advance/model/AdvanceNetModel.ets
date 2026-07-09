@@ -112,6 +112,9 @@ export class AdvanceSupplierModel {
   index: number = 0
   enable_cache: number = 0 // 1：表示需要缓存 0：表示不需要缓存
   cache_timeout: number | null = null // 缓存时间（秒），enable_cache 为 1 时有值
+  // Custom ADN 相关
+  is_custom_adn: number = 0; // 是否自定义渠道
+  custom_params: string = ''; // 自定义JSON参数
 
   // [User Defined] 接口返回的是object类型，并非class实例。因为实例并未初始化，故自定义字段默认值为undefined。要转实例得使用class-transformer.
   isHit: boolean | undefined = undefined // 被命中

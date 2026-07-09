@@ -9,6 +9,16 @@ export class AdvanceAdInfo {
   fromCache: boolean = false
 }
 
+export enum AdvanceAdType {
+  unknown,
+  splash,
+  banner,
+  interstitial,
+  rewardVideo,
+  nativeExpress, // 原生模板信息流
+  renderFeed, // 自渲染信息流
+}
+
 export interface AdvRewardVideoModel {
   //app user Identifier
   userId?: string
@@ -25,7 +35,6 @@ export interface AdvRewardCallbackInfo {
   rewardName: string // 激励名称
   rewardAmount: number // 激励数量
 }
-
 
 export enum AdvBidWinLossResultType {
   win,

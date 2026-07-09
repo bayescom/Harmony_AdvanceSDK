@@ -1,32 +1,13 @@
 import { AdvanceConstant } from '../../define/AdvanceConstant'
-import { AdvanceCommonAdapter } from './AdvanceCommonAdapter'
-import { AdvanceServerReward, AdvanceSupplierModel } from '../../model/AdvanceNetModel'
-import { AdvanceAdnInitState, AdvanceAdType } from '../../define/AdvanceDefine'
-import { AdvRewardVideoModel } from '../../model/AdvanceAdInfo'
-import { AdvanceError, ADV_ERR_ADN_INIT_FAILED, ADV_ERR_ADN_UNINSTALLED } from '../../define/AdvanceError'
+import { AdvanceADNUnitData, AdvanceCommonAdapter } from './AdvanceCommonAdapter'
+import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
+import { AdvanceAdnInitState } from '../../define/AdvanceDefine'
+import { AdvanceError, ADV_ERR_ADN_INIT_FAILED, ADV_ERR_ADN_UNINSTALLED,
+  ADV_ERR_CUSTOM_ADN_LOAD_FAILED } from '../../define/AdvanceError'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { AdvanceAdType } from '../../model/AdvanceAdInfo'
+import { AdvCustomAdnCacheManager, AdvCustomAdnModel } from '../../cache/AdvCustomAdnCacheManager'
 
-// 传递给 adapter 的参数信息
-export class AdvanceADNUnitData {
-  // 渠道id
-  adnId: string = ''
-  // 广告位类型
-  adType: AdvanceAdType = AdvanceAdType.unknown
-  // 广告位id
-  placementId: string = ''
-  // 超时时间
-  timeout: number = 0
-  // 广告位宽度
-  vpWidth?: number
-  // 广告位高度
-  vpHeight?: number
-  // 激励视频奖励信息（外部传入）
-  rewardVideoModel?: AdvRewardVideoModel
-  // 激励视频服务端验证对象
-  serverReward?: AdvanceServerReward
-  // 扩展信息
-  extra?: Record<string, string | number>
-}
 
 // 定义队列里存放的 Promise 触发器结构
 interface PromiseHandler {
@@ -116,6 +97,9 @@ export class AdvanceADNManager {
       // 媒体未引入渠道SDK或Adapter
       if (!AdapterClass) {
         AdvanceADNManager.initializeStatus.set(supplierId, AdvanceAdnInitState.failed);
+        if (supplier.is_custom_adn === 1) {
+          return new AdvanceError(ADV_ERR_CUSTOM_ADN_LOAD_FAILED, `自定义Adn配置类获取失败【请检查配置类是否在模块的Index文件中被导出】`);
+        }
         return new AdvanceError(ADV_ERR_ADN_UNINSTALLED, `渠道SDK未被安装【请检查配置类是否在模块的Index文件中被导出】`);
       }
 
@@ -125,9 +109,11 @@ export class AdvanceADNManager {
         AdvanceADNManager.pendingCompletions.get(supplierId)!.push({ resolve });
         try {
           // 开始触发三方 SDK 初始化
-          AdapterClass.initializeAdapter(supplier.mediaid, supplier.mediakey, (error: BusinessError<void> | undefined) => {
+          AdapterClass.initializeAdapter(supplier.mediaid, supplier.mediakey,
+            (error: BusinessError<void> | undefined) => {
               // 更改全局状态
-              AdvanceADNManager.initializeStatus.set(supplierId, error ? AdvanceAdnInitState.failed : AdvanceAdnInitState.success);
+              AdvanceADNManager.initializeStatus.set(supplierId,
+                error ? AdvanceAdnInitState.failed : AdvanceAdnInitState.success);
               // 批量引爆队列（包含自己和所有在步骤 3 挂起排队的并发请求）
               AdvanceADNManager.executePendingCompletions(supplier, error);
             });
@@ -198,7 +184,7 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
         return 'huawei_adapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_adn_module ?? ""
     }
   }
 
@@ -215,7 +201,7 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
         return 'AdvHuaweiConfigAdapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_config_adapter ?? ""
     }
   }
 
@@ -232,7 +218,7 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
         return 'AdvHuaweiSplashAdapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_splash_adapter ?? ""
     }
   }
 
@@ -245,7 +231,7 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
         return 'AdvMercuryBannerAdapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_banner_adapter ?? ""
     }
   }
 
@@ -262,7 +248,7 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
         return 'AdvHuaweiInterstitialAdapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_interstitial_adapter ?? ""
     }
   }
 
@@ -279,7 +265,7 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
         return 'AdvHuaweiRewardVideoAdapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_rewardvideo_adapter ?? ""
     }
   }
 
@@ -296,7 +282,7 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
         return 'AdvHuaweiNativeExpressAdapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_nativeexpress_adapter ?? ""
     }
   }
 
@@ -313,7 +299,23 @@ export class AdvanceADNManager {
       case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
         return 'AdvHuaweiRenderFeedAdapter'
       default: // 自定义ADN
-        return ''
+        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_renderfeed_adapter ?? ""
     }
   }
+
+  // 根据id获取自定义ADN对象
+  static getCustomAdn(supplierId: string) {
+    // 从缓存中获取adn_list信息
+    const cacheInfo = AdvCustomAdnCacheManager.customAdnListInfo()
+    if (cacheInfo?.custom_adn_list && cacheInfo.custom_adn_list.length) {
+      const adn = cacheInfo.custom_adn_list.filter((model: AdvCustomAdnModel) => {
+        return model.id.toString() === supplierId
+      })[0]
+      // mock数据
+       adn.custom_adn_module = 'custom_adapter'
+      return adn
+    }
+    return undefined
+  }
+
 }

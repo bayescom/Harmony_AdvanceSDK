@@ -2,10 +2,11 @@ import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceNativeExpressListener } from '../AdvanceAdOpenListener';
 import { NodeController } from '@kit.ArkUI';
 import { AdvanceCommonNativeExpressAdapter } from '../adn/AdvanceCommonAdapter';
-import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
+import { AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdInfo, AdvanceError, AdvanceAdLoadConfig, BYApp, BYLog } from '../../../../../../../Index';
 import { AdvanceCommonNativeExpressAdapterBridge } from '../adn/AdvanceCommonNativeExpressAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
+import { AdvanceAdType } from '../../model/AdvanceAdInfo';
 
 export class AdvanceNativeExpress extends AdvanceAdBase {
   constructor(option: AdvanceAdLoadConfig) {

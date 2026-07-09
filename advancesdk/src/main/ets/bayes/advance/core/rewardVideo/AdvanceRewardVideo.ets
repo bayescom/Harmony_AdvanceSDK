@@ -2,12 +2,13 @@ import { AdvanceAdBase } from '../AdvanceAdBase';
 import { AdvanceRewardVideoListener } from '../AdvanceAdOpenListener';
 import { window } from '@kit.ArkUI';
 import { BYApp } from '../../../basic/BYApp';
-import { AdvanceAdType, AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
+import { AdvanceAdnLoadAdState, AdvanceAdnReportTKEventType } from '../../define/AdvanceDefine';
 import { AdvanceAdLoadConfig } from '../../config/AdvanceAdConfig';
 import { AdvanceAdInfo, AdvRewardCallbackInfo, AdvanceError, BYLog, ADV_ERR_AD_Invalid_Expired } from '../../../../../../../Index';
 import { AdvanceCommonRewardVideoAdapter } from '../adn/AdvanceCommonAdapter';
 import { AdvanceCommonRewardVideoAdapterBridge } from '../adn/AdvanceCommonRewardVideoAdapterBridge';
 import { AdvanceAdCacheManager } from '../../cache/AdvanceAdCacheManager';
+import { AdvanceAdType } from '../../model/AdvanceAdInfo';
 
 export class AdvanceRewardVideo extends AdvanceAdBase {
   constructor(option: AdvanceAdLoadConfig) {
