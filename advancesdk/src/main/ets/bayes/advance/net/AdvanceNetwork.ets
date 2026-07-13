@@ -145,6 +145,7 @@ async function sendRequest(
             return;
           }
 
+          res.code = data.responseCode;
           // 防崩核心 3：非 200 拦截
           if (data.responseCode !== 200) {
             res.msg = "http 请求responseCode 非200， responseCode = " + data.responseCode;
@@ -159,7 +160,6 @@ async function sendRequest(
             BYLog.debug(TAG + `request success, url: ${url}, result: ${JSON.stringify(data.result)}`);
           }
 
-          res.code = data.responseCode;
           if (data.resultType === http.HttpDataType.STRING) {
             res.msg = data.result as string;
           } else if (data.resultType === http.HttpDataType.OBJECT) {

@@ -138,7 +138,6 @@ buildAdLayout(wrapper: AdvanceRenderFeedWrapper, clickViewIds: string[] = new Ar
 // 广告关闭操作
 onAdClose() {
     this.listArray.splice(2, 1); // 从数组中移除数据
-    this.renderFeedAd?.destroyAdapters()
     this.renderFeedAd = undefined
 }
 ```
