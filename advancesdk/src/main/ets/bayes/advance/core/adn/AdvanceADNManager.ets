@@ -311,8 +311,6 @@ export class AdvanceADNManager {
       const adn = cacheInfo.custom_adn_list.filter((model: AdvCustomAdnModel) => {
         return model.id.toString() === supplierId
       })[0]
-      // mock数据
-       adn.custom_adn_module = 'custom_adapter'
       return adn
     }
     return undefined

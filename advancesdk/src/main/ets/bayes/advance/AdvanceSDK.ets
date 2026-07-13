@@ -7,7 +7,6 @@ import { AdvanceSetting } from './config/AdvanceSetting'
 import { BYSetting } from '../../../../../Index'
 import { AdvCustomAdnCacheManager, AdvCustomAdnListInfo } from './cache/AdvCustomAdnCacheManager'
 import AdvanceNetwork from './net/AdvanceNetwork'
-import { AdvanceStrategyModel } from './model/AdvanceNetModel'
 
 export class AdvanceSDK {
   //初始化SDK
@@ -37,13 +36,10 @@ export class AdvanceSDK {
   private static updateCustomAdnListInfo() {
     // 从缓存中获取adn_list信息
     const cacheInfo = AdvCustomAdnCacheManager.customAdnListInfo()
-    AdvanceNetwork.shared().getCustomAdnListInfo(cacheInfo?.version).then((model: AdvanceStrategyModel) => {
-      if (model.code === 200 && model.msg.length) {
-        const info = JSON.parse(model.msg) as AdvCustomAdnListInfo
-        // 更新adn_list缓存
-        if (info.custom_adn_list && info.custom_adn_list.length) {
-          AdvCustomAdnCacheManager.cacheCustomAdnListInfo(info)
-        }
+    AdvanceNetwork.shared().getCustomAdnListInfo(cacheInfo?.version).then((info: AdvCustomAdnListInfo) => {
+      // 更新adn_list缓存
+      if (info.custom_adn_list && info.custom_adn_list.length) {
+        AdvCustomAdnCacheManager.cacheCustomAdnListInfo(info)
       }
     })
   }

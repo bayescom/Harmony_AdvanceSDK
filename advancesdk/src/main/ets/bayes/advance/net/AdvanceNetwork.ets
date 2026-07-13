@@ -1,5 +1,6 @@
 import http from '@ohos.net.http';
 import { BYLog } from '../../basic/BYLog';
+import { AdvCustomAdnListInfo } from '../cache/AdvCustomAdnCacheManager';
 import { AdvanceSetting } from '../config/AdvanceSetting';
 import {
   ADV_ERR_NET_UNSUPPORT_TYPE,
@@ -27,179 +28,173 @@ export default class AdvanceNetwork {
   // 获取策略信息
   async getStrategy(body?: string | Object | ArrayBuffer): Promise<AdvanceStrategyModel> {
     let reqUrl = `${getBaseUrl()}cruiser`
-    return requestSync(reqUrl, http.RequestMethod.POST, body, http.HttpDataType.OBJECT, true)
+    const result = await sendRequest(reqUrl, http.RequestMethod.POST, body, http.HttpDataType.OBJECT, true)
+    const model = result.data as AdvanceStrategyModel
+    return model
   }
 
   // 普通的上报请求，get方式
-  async reportUrl(oriUrl: string): Promise<AdvanceStrategyModel> {
-    return requestSync(oriUrl, http.RequestMethod.GET)
+  async reportUrl(oriUrl: string): Promise<boolean> {
+    const result = await sendRequest(oriUrl, http.RequestMethod.GET)
+    return result.code === 200
   }
 
   // 服务端激励验证
-  async verifyServerSideRewardedURL(oriUrl: string,
-    parameters: Record<string, string | number>): Promise<AdvanceStrategyModel> {
-    return requestSync(oriUrl, http.RequestMethod.POST, parameters, http.HttpDataType.OBJECT, true)
+  async verifyServerSideRewardedURL(oriUrl: string, parameters: Record<string, string | number>): Promise<ESObject> {
+    const result = await sendRequest(oriUrl, http.RequestMethod.POST, parameters, http.HttpDataType.OBJECT, true)
+    return result.data as ESObject
   }
 
   // 获取自定义AdnList信息
-  async getCustomAdnListInfo(version?: string): Promise<AdvanceStrategyModel> {
+  async getCustomAdnListInfo(version?: string): Promise<AdvCustomAdnListInfo> {
     const reqUrl = `${getBaseUrl()}custom_adn`
     const parameters: Record<string, string | number> = {"appid": AdvanceSetting.get().appId, "version": version ?? ""}
-    return requestSync(reqUrl, http.RequestMethod.GET, parameters)
+    const result = await sendRequest(reqUrl, http.RequestMethod.GET, parameters, http.HttpDataType.OBJECT)
+    const info = result.data as AdvCustomAdnListInfo
+    return info
   }
 
 }
 
+// 基础响应结构
+export class BaseResponse {
+  code: number = -1;
+  msg: string = '';
+  data: Object | undefined = undefined;
+}
+
 /**
- * 网络请求方法
+ * 通用网络请求方法
  * @param url 请求地址
  * @param method 请求方法
  * @param expectDataType 返回数据类型
  * @param extraData 请求体
  * @param forceTimeout 超时
- * @returns 策略对象
+ * @returns 通用 BaseResponse 对象
  */
-async function requestSync(
+async function sendRequest(
   url: string,
   method: http.RequestMethod,
   extraData?: string | Object | ArrayBuffer,
   expectDataType: http.HttpDataType = http.HttpDataType.STRING,
   forceTimeout: boolean = false
-): Promise<AdvanceStrategyModel> {
-  return new Promise<AdvanceStrategyModel>((resolve) => {
-    let res = new AdvanceStrategyModel()
-    let hasResult = false
-    try {
+): Promise<BaseResponse> {
+  return new Promise<BaseResponse>((resolve) => {
+    let res = new BaseResponse(); // 🌟 实例化通用响应对象
+    let hasResult = false;
+    let httpRequest: http.HttpRequest | null = null;
 
+    try {
       if (forceTimeout) {
         let tim = setTimeout(() => {
           try {
-            if (hasResult == true) {
+            if (hasResult) {
               BYLog.debug(TAG + `接口已返回，不再校验超时`)
               clearTimeout(tim)
               return
             }
-            BYLog.warn(TAG + 'requestSync timeout')
-            hasResult = true
-            res.code = ADV_ERR_NET_TIME_OUT
-            res.msg = `策略请求超时未响应`
-            resolve(res)
-            clearTimeout(tim)
+            BYLog.warn(TAG + 'sendRequest timeout')
+            hasResult = true;
+            res.code = ADV_ERR_NET_TIME_OUT;
+            res.msg = `策略请求超时未响应`;
+            resolve(res);
+            clearTimeout(tim);
+            if (httpRequest) {
+              httpRequest.destroy(); // 超时了就销毁请求，防止后续重复触发
+            }
           } catch (e) {
             BYLog.printE(e)
           }
         }, 5000)
       }
 
-
-      if (method === http.RequestMethod.POST) {
-        if (!extraData) {
-          // POST 必须有请求体，否则会报 Parameter error
-          extraData = new Object();
-        }
+      if (method === http.RequestMethod.POST && !extraData) {
+        extraData = new Object();
       }
-      const httpRequest = http.createHttp();
-      BYLog.debug(TAG + `start request, url: ${url}, method: ${method}, extraData: ` +
-      JSON.stringify(extraData, undefined, undefined));
 
-      let reqOption: http.HttpRequestOptions;
+      httpRequest = http.createHttp();
+      BYLog.debug(TAG + `start request, url: ${url}, method: ${method}`);
 
-      reqOption = ({
+      let reqOption: http.HttpRequestOptions = {
         method: method,
         expectDataType: expectDataType,
-        extraData: extraData
-      })
+        extraData: extraData,
+        readTimeout: 10000, // 增加原生超时防御，防止 500 时挂死
+        connectTimeout: 10000
+      };
 
-      //get请求需要请求头添加ua
-      // let ua = AdvanceDeviceManager.getUA()
-      // if (method == http.RequestMethod.GET && BYStrUtil.isNotEmpty(ua)) {
-      //   reqOption.header = { 'User-Agent': ua }
-      // }
-
-      httpRequest.request(
-        url, reqOption, (err, data) => {
+      httpRequest.request(url, reqOption, (err, data) => {
         try {
+          if (hasResult) return; // 如果已经走了解析阶段或超时阶段，直接拦截
+
+          // 防崩核心 1：异常拦截，不需要单独 resolve，靠下面的 finally 收尾
           if (err) {
-            res.code = err.code
-            let errMsg = err?.message ?? ""
-            res.msg = `接口响应失败：` + errMsg
-            BYLog.error(TAG + errMsg)
-            resolve(res)
-            return
+            res.code = err.code;
+            let errMsg = err?.message ?? "";
+            res.msg = `接口响应失败：` + errMsg;
+            BYLog.error(TAG + errMsg);
+            // resolve(res);
+            return;
           }
-          // todo 请求http返回状态码为500 ，会导致app crash，如何避免？https://issuereporter.developer.huawei.com/detail/240914190446130/comment
-          if (data && data.responseCode === 200) {
-            BYLog.debug(TAG + `request success`)
 
-            //post请求才打印返回信息
-            if (method == http.RequestMethod.POST) {
-              BYLog.debug(TAG +
-                `request success, url: ${url}, result: ${JSON.stringify(data, undefined, undefined)}`)
-            }
+          // 防崩核心 2：全面兜底 data 为空
+          if (!data) {
+            res.code = ADV_ERR_NET_FAILED;
+            res.msg = "Http 请求返回的 data 对象为空";
+            // resolve(res);
+            return;
+          }
 
-            if (data.resultType === http.HttpDataType.STRING) {
-              res.code = data.responseCode
-              res.msg = data.result as string
+          // 防崩核心 3：非 200 拦截
+          if (data.responseCode !== 200) {
+            res.msg = "http 请求responseCode 非200， responseCode = " + data.responseCode;
+            BYLog.error(TAG + `request error, url: ${url}`);
+            // resolve(res);
+            return;
+          }
 
-            } else if (data.resultType === http.HttpDataType.OBJECT) {
-              const obj = data.result as AdvanceStrategyModel;
-              res = obj
-              // res.suppliers = obj.suppliers
-              // res.code = obj.code
-              // res.msg = obj.msg
-              // res.abtag = obj.abtag
-              // res.reqid = obj.reqid
-              // res.setting = obj.setting
-              // res.server_reward = obj.server_reward
-            } else {
-              res.code = ADV_ERR_NET_UNSUPPORT_TYPE
-              res.msg = `UnSupport data type: ${data.resultType}`
-            }
+          // ===== 以下为 200 成功数据解析 =====
+          BYLog.debug(TAG + `request success`);
+          if (method == http.RequestMethod.POST) {
+            BYLog.debug(TAG + `request success, url: ${url}, result: ${JSON.stringify(data.result)}`);
+          }
+
+          res.code = data.responseCode;
+          if (data.resultType === http.HttpDataType.STRING) {
+            res.msg = data.result as string;
+          } else if (data.resultType === http.HttpDataType.OBJECT) {
+            // 🌟 如果已经是 OBJECT 类型，直接赋值给普通的数据载体 data
+            res.data = data.result as Object;
+            res.msg = "获取 Object 成功";
           } else {
-            res.code = data?.responseCode ?? ADV_ERR_NET_FAILED
-            res.msg = "http 请求responseCode 非200， responseCode = " + data?.responseCode
-            BYLog.error(TAG + `request error, url: ${url}, error: ${JSON.stringify(err, undefined, undefined)}`)
+            res.code = ADV_ERR_NET_UNSUPPORT_TYPE;
+            res.msg = `UnSupport data type: ${data.resultType}`;
           }
-          // 当该请求使用完毕时，调用destroy方法主动销毁
-          httpRequest.destroy();
-        } catch (e) {
-          BYLog.printE(e)
-          try {
-            res.code = ADV_ERR_NET_EXCEPTION
-            let error = e as Error;
-            let name = error.name;
-            let msg = error.message;
-            let inf = `请求发起阶段发生 exception ,err name:` + name + " , msg = " + msg
-            res.msg = inf
-          } catch (e) {
-          }
-        }
-        hasResult = true
-        resolve(res);
-      }
-      )
-    } catch (e) {
-      try {
-        res.code = ADV_ERR_NET_EXCEPTION
 
-        let error = e as Error;
-        let name = error.name;
-        let msg = error.message;
-        let errInf = `请求发起阶段发生 exception  ,err name:` + name + " , msg = " + msg
-        BYLog.error(TAG + errInf)
-        BYLog.printE(e)
-        if (!hasResult) {
-          hasResult = true
-          res.msg = errInf
+        } catch (e) {
+          BYLog.printE(e);
+          res.code = ADV_ERR_NET_EXCEPTION;
+          res.msg = `请求解析阶段发生 exception: ${e?.message ?? ''}`;
+        } finally {
+          //debugger // ？？？断点调试时开启，否则断点进不来
+          BYLog.debug(TAG + 'request enter finally')
+          hasResult = true;
+          if (httpRequest) {
+            httpRequest.destroy();
+          }
           resolve(res);
         }
-      } catch (e) {
-      } finally {
-        resolve(res);
+      });
+    } catch (e) {
+      res.code = ADV_ERR_NET_EXCEPTION;
+      res.msg = `请求发起阶段发生 exception: ${e?.message ?? ''}`;
+      hasResult = true;
+      if (httpRequest) {
+        httpRequest.destroy();
       }
+      resolve(res);
     }
-    BYLog.debug(TAG + ' request end')
-  })
+  });
 }
 
 function getBaseUrl(): string {

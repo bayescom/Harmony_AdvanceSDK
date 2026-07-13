@@ -9,7 +9,7 @@ import {
   ADV_ERR_CUSTOM_ADN_LOAD_FAILED
 } from '../define/AdvanceError'
 import { AdvanceStrategyModel, AdvanceSupplierModel } from '../model/AdvanceNetModel'
-import { AdvanceRequestManager } from '../net/AdvanceRequestManager'
+import { AdvanceStrategyRequest } from '../net/AdvanceStrategyRequest'
 import { AdvanceCommonAdapter } from './adn/AdvanceCommonAdapter'
 import { taskpool } from '@kit.ArkTS'
 import AdvanceNetwork from '../net/AdvanceNetwork'
@@ -78,7 +78,7 @@ export abstract class AdvanceAdBase {
     }
 
     this.loadTimestamp = systemDateTime.getTime()
-    AdvanceRequestManager.requestAdStrategy(this.adConfig, (err, data) => {
+    AdvanceStrategyRequest.requestAdStrategy(this.adConfig, (err, data) => {
       if (err) {
         BYLog.error(TAG + err.msg)
         this.loadStrategyFailed(err)
@@ -473,8 +473,8 @@ export abstract class AdvanceAdBase {
     loadTimeStamp: number, cacheReqId?: string, error?: AdvanceError) {
     urls.forEach(async (url: string) => {
       let reportUrl = AdvanceUtil.joinUrlParameters(url, eventType, price, loadTimeStamp, cacheReqId, error)
-      let model = await AdvanceNetwork.shared().reportUrl(reportUrl) as AdvanceStrategyModel
-      if (model.code === 200) {
+      let success = await AdvanceNetwork.shared().reportUrl(reportUrl)
+      if (success) {
         BYLog.debug(`AdvanceTK上报成功：${reportUrl}`)
       } else {
         BYLog.debug(`AdvanceTK上报失败：${reportUrl}`)
@@ -507,11 +507,11 @@ export abstract class AdvanceAdBase {
         "is_cached": supplier.cachedReqId ? 1 : 0,
         "cached_reqid": supplier.cachedReqId ?? ""
       }
-      AdvanceNetwork.shared().verifyServerSideRewardedURL(this.strategyModel.server_reward.url, param).then((model: AdvanceStrategyModel) => {
-        if (model.code === 1) {
+      AdvanceNetwork.shared().verifyServerSideRewardedURL(this.strategyModel.server_reward.url, param).then((obj: ESObject) => {
+        if (obj.code == 1) {
           completion(rewardInfo, undefined)
         } else {
-          completion(undefined, new AdvanceError(model.code, model.msg))
+          completion(undefined, new AdvanceError(obj.code, obj.msg))
         }
       })
     } else { // 客户端回调
