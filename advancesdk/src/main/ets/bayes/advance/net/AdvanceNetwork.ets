@@ -29,8 +29,8 @@ export default class AdvanceNetwork {
   async getStrategy(body?: string | Object | ArrayBuffer): Promise<AdvanceStrategyModel> {
     let reqUrl = `${getBaseUrl()}cruiser`
     const result = await sendRequest(reqUrl, http.RequestMethod.POST, body, http.HttpDataType.OBJECT, true)
-    const model = result.data as AdvanceStrategyModel
-    return model
+    const json = result.data as AdvanceStrategyModel | undefined
+    return AdvanceStrategyModel.fromJson(json)
   }
 
   // 普通的上报请求，get方式

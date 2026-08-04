@@ -62,6 +62,26 @@ export class AdvanceStrategyModel {
   abtag: string = ""
   setting: AdvanceSettingModel = new AdvanceSettingModel()
   server_reward?: AdvanceServerReward
+
+  static fromJson(json?: AdvanceStrategyModel): AdvanceStrategyModel {
+    const model = new AdvanceStrategyModel()
+    if (!json) {
+      return model
+    }
+
+    model.suppliers = (json.suppliers ?? model.suppliers).map((supplier: AdvanceSupplierModel) => {
+      return AdvanceSupplierModel.fromJson(supplier)
+    })
+    model.code = json.code ?? model.code
+    model.msg = json.msg ?? model.msg
+    model.reqid = json.reqid ?? model.reqid
+    model.abtag = json.abtag ?? model.abtag
+    model.setting = AdvanceSettingModel.fromJson(json.setting)
+    if (json.server_reward) {
+      model.server_reward = AdvanceServerReward.fromJson(json.server_reward)
+    }
+    return model
+  }
 }
 
 
@@ -116,10 +136,47 @@ export class AdvanceSupplierModel {
   is_custom_adn: number = 0; // 是否自定义渠道
   custom_params: string = ''; // 自定义JSON参数
 
-  // [User Defined] 接口返回的是object类型，并非class实例。因为实例并未初始化，故自定义字段默认值为undefined。要转实例得使用class-transformer.
-  isHit: boolean | undefined = undefined // 被命中
-  loadAdState: AdvanceAdnLoadAdState | undefined = undefined
+  /**
+   * [User Defined] 接口返回的是object类型。因为实例并未初始化，故自定义字段默认值为undefined。要转实例得使用class-transformer.
+   * 或用以下替代方案`fromJson()`
+   */
+  isHit: boolean = false // 被命中
+  loadAdState: AdvanceAdnLoadAdState = AdvanceAdnLoadAdState.ready
   cachedReqId: string | undefined = undefined // 缓存广告的reqId，用于tk上报
+
+  static fromJson(json?: AdvanceSupplierModel): AdvanceSupplierModel {
+    const model = new AdvanceSupplierModel()
+    if (!json) {
+      return model
+    }
+
+    model.id = json.id ?? model.id
+    model.name = json.name ?? model.name
+    model.adspotid = json.adspotid ?? model.adspotid
+    model.mediaid = json.mediaid ?? model.mediaid
+    model.mediakey = json.mediakey ?? model.mediakey
+    model.mediasecret = json.mediasecret ?? model.mediasecret
+    model.sdktag = json.sdktag ?? model.sdktag
+    model.sdk_id = json.sdk_id ?? model.sdk_id
+    model.loadedtk = json.loadedtk ?? model.loadedtk
+    model.loadendtk = json.loadendtk ?? model.loadendtk
+    model.succeedtk = json.succeedtk ?? model.succeedtk
+    model.failedtk = json.failedtk ?? model.failedtk
+    model.wintk = json.wintk ?? model.wintk
+    model.imptk = json.imptk ?? model.imptk
+    model.clicktk = json.clicktk ?? model.clicktk
+    model.is_head_bidding = json.is_head_bidding ?? model.is_head_bidding
+    model.timeout = json.timeout ?? model.timeout
+    model.priority = json.priority ?? model.priority
+    model.sdk_price = json.sdk_price ?? model.sdk_price
+    model.bid_ratio = json.bid_ratio ?? model.bid_ratio
+    model.index = json.index ?? model.index
+    model.enable_cache = json.enable_cache ?? model.enable_cache
+    model.cache_timeout = json.cache_timeout ?? model.cache_timeout
+    model.is_custom_adn = json.is_custom_adn ?? model.is_custom_adn
+    model.custom_params = json.custom_params ?? model.custom_params
+    return model
+  }
 }
 
 // "setting": {
@@ -138,6 +195,19 @@ export class AdvanceSettingModel {
   parallel_group: number[][] = []
   // 需要进行headbidding的渠道SDK （存放is_head_bidding = 1 的 suppliers）
   head_bidding_group: number[] = []
+
+  static fromJson(json?: AdvanceSettingModel): AdvanceSettingModel {
+    const model = new AdvanceSettingModel()
+    if (!json) {
+      return model
+    }
+
+    model.bidding_type = json.bidding_type ?? model.bidding_type
+    model.parallel_timeout = json.parallel_timeout ?? model.parallel_timeout
+    model.parallel_group = json.parallel_group ?? model.parallel_group
+    model.head_bidding_group = json.head_bidding_group ?? model.head_bidding_group
+    return model
+  }
 }
 
 // 服务端激励验证对象
@@ -148,4 +218,16 @@ export class AdvanceServerReward {
   name: string = ''
   // 奖励发放的数量，用来透传
   count: number = 0
+
+  static fromJson(json?: AdvanceServerReward): AdvanceServerReward {
+    const model = new AdvanceServerReward()
+    if (!json) {
+      return model
+    }
+
+    model.url = json.url ?? model.url
+    model.name = json.name ?? model.name
+    model.count = json.count ?? model.count
+    return model
+  }
 }
