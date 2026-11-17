@@ -97,10 +97,12 @@ export class AdvanceADNManager {
       // 媒体未引入渠道SDK或Adapter
       if (!AdapterClass) {
         AdvanceADNManager.initializeStatus.set(supplierId, AdvanceAdnInitState.failed);
-        if (supplier.is_custom_adn === 1) {
-          return new AdvanceError(ADV_ERR_CUSTOM_ADN_LOAD_FAILED, `自定义Adn配置类获取失败【请检查配置类是否在模块的Index文件中被导出】`);
-        }
-        return new AdvanceError(ADV_ERR_ADN_UNINSTALLED, `渠道SDK未被安装【请检查配置类是否在模块的Index文件中被导出】`);
+        const error = supplier.is_custom_adn === 1
+          ? new AdvanceError(ADV_ERR_CUSTOM_ADN_LOAD_FAILED, `自定义Adn配置类获取失败【请检查配置类是否在模块的Index文件中被导出】`)
+          : new AdvanceError(ADV_ERR_ADN_UNINSTALLED, `渠道SDK未被安装【请检查配置类是否在模块的Index文件中被导出】`);
+        // 当前请求与已经排队的请求都返回相同的失败结果。
+        AdvanceADNManager.executePendingCompletions(supplier, error);
+        return error;
       }
 
       // 作为“第一个发起者”，要把自己塞进队列里，同时去 await 初始化结果
@@ -138,7 +140,7 @@ export class AdvanceADNManager {
   }
 
   // 执行所有等待中的回调
-  static executePendingCompletions(supplier: AdvanceSupplierModel, error: BusinessError | undefined): void {
+  static executePendingCompletions(supplier: AdvanceSupplierModel, error: BusinessError | AdvanceError | undefined): void {
     const queue = AdvanceADNManager.pendingCompletions.get(supplier.id);
     if (!queue || queue.length === 0) return;
 
@@ -150,6 +152,8 @@ export class AdvanceADNManager {
     completionsToTrigger.forEach((handler) => {
       if (!error) {
         handler.resolve(undefined);
+      } else if (error instanceof AdvanceError) {
+        handler.resolve(error);
       } else {
         handler.resolve(new AdvanceError(ADV_ERR_ADN_INIT_FAILED,
           `${supplier.name}初始化失败：code: ${error.code}, msg: ${error.message}`))

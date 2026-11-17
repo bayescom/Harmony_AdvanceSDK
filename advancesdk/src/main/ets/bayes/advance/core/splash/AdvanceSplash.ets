@@ -63,22 +63,27 @@ export class AdvanceSplash extends AdvanceAdBase {
   }
 
   showAd(windowStage?: window.WindowStage) {
+    const adapter = this.winAdapter as AdvanceCommonSplashAdapter
+    if (adapter) {
+      const supplier = this.matchSupplier(adapter)
+      // 发起展示即删除缓存，无需等待曝光回调。
+      AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id, adapter)
+    }
     if (!this.isAdValid()) {
       return;
     }
     if (!windowStage) {
       windowStage = BYApp.getWindowStage()
     }
-    let adapter = this.winAdapter as AdvanceCommonSplashAdapter
     adapter.adapter_showAd(windowStage)
   }
 
   protected bridge: AdvanceCommonSplashAdapterBridge = {
     splash_didAdLoaded: (adapter: AdvanceCommonSplashAdapter, price: number) => {
       let supplier = this.matchSupplier(adapter)
-      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
-          supplier.sdk_id)
+      if (supplier.enable_cache && !adapter.isFromCache) {
+        AdvanceAdCacheManager.cacheAdIfAbsent(adapter, price, supplier.cache_timeout,
+          this.adConfig.reqId ?? '', supplier.sdk_id)
       }
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
@@ -91,10 +96,6 @@ export class AdvanceSplash extends AdvanceAdBase {
       let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
       this.mListener?.onAdShow()
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     splash_didAdShowFailed: (adapter: AdvanceCommonSplashAdapter, error: AdvanceError) => {
       let supplier = this.matchSupplier(adapter)
@@ -102,10 +103,6 @@ export class AdvanceSplash extends AdvanceAdBase {
       this.mListener?.onAdShowFailed(error)
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     splash_didAdClick: (adapter: AdvanceCommonSplashAdapter) => {
       let supplier = this.matchSupplier(adapter)

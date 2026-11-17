@@ -168,6 +168,10 @@ export abstract class AdvanceAdBase {
       }
       // 初始化SDK
       let error = await AdvanceADNManager.loadADN(supplier)
+      // 初始化可能晚于渠道超时，已结束的渠道不能再绑定缓存 Adapter 的 Bridge。
+      if (supplier.loadAdState !== AdvanceAdnLoadAdState.ready) {
+        return
+      }
       if (error) {
         BYLog.debug(`${supplier.name}渠道SDK执行初始化失败`)
         this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
@@ -178,7 +182,8 @@ export abstract class AdvanceAdBase {
 
       let adapter: AdvanceCommonAdapter | undefined = undefined
       // 尝试获取Adapter缓存
-      let cacheModel = AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)
+      const cacheModel = supplier.enable_cache
+        ? AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id) : undefined
       if (supplier.enable_cache && cacheModel) {
         // 此次加载允许缓存 且 内存中存在Adapter缓存时
         supplier.cachedReqId = cacheModel.sourceReqId; //用于tk上报

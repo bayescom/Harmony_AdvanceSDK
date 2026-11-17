@@ -41,9 +41,12 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
 
   // Bidding成功
   protected override adnBidWin(adInfo: AdvanceAdInfo): void {
+    const adapter = this.winAdapter as AdvanceCommonNativeExpressAdapter
+    const supplier = this.matchSupplier(adapter)
+    // 开始渲染前删除缓存，无需等待渲染成功回调。
+    AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id, adapter)
     this.mListener?.onAdLoaded(adInfo)
     // 竞胜的广告源渲染广告
-    let adapter = this.winAdapter as AdvanceCommonNativeExpressAdapter
     adapter.adapter_render(BYApp.getUIContext())
   }
 
@@ -63,9 +66,9 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
   protected bridge: AdvanceCommonNativeExpressAdapterBridge = {
     nativeExpress_didAdLoaded: (adapter: AdvanceCommonNativeExpressAdapter, price: number) => {
       let supplier = this.matchSupplier(adapter)
-      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
-          supplier.sdk_id)
+      if (supplier.enable_cache && !adapter.isFromCache) {
+        AdvanceAdCacheManager.cacheAdIfAbsent(adapter, price, supplier.cache_timeout,
+          this.adConfig.reqId ?? '', supplier.sdk_id)
       }
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
@@ -75,12 +78,7 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
       this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
     },
     nativeExpress_didAdRenderSuccess: (adapter: AdvanceCommonNativeExpressAdapter) => {
-      let supplier = this.matchSupplier(adapter)
       this.mListener?.onRenderSuccess()
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     nativeExpress_didAdRenderFail: (adapter: AdvanceCommonNativeExpressAdapter, error: AdvanceError) => {
       let supplier = this.matchSupplier(adapter)
@@ -88,10 +86,6 @@ export class AdvanceNativeExpress extends AdvanceAdBase {
       this.mListener?.onRenderFail(error)
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     nativeExpress_didAdShow: (adapter: AdvanceCommonNativeExpressAdapter) => {
       let supplier = this.matchSupplier(adapter)

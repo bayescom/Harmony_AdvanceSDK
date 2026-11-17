@@ -41,9 +41,12 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
 
   // Bidding成功
   protected override adnBidWin(adInfo: AdvanceAdInfo): void {
+    const adapter = this.winAdapter as AdvanceCommonRenderFeedAdapter
+    const supplier = this.matchSupplier(adapter)
+    // 开始渲染前删除缓存，无需等待渲染成功回调。
+    AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id, adapter)
     this.mListener?.onAdLoaded(adInfo)
     // 竞胜的广告源渲染广告
-    let adapter = this.winAdapter as AdvanceCommonRenderFeedAdapter
     adapter.adapter_render(BYApp.getUIContext())
   }
 
@@ -58,9 +61,9 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
   protected bridge: AdvanceCommonRenderFeedAdapterBridge = {
     renderFeed_didAdLoaded: (adapter: AdvanceCommonRenderFeedAdapter, price: number) => {
       let supplier = this.matchSupplier(adapter)
-      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
-          supplier.sdk_id)
+      if (supplier.enable_cache && !adapter.isFromCache) {
+        AdvanceAdCacheManager.cacheAdIfAbsent(adapter, price, supplier.cache_timeout,
+          this.adConfig.reqId ?? '', supplier.sdk_id)
       }
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
@@ -70,12 +73,7 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
       this.checkTarget(supplier, AdvanceAdnLoadAdState.failed, error)
     },
     renderFeed_didAdRenderSuccess: (adapter: AdvanceCommonRenderFeedAdapter, wrapper: AdvanceRenderFeedAdWrapper) => {
-      let supplier = this.matchSupplier(adapter)
       this.mListener?.onRenderSuccess(wrapper)
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     renderFeed_didAdRenderFail: (adapter: AdvanceCommonRenderFeedAdapter, error: AdvanceError) => {
       let supplier = this.matchSupplier(adapter)
@@ -83,10 +81,6 @@ export class AdvanceRenderFeed extends AdvanceAdBase {
       this.mListener?.onRenderFail(error)
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     renderFeed_didAdShow: (adapter: AdvanceCommonRenderFeedAdapter) => {
       let supplier = this.matchSupplier(adapter)

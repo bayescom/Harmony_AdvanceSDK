@@ -131,7 +131,7 @@ export class AdvanceSupplierModel {
   bid_ratio: number = 0
   index: number = 0
   enable_cache: number = 0 // 1：表示需要缓存 0：表示不需要缓存
-  cache_timeout: number | null = null // 缓存时间（秒），enable_cache 为 1 时有值
+  cache_timeout: number = 1800 // 缓存时间（秒），启用缓存时默认 30 分钟
   // Custom ADN 相关
   is_custom_adn: number = 0; // 是否自定义渠道
   custom_params: string = ''; // 自定义JSON参数
@@ -172,7 +172,7 @@ export class AdvanceSupplierModel {
     model.bid_ratio = json.bid_ratio ?? model.bid_ratio
     model.index = json.index ?? model.index
     model.enable_cache = json.enable_cache ?? model.enable_cache
-    model.cache_timeout = json.cache_timeout ?? model.cache_timeout
+    model.cache_timeout = json.cache_timeout || model.cache_timeout
     model.is_custom_adn = json.is_custom_adn ?? model.is_custom_adn
     model.custom_params = json.custom_params ?? model.custom_params
     return model

@@ -42,9 +42,12 @@ export class AdvanceBanner extends AdvanceAdBase {
 
   // Bidding成功
   protected override adnBidWin(adInfo: AdvanceAdInfo): void {
+    const adapter = this.winAdapter as AdvanceCommonBannerAdapter
+    const supplier = this.matchSupplier(adapter)
+    // Banner 在竞胜后立即渲染，渲染前删除缓存。
+    AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id, adapter)
     this.mListener?.onAdLoaded(adInfo)
     // 竞胜的广告源渲染广告
-    let adapter = this.winAdapter as AdvanceCommonBannerAdapter
     adapter.adapter_render(BYApp.getUIContext())
   }
 
@@ -80,9 +83,9 @@ export class AdvanceBanner extends AdvanceAdBase {
   protected bridge: AdvanceCommonBannerAdapterBridge = {
     banner_didAdLoaded: (adapter: AdvanceCommonBannerAdapter, price: number) => {
       let supplier = this.matchSupplier(adapter)
-      if (supplier.enable_cache && !AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) { // 缓存adapter
-        AdvanceAdCacheManager.cacheAd(adapter, price, supplier.cache_timeout ?? 0, this.adConfig.reqId ?? "",
-          supplier.sdk_id)
+      if (supplier.enable_cache && !adapter.isFromCache) {
+        AdvanceAdCacheManager.cacheAdIfAbsent(adapter, price, supplier.cache_timeout,
+          this.adConfig.reqId ?? '', supplier.sdk_id)
       }
       this.setECPMIfNeeded(supplier, price)
       this.checkTarget(supplier, AdvanceAdnLoadAdState.success)
@@ -95,10 +98,6 @@ export class AdvanceBanner extends AdvanceAdBase {
       let supplier = this.matchSupplier(adapter)
       this.reportAdnTask(AdvanceAdnReportTKEventType.exposed, supplier)
       this.mListener?.onAdShow()
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     banner_didAdShowFailed: (adapter: AdvanceCommonBannerAdapter, error: AdvanceError) => {
       let supplier = this.matchSupplier(adapter)
@@ -106,10 +105,6 @@ export class AdvanceBanner extends AdvanceAdBase {
       this.mListener?.onAdShowFailed(error)
       // 销毁各渠道Adapter对象
       this.destroyAdapters()
-      // 删除缓存Adapter
-      if (AdvanceAdCacheManager.getAdCacheModelFromCachedKey(supplier.sdk_id)) {
-        AdvanceAdCacheManager.removeAdCacheModelFromCachedKey(supplier.sdk_id)
-      }
     },
     banner_didAdClick: (adapter: AdvanceCommonBannerAdapter) => {
       let supplier = this.matchSupplier(adapter)
