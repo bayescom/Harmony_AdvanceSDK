@@ -2,7 +2,6 @@ import { BYLog } from '../../basic/BYLog'
 import { AdvanceAdLoadConfig } from '../config/AdvanceAdConfig'
 import {
   AdvanceError,
-  ADV_ERR_SDK_INIT_MISS,
   ADV_ERR_ALL_ADN_FAILED,
   ADV_ERR_DATA_NULL,
   ADV_ERR_ADN_TIMEOUT,
@@ -68,15 +67,6 @@ export abstract class AdvanceAdBase {
   }
 
   protected loadStrategy(): void {
-    if (!BYConstant.context) {
-      let advErr = new AdvanceError()
-      advErr.code = ADV_ERR_SDK_INIT_MISS
-      advErr.msg = '未找到上下文，请先确保完成AdvanceSDK初始化'
-      BYLog.error(TAG + advErr.msg)
-      this.loadStrategyFailed(advErr)
-      return
-    }
-
     this.loadTimestamp = systemDateTime.getTime()
     AdvanceStrategyRequest.requestAdStrategy(this.adConfig, (err, data) => {
       if (err) {

@@ -3,6 +3,8 @@ import { BYLog } from '../../basic/BYLog';
 import { AdvCustomAdnListInfo } from '../cache/AdvCustomAdnCacheManager';
 import { AdvanceSetting } from '../config/AdvanceSetting';
 import {
+  AdvanceError,
+  ADV_ERR_DATA_NULL,
   ADV_ERR_NET_UNSUPPORT_TYPE,
   ADV_ERR_NET_FAILED,
   ADV_ERR_NET_EXCEPTION,
@@ -29,7 +31,13 @@ export default class AdvanceNetwork {
   async getStrategy(body?: string | Object | ArrayBuffer): Promise<AdvanceStrategyModel> {
     let reqUrl = `${getBaseUrl()}cruiser`
     const result = await sendRequest(reqUrl, http.RequestMethod.POST, body, http.HttpDataType.OBJECT, true)
-    const json = result.data as AdvanceStrategyModel | undefined
+    if (result.code !== 200) {
+      return Promise.reject<AdvanceStrategyModel>(new AdvanceError(result.code, result.msg))
+    }
+    if (!result.data) {
+      return Promise.reject<AdvanceStrategyModel>(new AdvanceError(ADV_ERR_DATA_NULL, '策略信息为空'))
+    }
+    const json = result.data as AdvanceStrategyModel
     return AdvanceStrategyModel.fromJson(json)
   }
 
@@ -49,9 +57,14 @@ export default class AdvanceNetwork {
   async getCustomAdnListInfo(version?: string): Promise<AdvCustomAdnListInfo> {
     const reqUrl = `${getBaseUrl()}custom_adn`
     const parameters: Record<string, string | number> = {"appid": AdvanceSetting.get().appId, "version": version ?? ""}
-    const result = await sendRequest(reqUrl, http.RequestMethod.GET, parameters, http.HttpDataType.OBJECT)
-    const info = result.data as AdvCustomAdnListInfo
-    return info
+    const result = await sendRequest(reqUrl, http.RequestMethod.GET, parameters, http.HttpDataType.OBJECT, true)
+    if (result.code !== 200) {
+      return Promise.reject<AdvCustomAdnListInfo>(new AdvanceError(result.code, result.msg))
+    }
+    if (!result.data) {
+      return Promise.reject<AdvCustomAdnListInfo>(new AdvanceError(ADV_ERR_DATA_NULL, '自定义ADN配置为空'))
+    }
+    return result.data as AdvCustomAdnListInfo
   }
 
 }
@@ -96,7 +109,7 @@ async function sendRequest(
             BYLog.warn(TAG + 'sendRequest timeout')
             hasResult = true;
             res.code = ADV_ERR_NET_TIME_OUT;
-            res.msg = `策略请求超时未响应`;
+            res.msg = `接口请求超时未响应`;
             resolve(res);
             clearTimeout(tim);
             if (httpRequest) {

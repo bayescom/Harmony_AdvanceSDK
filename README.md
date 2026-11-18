@@ -139,16 +139,25 @@
 
 ## 初始化SDK
 
-<span style="background-color: #297497"><font  color=#FFFFF>appId必须要在具体广告位初始化之前设置</font></span>
+调用 `AdvanceSDK.start(context, appId)` 初始化 SDK，返回 `Promise<AdvanceError | undefined>`。
+在 `.then((error) => ...)` 中判断结果：`error` 为 `undefined` 表示成功，有值表示失败。初始化成功后再请求广告。
 
 ```
 onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     let ctx = this.context
     AdvanceSDK.debug()
-    //初始化SDK
-    AdvanceSDK.initSDK(ctx, 'your appId')
+    AdvanceSDK.start(ctx, 'your appId').then((error) => {
+        if (error) {
+            console.error(`AdvanceSDK初始化失败：${error.toString()}`)
+            return
+        }
+        // SDK初始化成功，此后可以创建广告对象并请求广告。
+    })
 }
 ```
+
+当前 AppId 有自定义渠道缓存时，SDK 使用缓存完成初始化，并在后台更新；首次无缓存时，
+须等待自定义渠道配置请求成功。没有配置自定义渠道的空列表也可正常初始化。
 
 ## 接入代码
 您可以点击上述支持的广告位类型进行查看具体广告位的对接代码，也可以运行自带的Demo工程，参考Demo工程中的接入代码进行开发。

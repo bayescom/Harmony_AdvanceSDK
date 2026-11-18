@@ -1,7 +1,7 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
-import { AdvanceSDK } from 'advancesdk';
+import { AdvanceError, AdvanceSDK } from 'advancesdk';
 import WindowUtils from '../util/WindowUtils';
 
 export default class EntryAbility extends UIAbility {
@@ -10,8 +10,13 @@ export default class EntryAbility extends UIAbility {
     let ctx = this.context
 
     AdvanceSDK.debug()
-    //初始化SDK
-    AdvanceSDK.initSDK(ctx, '105015')
+    AdvanceSDK.start(ctx, '105015').then((error?: AdvanceError) => {
+      if (error) {
+        hilog.error(0x0000, 'testTag', 'AdvanceSDK初始化失败：%{public}s', error.toString())
+        return
+      }
+      hilog.info(0x0000, 'testTag', '%{public}s', 'AdvanceSDK初始化成功，可以请求广告')
+    })
   }
 
   onDestroy(): void {

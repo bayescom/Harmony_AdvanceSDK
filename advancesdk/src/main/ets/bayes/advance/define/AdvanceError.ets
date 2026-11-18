@@ -14,8 +14,8 @@ export const ADV_ERR_DATA_NO_SUPPLIER = 9901;
 export const ADV_ERR_DATA_NULL = 9902;
 // 渠道广告加载超时
 export const ADV_ERR_ADN_TIMEOUT = 9903;
-// advance未初始化
-export const ADV_ERR_SDK_INIT_MISS = 9904;
+// SDK初始化失败
+export const ADV_ERR_SDK_INIT_FAILED = 9904;
 // 广告展示前广告已失效过期
 export const ADV_ERR_AD_Invalid_Expired = 9905;
 // 全部渠道加载失败
