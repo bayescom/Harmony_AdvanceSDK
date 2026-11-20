@@ -12,7 +12,7 @@ import { AdvanceError,
 import { AdvanceConstant } from '../define/AdvanceConstant';
 import { AdvanceSetting } from '../config/AdvanceSetting';
 import { AdvanceADNManager } from '../core/adn/AdvanceADNManager';
-import { AdvCustomAdnCacheManager, AdvCustomAdnModel } from '../cache/AdvCustomAdnCacheManager';
+import { AdvanceAdapterDescriptor, AdvanceAdapterRepository } from '../core/adn/AdvanceAdapterRepository';
 
 export class AdvanceStrategyRequest {
   // 获取策略请求参数信息
@@ -40,37 +40,15 @@ export class AdvanceStrategyRequest {
   //添加各ADN版本号
   static async addSDKVersion(): Promise<Record<string, string>> {
     let extra: Record<string, string> = {}
-    //添加CSJ版本号
-    const csj_v = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_CSJ)
-    if (csj_v) {
-      extra['csj_v'] = csj_v
-    }
-    //添加GDT版本号
-    const gdt_v = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_GDT)
-    if (gdt_v) {
-      extra['gdt_v'] = gdt_v
-    }
-    //添加Mercury版本号
-    const mry_v = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_MERCURY)
-    if (mry_v) {
-      extra['mry_v'] = mry_v
-    }
-    //添加KS版本号
-    const ks_v = await AdvanceADNManager.getSDKVersion(AdvanceConstant.ADV_SDK_ID_KS)
-    if (ks_v) {
-      extra['ks_v'] = ks_v
-    }
-    //添加自定义ADN版本号
-    const cacheInfo = AdvCustomAdnCacheManager.customAdnListInfo()
-    if (cacheInfo?.custom_adn_list && cacheInfo.custom_adn_list.length) {
-      // 🌟 等待网络并发池里的所有任务全部执行完毕！
-      await Promise.all(cacheInfo.custom_adn_list.map(async (adn: AdvCustomAdnModel) => {
-        const adn_v = await AdvanceADNManager.getSDKVersion(adn.id.toString())
-        if (adn_v) {
-          extra[`custom_${adn.id}_v`] = adn_v
-        }
-      }))
-    }
+    await Promise.all(AdvanceAdapterRepository.allDescriptors().map(async (descriptor: AdvanceAdapterDescriptor) => {
+      if (!descriptor.versionParameterKey) {
+        return
+      }
+      const version = await AdvanceADNManager.getSDKVersion(descriptor.supplierId)
+      if (version) {
+        extra[descriptor.versionParameterKey] = version
+      }
+    }))
     return extra
   }
 

@@ -7,7 +7,8 @@ import { AdvanceSetting } from './config/AdvanceSetting'
 import { BYSetting } from '../basic/BYSetting'
 import { AdvCustomAdnCacheManager, AdvCustomAdnListInfo } from './cache/AdvCustomAdnCacheManager'
 import AdvanceNetwork from './net/AdvanceNetwork'
-import { AdvanceError, ADV_ERR_DATA_NULL, ADV_ERR_SDK_INIT_FAILED } from './define/AdvanceError'
+import { AdvanceError, ADV_ERR_SDK_INIT_FAILED } from './define/AdvanceError'
+import { AdvanceAdapterRepository } from './core/adn/AdvanceAdapterRepository'
 
 export class AdvanceSDK {
 
@@ -21,9 +22,11 @@ export class AdvanceSDK {
       AdvanceSetting.get().appId = appId
       BYConstant.context = context as common.UIAbilityContext
       BYLifecycle.registerLife(context)
+      AdvanceAdapterRepository.loadBuiltInAdapterDescriptors()
 
       const cacheInfo = AdvCustomAdnCacheManager.customAdnListInfo()
       if (cacheInfo) {
+        AdvanceAdapterRepository.syncCustomAdaptersWithAdnList(cacheInfo.custom_adn_list)
         resolve(undefined)
         AdvanceSDK.updateCustomAdnListInfo(cacheInfo.version)
         return
@@ -32,6 +35,7 @@ export class AdvanceSDK {
       // 首次无缓存，获取并保存自定义渠道配置后才完成初始化。
       AdvanceNetwork.shared().getCustomAdnListInfo().then((info: AdvCustomAdnListInfo) => {
         AdvCustomAdnCacheManager.cacheCustomAdnListInfo(info)
+        AdvanceAdapterRepository.syncCustomAdaptersWithAdnList(info.custom_adn_list)
         resolve(undefined)
       }).catch((error: AdvanceError) => {
         resolve(error)
@@ -59,7 +63,10 @@ export class AdvanceSDK {
     AdvanceNetwork.shared().getCustomAdnListInfo(version).then((info: AdvCustomAdnListInfo) => {
       if (info.custom_adn_list && info.custom_adn_list.length) {
         AdvCustomAdnCacheManager.cacheCustomAdnListInfo(info)
+        AdvanceAdapterRepository.syncCustomAdaptersWithAdnList(info.custom_adn_list)
       }
+    }).catch((error: AdvanceError) => {
+      BYLog.printE(error)
     })
   }
 }

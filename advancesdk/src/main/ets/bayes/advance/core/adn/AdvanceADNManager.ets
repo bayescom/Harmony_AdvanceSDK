@@ -1,12 +1,10 @@
-import { AdvanceConstant } from '../../define/AdvanceConstant'
 import { AdvanceADNUnitData, AdvanceCommonAdapter } from './AdvanceCommonAdapter'
 import { AdvanceSupplierModel } from '../../model/AdvanceNetModel'
 import { AdvanceAdnInitState } from '../../define/AdvanceDefine'
 import { AdvanceError, ADV_ERR_ADN_INIT_FAILED, ADV_ERR_ADN_UNINSTALLED,
   ADV_ERR_CUSTOM_ADN_LOAD_FAILED } from '../../define/AdvanceError'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { AdvanceAdType } from '../../model/AdvanceAdInfo'
-import { AdvCustomAdnCacheManager, AdvCustomAdnModel } from '../../cache/AdvCustomAdnCacheManager'
+import { AdvanceAdapterRepository } from './AdvanceAdapterRepository'
 
 
 // 定义队列里存放的 Promise 触发器结构
@@ -23,33 +21,13 @@ export class AdvanceADNManager {
 
   //生成对应adapter实现类
   static async generateAdnAdapter(adnData: AdvanceADNUnitData): Promise<AdvanceCommonAdapter | undefined> {
-    let supplierId = adnData.adnId
-    let harName = AdvanceADNManager.mappingModuleName(supplierId)
-    let className = ''
-    switch (adnData.adType) {
-      case AdvanceAdType.splash:
-        className = AdvanceADNManager.mappingSplashAdapterName(supplierId)
-        break
-      case AdvanceAdType.banner:
-        className = AdvanceADNManager.mappingBannerAdapterName(supplierId)
-        break
-      case AdvanceAdType.interstitial:
-        className = AdvanceADNManager.mappingInterstitialAdapterName(supplierId)
-        break
-      case AdvanceAdType.rewardVideo:
-        className = AdvanceADNManager.mappingRewardVideoAdapterName(supplierId)
-        break
-      case AdvanceAdType.nativeExpress:
-        className = AdvanceADNManager.mappingNativeExpressAdapterName(supplierId)
-        break
-      case AdvanceAdType.renderFeed:
-        className = AdvanceADNManager.mappingRenderFeedAdapterName(supplierId)
-        break
-      default:
-        return undefined
+    const descriptor = AdvanceAdapterRepository.descriptorForSupplierId(adnData.adnId)
+    const className = descriptor?.adapters.get(adnData.adType)
+    if (!descriptor?.moduleName || !className) {
+      return undefined
     }
     try {
-      const ns: ESObject = await import(harName);
+      const ns: ESObject = await import(descriptor.moduleName);
       const AdapterClass: ESObject = ns[className];
       // 如果类存在则实例化并返回，否则返回 undefined
       return AdapterClass ? new AdapterClass(adnData) : undefined;
@@ -88,8 +66,9 @@ export class AdvanceADNManager {
     AdvanceADNManager.initializeStatus.set(supplierId, AdvanceAdnInitState.loading);
     try {
       // 动态加载适配
-      const harName: string = AdvanceADNManager.mappingModuleName(supplierId);
-      const className: string = AdvanceADNManager.mappingConfigAdapterName(supplierId);
+      const descriptor = AdvanceAdapterRepository.descriptorForSupplierId(supplierId);
+      const harName = descriptor?.moduleName ?? '';
+      const className = descriptor?.configAdapterName ?? '';
 
       const ns: ESObject = await import(harName);
       const AdapterClass: ESObject = ns[className];
@@ -163,161 +142,17 @@ export class AdvanceADNManager {
 
   //获取ADN版本号
   static async getSDKVersion(supplierId: string): Promise<string | undefined> {
+    const descriptor = AdvanceAdapterRepository.descriptorForSupplierId(supplierId)
+    if (!descriptor?.moduleName || !descriptor.configAdapterName) {
+      return undefined
+    }
     try {
-      const harName: string = AdvanceADNManager.mappingModuleName(supplierId)
-      const className: string = AdvanceADNManager.mappingConfigAdapterName(supplierId)
-
-      const ns: ESObject = await import(harName);
-      const AdapterClass: ESObject = ns[className];
+      const ns: ESObject = await import(descriptor.moduleName);
+      const AdapterClass: ESObject = ns[descriptor.configAdapterName];
       return AdapterClass ? AdapterClass.getSDKVersion() : undefined;
     } catch (error) {
       return undefined;
     }
-  }
-
-  static mappingModuleName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'csj_adapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'gdt_adapter'
-      case AdvanceConstant.ADV_SDK_ID_KS: // 快手
-        return 'ks_adapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'mercury_adapter'
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
-        return 'huawei_adapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_adn_module ?? ""
-    }
-  }
-
-  static mappingConfigAdapterName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'AdvCSJConfigAdapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'AdvGDTConfigAdapter'
-      case AdvanceConstant.ADV_SDK_ID_KS: // 快手
-        return 'AdvKSConfigAdapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'AdvMercuryConfigAdapter'
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
-        return 'AdvHuaweiConfigAdapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_config_adapter ?? ""
-    }
-  }
-
-  static mappingSplashAdapterName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'AdvCSJSplashAdapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'AdvGDTSplashAdapter'
-      case AdvanceConstant.ADV_SDK_ID_KS: // 快手
-        return 'AdvKSSplashAdapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'AdvMercurySplashAdapter'
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
-        return 'AdvHuaweiSplashAdapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_splash_adapter ?? ""
-    }
-  }
-
-  static mappingBannerAdapterName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'AdvCSJBannerAdapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'AdvGDTBannerAdapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'AdvMercuryBannerAdapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_banner_adapter ?? ""
-    }
-  }
-
-  static mappingInterstitialAdapterName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'AdvCSJInterstitialAdapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'AdvGDTInterstitialAdapter'
-      case AdvanceConstant.ADV_SDK_ID_KS: // 快手
-        return 'AdvKSInterstitialAdapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'AdvMercuryInterstitialAdapter'
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
-        return 'AdvHuaweiInterstitialAdapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_interstitial_adapter ?? ""
-    }
-  }
-
-  static mappingRewardVideoAdapterName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'AdvCSJRewardVideoAdapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'AdvGDTRewardVideoAdapter'
-      case AdvanceConstant.ADV_SDK_ID_KS: // 快手
-        return 'AdvKSRewardVideoAdapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'AdvMercuryRewardVideoAdapter'
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
-        return 'AdvHuaweiRewardVideoAdapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_rewardvideo_adapter ?? ""
-    }
-  }
-
-  static mappingNativeExpressAdapterName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'AdvCSJNativeExpressAdapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'AdvGDTNativeExpressAdapter'
-      case AdvanceConstant.ADV_SDK_ID_KS: // 快手
-        return 'AdvKSNativeExpressAdapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'AdvMercuryNativeExpressAdapter'
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
-        return 'AdvHuaweiNativeExpressAdapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_nativeexpress_adapter ?? ""
-    }
-  }
-
-  static mappingRenderFeedAdapterName(supplierId: string) {
-    switch (supplierId) {
-      case AdvanceConstant.ADV_SDK_ID_CSJ: // 穿山甲
-        return 'AdvCSJRenderFeedAdapter'
-      case AdvanceConstant.ADV_SDK_ID_GDT: // 广点通
-        return 'AdvGDTRenderFeedAdapter'
-      case AdvanceConstant.ADV_SDK_ID_KS: // 快手
-        return 'AdvKSRenderFeedAdapter'
-      case AdvanceConstant.ADV_SDK_ID_MERCURY: // 倍业
-        return 'AdvMercuryRenderFeedAdapter'
-      case AdvanceConstant.ADV_SDK_ID_HUAWEI: // 华为
-        return 'AdvHuaweiRenderFeedAdapter'
-      default: // 自定义ADN
-        return AdvanceADNManager.getCustomAdn(supplierId)?.custom_renderfeed_adapter ?? ""
-    }
-  }
-
-  // 根据id获取自定义ADN对象
-  static getCustomAdn(supplierId: string) {
-    // 从缓存中获取adn_list信息
-    const cacheInfo = AdvCustomAdnCacheManager.customAdnListInfo()
-    if (cacheInfo?.custom_adn_list && cacheInfo.custom_adn_list.length) {
-      const adn = cacheInfo.custom_adn_list.filter((model: AdvCustomAdnModel) => {
-        return model.id.toString() === supplierId
-      })[0]
-      return adn
-    }
-    return undefined
   }
 
 }

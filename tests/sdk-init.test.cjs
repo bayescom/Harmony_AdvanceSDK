@@ -27,6 +27,7 @@ function fixture(cached, cacheWriteError, cacheReadError) {
   const requests = [];
   const logged = [];
   const setting = { appId: '' };
+  let descriptors = [];
   const network = { getCustomAdnListInfo: (version) => new Promise((resolve, reject) => {
     requests.push({ version, resolve, reject });
   }) };
@@ -48,11 +49,16 @@ function fixture(cached, cacheWriteError, cacheReadError) {
       }
     } },
     './net/AdvanceNetwork': { default: { shared: () => network } },
-    './define/AdvanceError': errors
+    './define/AdvanceError': errors,
+    './core/adn/AdvanceAdapterRepository': { AdvanceAdapterRepository: {
+      loadBuiltInAdapterDescriptors: () => { descriptors = []; },
+      syncCustomAdaptersWithAdnList: (list) => { descriptors = list ?? []; }
+    } }
   });
   return {
     sdk, requests, logged, setting, cached: () => cached,
-    start: (appId = 'app') => sdk.initSDK({}, appId)
+    descriptors: () => descriptors,
+    start: (appId = 'app') => sdk.start({}, appId)
   };
 }
 
@@ -73,6 +79,7 @@ test('cold initialization saves configuration before completion, including an em
     f.requests[0].resolve(value);
     assert.equal(await result, undefined);
     assert.equal(f.cached(), value);
+    assert.equal(f.descriptors(), value.custom_adn_list);
   }
 });
 
@@ -80,16 +87,18 @@ test('cached initialization resolves without waiting for the background refresh'
   for (const list of [[{ id: 200 }], []]) {
     const f = fixture(info);
     let completions = 0;
-    await f.sdk.initSDK({}, 'app').then((error) => {
+    await f.start().then((error) => {
       assert.equal(error, undefined);
       completions++;
     });
     assert.equal(completions, 1);
+    assert.equal(f.descriptors(), info.custom_adn_list);
     assert.equal(f.requests[0].version, 'v1');
     const updated = { version: 'v2', custom_adn_list: list };
     f.requests[0].resolve(updated);
     await flush();
     assert.equal(f.cached(), list.length ? updated : info);
+    assert.equal(f.descriptors(), list.length ? list : info.custom_adn_list);
     assert.equal(completions, 1);
   }
 });
@@ -105,12 +114,13 @@ test('cold request failure is returned to the caller and a subsequent initializa
   f.requests[1].resolve(info);
   assert.equal(await retry, undefined);
   assert.equal(f.cached(), info);
+  assert.equal(f.descriptors(), info.custom_adn_list);
 });
 
 test('background update failure retains cache without changing initialization success', async () => {
   const f = fixture(info);
   let completions = 0;
-  await f.sdk.initSDK({}, 'app').then((error) => {
+  await f.start().then((error) => {
     assert.equal(error, undefined);
     completions++;
   });
@@ -119,32 +129,34 @@ test('background update failure retains cache without changing initialization su
   await flush();
   assert.equal(completions, 1);
   assert.equal(f.cached(), info);
+  assert.equal(f.descriptors(), info.custom_adn_list);
   assert.deepEqual(f.logged, [error]);
 });
 
-test('a malformed cold response returns an error without caching it', async () => {
+test('a configuration error from the network layer is returned without publishing custom descriptors', async () => {
   const f = fixture();
   const result = f.start();
-  f.requests[0].resolve({});
-  assert.equal((await result).code, String(errors.ADV_ERR_DATA_NULL));
+  const error = new errors.AdvanceError(errors.ADV_ERR_DATA_NULL, '自定义ADN配置为空');
+  f.requests[0].reject(error);
+  assert.equal(await result, error);
   assert.equal(f.cached(), undefined);
+  assert.deepEqual(f.descriptors(), []);
 });
 
-test('cache write errors are returned as initialization errors', { timeout: 1000 }, async () => {
+test('cache write errors are returned before custom descriptors are published', { timeout: 1000 }, async () => {
   const error = new Error('cache write failed');
   const f = fixture(undefined, error);
   const result = f.start();
   f.requests[0].resolve(info);
   const resultError = await result;
-  assert.equal(resultError.code, String(errors.ADV_ERR_SDK_INIT_FAILED));
-  assert.equal(resultError.msg, 'SDK初始化失败');
+  assert.equal(resultError, error);
+  assert.deepEqual(f.descriptors(), []);
 });
 
-test('synchronous cache read errors are returned through then as initialization errors', async () => {
+test('synchronous cache read errors reject the startup Promise without requesting configuration', async () => {
   const error = new Error('cache read failed');
   const f = fixture(undefined, undefined, error);
-  const resultError = await f.start().then((value) => value);
-  assert.equal(resultError.code, String(errors.ADV_ERR_SDK_INIT_FAILED));
-  assert.equal(resultError.msg, 'SDK初始化失败');
+  await assert.rejects(f.start(), error);
   assert.equal(f.requests.length, 0);
+  assert.deepEqual(f.descriptors(), []);
 });

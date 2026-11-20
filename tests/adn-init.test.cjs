@@ -1,4 +1,4 @@
-// Executes the production manager with fake ADN modules and an in-memory custom ADN list.
+// Executes the production repository and manager with fake ADN modules.
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { readFileSync } = require('node:fs');
@@ -11,14 +11,19 @@ const advance = path.resolve(__dirname, '../advancesdk/src/main/ets/bayes/advanc
 function fixture(custom = false) {
   const namespace = {};
   const modules = new Map();
-  const customCache = path.join(advance, 'cache/AdvCustomAdnCacheManager.ets');
-  const customList = { custom_adn_list: [{
+  const namespaces = new Map([['csj_adapter', namespace], ['test_adapter', namespace]]);
+  const importedModules = [];
+  const stubs = new Map([
+    [path.resolve(advance, '../basic/BYLog.ets'), { BYLog: {} }],
+    [path.resolve(advance, '../basic/BYUtil.ets'), { BYUtil: {} }],
+    [path.join(advance, 'core/AdvanceDeviceManager.ets'), { AdvanceDeviceManager: {} }],
+    [path.join(advance, 'net/AdvanceNetwork.ets'), { default: {} }]
+  ]);
+  const customList = [{
     id: 100, custom_adn_module: 'test_adapter', custom_config_adapter: 'TestConfigAdapter'
-  }] };
+  }];
   function load(file) {
-    if (file === customCache) {
-      return { AdvCustomAdnCacheManager: { customAdnListInfo: () => customList } };
-    }
+    if (stubs.has(file)) return stubs.get(file);
     if (modules.has(file)) return modules.get(file).exports;
     const compiled = ts.transpileModule(readFileSync(file, 'utf8'), {
       fileName: file.replace(/\.ets$/, '.ts'),
@@ -29,14 +34,20 @@ function fixture(custom = false) {
     const module = { exports: {} };
     modules.set(file, module);
     const requireEts = (id) => {
-      if (id === 'csj_adapter' || id === 'test_adapter') return namespace;
-      assert.ok(id.startsWith('.'), `Unexpected dependency: ${id}`);
+      if (id === '@kit.BasicServicesKit' || id === '@ohos.bundle.bundleManager') return {};
+      if (!id.startsWith('.')) {
+        importedModules.push(id);
+        if (namespaces.has(id)) return namespaces.get(id);
+        throw new Error(`ADN module not installed: ${id}`);
+      }
       return load(path.resolve(path.dirname(file), id) + '.ets');
     };
     compileFunction(compiled.outputText, ['require', 'module', 'exports'], { filename: file })(
       requireEts, module, module.exports);
     return module.exports;
   }
+  const { AdvanceAdapterRepository: repository } = load(path.join(advance, 'core/adn/AdvanceAdapterRepository.ets'));
+  repository.syncCustomAdaptersWithAdnList(customList);
   const { AdvanceADNManager: manager } = load(path.join(advance, 'core/adn/AdvanceADNManager.ets'));
   const { AdvanceAdnInitState: states } = load(path.join(advance, 'define/AdvanceDefine.ets'));
   const errors = load(path.join(advance, 'define/AdvanceError.ets'));
@@ -44,7 +55,8 @@ function fixture(custom = false) {
     id: custom ? '100' : '3', name: 'test ADN', mediaid: 'app-id', mediakey: '',
     is_custom_adn: custom ? 1 : 0
   };
-  return { manager, states, errors, supplier, namespace };
+  const { AdvanceAdType: adTypes } = load(path.join(advance, 'model/AdvanceAdInfo.ets'));
+  return { manager, states, errors, supplier, namespace, repository, namespaces, importedModules, adTypes, load };
 }
 
 for (const custom of [false, true]) {
@@ -111,3 +123,133 @@ test('SDK initialization errors still finish every waiter with the SDK init erro
     assert.equal(manager.initializeStatus.get(supplier.id), states.failed);
     assert.equal(manager.pendingCompletions.get(supplier.id).length, 0);
   });
+
+test('built-in descriptors match actual module exports without importing or initializing any ADN', () => {
+  const { repository, importedModules, adTypes } = fixture();
+  repository.loadBuiltInAdapterDescriptors();
+  assert.equal(repository.allDescriptors().length, 5);
+  const root = path.resolve(__dirname, '..');
+  for (const descriptor of repository.allDescriptors()) {
+    const index = readFileSync(path.join(root, descriptor.moduleName, 'Index.ets'), 'utf8');
+    for (const name of [descriptor.configAdapterName, ...descriptor.adapters.values()]) {
+      assert.match(index, new RegExp(`export\\s*\\{\\s*${name}\\s*\\}`));
+    }
+  }
+  assert.equal(repository.descriptorForSupplierId('5').adapters.has(adTypes.banner), false);
+  assert.equal(repository.descriptorForSupplierId('12').adapters.has(adTypes.banner), false);
+  assert.equal(repository.descriptorForSupplierId('12').adapters.has(adTypes.renderFeed), false);
+  assert.equal(repository.descriptorForSupplierId('unknown'), undefined);
+  assert.deepEqual(importedModules, []);
+});
+
+test('custom descriptors declare only configured ad types and keep built-ins authoritative', () => {
+  const { repository, adTypes } = fixture();
+  repository.syncCustomAdaptersWithAdnList([
+    { id: 3, custom_adn_module: 'override' },
+    { id: 100, custom_adn_module: 'first', custom_config_adapter: 'Config',
+      custom_splash_adapter: 'Splash', custom_banner_adapter: '', custom_renderfeed_adapter: 'Feed' },
+    { id: 100, custom_adn_module: 'duplicate' },
+    { id: null }, { id: undefined }
+  ]);
+  assert.equal(repository.descriptorForSupplierId('3').moduleName, 'csj_adapter');
+  const descriptor = repository.descriptorForSupplierId('100');
+  assert.equal(descriptor.moduleName, 'first');
+  assert.equal(descriptor.configAdapterName, 'Config');
+  assert.equal(descriptor.versionParameterKey, 'custom_100_v');
+  assert.deepEqual([...descriptor.adapters], [[adTypes.splash, 'Splash'], [adTypes.renderFeed, 'Feed']]);
+  assert.equal(repository.allDescriptors().length, 6);
+});
+
+test('a full custom-list refresh removes deleted channels and an empty list restores built-ins', () => {
+  const { repository } = fixture();
+  const old = repository.descriptorForSupplierId('100');
+  repository.syncCustomAdaptersWithAdnList([{ id: 200, custom_adn_module: 'new' }]);
+  assert.equal(repository.descriptorForSupplierId('100'), undefined);
+  assert.equal(repository.descriptorForSupplierId('200').moduleName, 'new');
+  assert.equal(old.moduleName, 'test_adapter');
+  repository.syncCustomAdaptersWithAdnList([]);
+  assert.equal(repository.descriptorForSupplierId('200'), undefined);
+  assert.equal(repository.allDescriptors().length, 5);
+  repository.syncCustomAdaptersWithAdnList([{ id: 200 }]);
+  repository.loadBuiltInAdapterDescriptors();
+  assert.equal(repository.descriptorForSupplierId('200'), undefined);
+});
+
+test('every declared built-in ad type creates the configured adapter lazily', async () => {
+  const { repository, manager, namespaces, importedModules } = fixture();
+  repository.loadBuiltInAdapterDescriptors();
+  let created = 0;
+  for (const descriptor of repository.allDescriptors()) {
+    const exports = {};
+    descriptor.adapters.forEach((name) => {
+      exports[name] = class {
+        constructor(data) { this.unitData = data; this.name = name; created++; }
+      };
+    });
+    namespaces.set(descriptor.moduleName, exports);
+  }
+  assert.equal(created, 0);
+  for (const descriptor of repository.allDescriptors()) {
+    for (const [adType, name] of descriptor.adapters) {
+      const data = { adnId: descriptor.supplierId, adType, placementId: 'slot' };
+      const adapter = await manager.generateAdnAdapter(data);
+      assert.equal(adapter.name, name);
+      assert.equal(adapter.unitData, data);
+    }
+  }
+  assert.equal(created, 27);
+  assert.equal(importedModules.length, created);
+  assert.equal(manager.initializeStatus.size, 0);
+});
+
+test('unknown channels and unsupported ad types do not import ADN modules', async () => {
+  const { manager, adTypes, importedModules } = fixture();
+  for (const data of [
+    { adnId: '12', adType: adTypes.banner }, { adnId: '12', adType: adTypes.renderFeed },
+    { adnId: '5', adType: adTypes.banner }, { adnId: '3', adType: adTypes.unknown },
+    { adnId: '100', adType: adTypes.splash }, { adnId: 'unknown', adType: adTypes.splash }
+  ]) assert.equal(await manager.generateAdnAdapter(data), undefined);
+  assert.deepEqual(importedModules, []);
+});
+
+test('uninstalled modules and missing ad exports return an unavailable adapter', async () => {
+  const { manager, namespaces, adTypes } = fixture();
+  assert.equal(await manager.generateAdnAdapter({ adnId: '3', adType: adTypes.splash }), undefined);
+  namespaces.delete('csj_adapter');
+  assert.equal(await manager.generateAdnAdapter({ adnId: '3', adType: adTypes.splash }), undefined);
+  assert.equal(await manager.getSDKVersion('3'), undefined);
+});
+
+test('custom adapter creation keeps one descriptor snapshot during a refresh', async () => {
+  const { manager, repository, namespace, namespaces, adTypes } = fixture();
+  repository.syncCustomAdaptersWithAdnList([{
+    id: 100, custom_adn_module: 'test_adapter', custom_splash_adapter: 'OldSplash'
+  }]);
+  namespace.OldSplash = class { constructor() { this.name = 'old'; } };
+  namespaces.set('next_adapter', { NextSplash: class { constructor() { this.name = 'next'; } } });
+  const first = manager.generateAdnAdapter({ adnId: '100', adType: adTypes.splash });
+  repository.syncCustomAdaptersWithAdnList([{
+    id: 100, custom_adn_module: 'next_adapter', custom_splash_adapter: 'NextSplash'
+  }]);
+  assert.equal((await first).name, 'old');
+  assert.equal((await manager.generateAdnAdapter({ adnId: '100', adType: adTypes.splash })).name, 'next');
+});
+
+test('version reporting uses repository keys and skips unavailable or empty versions without SDK initialization', async () => {
+  const { repository, namespaces, manager, load } = fixture();
+  for (const descriptor of repository.allDescriptors()) {
+    if (!descriptor.versionParameterKey) continue;
+    namespaces.set(descriptor.moduleName, {
+      [descriptor.configAdapterName]: {
+        getSDKVersion: () => descriptor.supplierId === '5' ? '' : `version-${descriptor.supplierId}`,
+        initializeAdapter: () => assert.fail('Version reporting must not initialize an ADN')
+      }
+    });
+  }
+  namespaces.delete('gdt_adapter');
+  const { AdvanceStrategyRequest } = load(path.join(advance, 'net/AdvanceStrategyRequest.ets'));
+  assert.deepEqual(await AdvanceStrategyRequest.addSDKVersion(), {
+    mry_v: 'version-1', csj_v: 'version-3', custom_100_v: 'version-100'
+  });
+  assert.equal(manager.initializeStatus.size, 0);
+});
