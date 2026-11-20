@@ -1,7 +1,10 @@
 import http from '@ohos.net.http';
+import bundleManager from '@ohos.bundle.bundleManager';
 import { BYLog } from '../../basic/BYLog';
+import { AdvanceSDKConfig } from '../cache/AdvConfigCacheManager';
 import { AdvCustomAdnListInfo } from '../cache/AdvCustomAdnCacheManager';
 import { AdvanceSetting } from '../config/AdvanceSetting';
+import { AdvanceConstant } from '../define/AdvanceConstant';
 import {
   AdvanceError,
   ADV_ERR_DATA_NULL,
@@ -32,10 +35,10 @@ export default class AdvanceNetwork {
     let reqUrl = `${getBaseUrl()}cruiser`
     const result = await sendRequest(reqUrl, http.RequestMethod.POST, body, http.HttpDataType.OBJECT, true)
     if (result.code !== 200) {
-      return Promise.reject<AdvanceStrategyModel>(new AdvanceError(result.code, result.msg))
+      return Promise.reject(new AdvanceError(result.code, result.msg))
     }
     if (!result.data) {
-      return Promise.reject<AdvanceStrategyModel>(new AdvanceError(ADV_ERR_DATA_NULL, '策略信息为空'))
+      return Promise.reject(new AdvanceError(ADV_ERR_DATA_NULL, '策略信息为空'))
     }
     const json = result.data as AdvanceStrategyModel
     return AdvanceStrategyModel.fromJson(json)
@@ -59,12 +62,31 @@ export default class AdvanceNetwork {
     const parameters: Record<string, string | number> = {"appid": AdvanceSetting.get().appId, "version": version ?? ""}
     const result = await sendRequest(reqUrl, http.RequestMethod.GET, parameters, http.HttpDataType.OBJECT, true)
     if (result.code !== 200) {
-      return Promise.reject<AdvCustomAdnListInfo>(new AdvanceError(result.code, result.msg))
+      return Promise.reject(new AdvanceError(result.code, result.msg))
     }
     if (!result.data) {
-      return Promise.reject<AdvCustomAdnListInfo>(new AdvanceError(ADV_ERR_DATA_NULL, '自定义ADN配置为空'))
+      return Promise.reject(new AdvanceError(ADV_ERR_DATA_NULL, '自定义ADN配置为空'))
     }
     return result.data as AdvCustomAdnListInfo
+  }
+
+  // 获取 SDK 通用配置。
+  async getSDKCommonConfig(appId: string = AdvanceSetting.get().appId): Promise<AdvanceSDKConfig> {
+    const reqUrl = `${getBaseUrl()}advance_sdk_config`
+    const bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION)
+    const parameters: Record<string, string> = {
+      'appid': appId,
+      'appver': bundleInfo.versionName,
+      'sdkver': AdvanceConstant.ADV_SDK_VERSION_NAME
+    }
+    const result = await sendRequest(reqUrl, http.RequestMethod.POST, parameters, http.HttpDataType.OBJECT, true)
+    if (result.code !== 200) {
+      return Promise.reject(new AdvanceError(result.code, result.msg))
+    }
+    if (!result.data) {
+      return Promise.reject(new AdvanceError(ADV_ERR_DATA_NULL, 'SDK通用配置为空'))
+    }
+    return result.data as AdvanceSDKConfig
   }
 
 }
